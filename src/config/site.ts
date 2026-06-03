@@ -77,17 +77,17 @@ export type SiteConfig = {
 };
 
 export const siteConfig: SiteConfig = {
-  name: "n8x marketing",
-  legalName: "n8x marketing Comunicação Ltda.",
-  foundedYear: 2010,
-  registration: "00.000.000/0001-00",
+  name: "N8X Marketing",
+  legalName: "n8x marketing & vendas.",
+  foundedYear: 2017,
+  registration: "43.158.706/0001-99",
 
   contact: {
-    email: "contato@genericstudious.com.br",
-    phone: "+55 (13) 99999-0000",
+    email: "marketing@n8company.com.br",
+    phone: "+55 (13) 99618-4401",
     whatsapp: {
-      number: "5513999990000",
-      display: "(13) 99999-0000",
+      number: "5513996184401",
+      display: "(13) 99618-4401",
     },
     address: {
       street: "Rua Frei Gaspar, 22 - sala 14",
@@ -98,9 +98,9 @@ export const siteConfig: SiteConfig = {
   },
 
   social: {
-    instagram: "https://instagram.com/genericstudious",
-    tiktok: "https://tiktok.com/@genericstudious",
-    linkedin: "https://linkedin.com/company/genericstudious",
+    instagram: "https://instagram.com/n8xmarketing",
+    tiktok: "https://tiktok.com/@thigo.vannuchi",
+    linkedin: "https://www.linkedin.com/in/thiago-v-a060a7215/",
   },
 
   nav: [
