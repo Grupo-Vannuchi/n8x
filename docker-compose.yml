@@ -1,0 +1,27 @@
+# Local PostgreSQL for development.
+# Usage:
+#   docker compose up -d      # start
+#   npm run db:migrate        # apply schema
+#   npm run db:seed           # load demo content + admin user
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: n8x-marketing-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: agency
+      POSTGRES_PASSWORD: agency
+      POSTGRES_DB: agency
+    ports:
+      # Host port is configurable to avoid clashing with a local Postgres.
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - agency-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agency -d agency"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  agency-pgdata:

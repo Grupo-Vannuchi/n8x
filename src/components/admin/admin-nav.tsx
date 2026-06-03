@@ -1,0 +1,43 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { LayoutDashboard, Inbox, FolderKanban } from "lucide-react";
+import { Link, usePathname } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
+
+const items = [
+  { href: "/admin", key: "dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/admin/projects", key: "projects", icon: FolderKanban, exact: false },
+  { href: "/admin/leads", key: "leads", icon: Inbox, exact: false },
+] as const;
+
+export function AdminNav() {
+  const t = useTranslations("admin.nav");
+  const pathname = usePathname();
+
+  return (
+    <nav className="flex flex-col gap-1">
+      {items.map((item) => {
+        const active = item.exact
+          ? pathname === item.href
+          : pathname.startsWith(item.href);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              active
+                ? "bg-brand/10 text-brand"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <item.icon className="size-4" />
+            {t(item.key)}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}

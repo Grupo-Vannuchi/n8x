@@ -1,0 +1,257 @@
+{
+  "metadata": {
+    "defaultTitle": "{brand} — Comunicação, estratégia e performance",
+    "titleTemplate": "%s · {brand}",
+    "description": "Agência de comunicação que transforma marcas com estratégia, performance e criatividade.",
+    "keywords": "agência, publicidade, marketing, social media, branding, tráfego pago"
+  },
+  "nav": {
+    "about": "Quem somos",
+    "services": "Serviços",
+    "portfolio": "Portfólio",
+    "careers": "Trabalhe conosco",
+    "contact": "Contato",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu"
+  },
+  "common": {
+    "talkToUs": "Fale com a gente",
+    "startProject": "Começar um projeto",
+    "viewWork": "Ver trabalhos",
+    "viewAllProjects": "Ver todos os projetos",
+    "viewCase": "Ver case",
+    "learnMore": "Saiba mais",
+    "sendWhatsapp": "Chamar no WhatsApp",
+    "backHome": "Voltar para o início",
+    "loading": "Carregando…"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Há {years} anos no mercado",
+      "titleLead": "Transformamos marcas com",
+      "rotating": ["estratégia", "performance", "criatividade"],
+      "subtitle": "Somos um estúdio de comunicação completo: da identidade ao tráfego, do conteúdo ao resultado.",
+      "primaryCta": "Começar um projeto",
+      "secondaryCta": "Conhecer trabalhos"
+    },
+    "services": {
+      "eyebrow": "O que fazemos",
+      "title": "Serviços de ponta a ponta",
+      "subtitle": "Tudo o que sua marca precisa para crescer, em um só lugar."
+    },
+    "portfolio": {
+      "eyebrow": "Portfólio",
+      "title": "Trabalhos que falam por nós",
+      "subtitle": "Cases selecionados de marcas que confiaram na gente."
+    },
+    "stats": {
+      "title": "Números que contam nossa história"
+    },
+    "clients": {
+      "title": "Marcas que confiam na gente"
+    },
+    "testimonials": {
+      "eyebrow": "Depoimentos",
+      "title": "O que dizem sobre nós",
+      "subtitle": "A satisfação de quem trabalha com a gente."
+    },
+    "team": {
+      "eyebrow": "Time",
+      "title": "Gente que faz acontecer",
+      "subtitle": "Especialistas apaixonados por marcas."
+    },
+    "cta": {
+      "title": "Pronto para transformar sua marca?",
+      "subtitle": "Conte o seu desafio. A gente cuida da estratégia, da execução e do resultado.",
+      "button": "Começar agora"
+    }
+  },
+  "about": {
+    "title": "Quem somos",
+    "subtitle": "Estratégia, criatividade e performance desde {foundedYear}.",
+    "lead": "Somos um estúdio de comunicação completo. Unimos dados e criatividade para construir marcas que vendem e que ficam.",
+    "missionTitle": "Nossa missão",
+    "mission": "Transformar marcas em referências por meio de estratégia, conteúdo e performance — com transparência e resultado.",
+    "valuesTitle": "No que acreditamos",
+    "values": [
+      { "title": "Estratégia primeiro", "description": "Toda entrega nasce de um objetivo claro e mensurável." },
+      { "title": "Criatividade com propósito", "description": "Ideias bonitas que também performam." },
+      { "title": "Transparência", "description": "Relatórios claros e conversas honestas, sempre." }
+    ]
+  },
+  "portfolio": {
+    "title": "Portfólio",
+    "subtitle": "Cases de marcas que crescem com a gente.",
+    "empty": "Em breve, novos cases por aqui.",
+    "client": "Cliente",
+    "year": "Ano",
+    "category": "Categoria",
+    "tags": "Entregas",
+    "nextProject": "Próximo case",
+    "ctaTitle": "Quer um case assim para a sua marca?",
+    "ctaButton": "Vamos conversar"
+  },
+  "contact": {
+    "title": "Vamos conversar",
+    "subtitle": "Conte sobre o seu projeto. Respondemos em até um dia útil.",
+    "infoTitle": "Outras formas de falar com a gente",
+    "labels": {
+      "email": "E-mail",
+      "phone": "Telefone",
+      "whatsapp": "WhatsApp",
+      "address": "Endereço"
+    },
+    "form": {
+      "name": "Nome",
+      "email": "E-mail",
+      "phone": "Telefone (opcional)",
+      "company": "Empresa (opcional)",
+      "message": "Mensagem",
+      "messagePlaceholder": "Conte um pouco sobre o seu desafio…",
+      "submit": "Enviar mensagem",
+      "submitting": "Enviando…",
+      "success": "Mensagem enviada! Em breve entramos em contato.",
+      "error": "Não foi possível enviar agora. Tente novamente ou chame no WhatsApp."
+    }
+  },
+  "careers": {
+    "title": "Trabalhe com a gente",
+    "subtitle": "Gosta de marcas, dados e criatividade? Manda seu portfólio.",
+    "form": {
+      "name": "Nome",
+      "email": "E-mail",
+      "phone": "Telefone (opcional)",
+      "role": "Vaga de interesse",
+      "portfolio": "Link do portfólio (opcional)",
+      "message": "Conte sobre você",
+      "messagePlaceholder": "Sua experiência, o que te move…",
+      "submit": "Enviar candidatura",
+      "submitting": "Enviando…",
+      "success": "Candidatura recebida! Vamos analisar e retornar.",
+      "error": "Não foi possível enviar agora. Tente novamente mais tarde."
+    }
+  },
+  "validation": {
+    "nameMin": "Informe seu nome (mín. 2 caracteres).",
+    "emailInvalid": "Informe um e-mail válido.",
+    "messageMin": "Escreva uma mensagem (mín. 10 caracteres).",
+    "required": "Campo obrigatório."
+  },
+  "footer": {
+    "tagline": "Comunicação que transforma marcas.",
+    "navTitle": "Navegação",
+    "contactTitle": "Contato",
+    "socialTitle": "Redes",
+    "rights": "Todos os direitos reservados.",
+    "registration": "CNPJ {value}",
+    "mapTitle": "Nossa localização no mapa"
+  },
+  "localeSwitcher": {
+    "label": "Idioma",
+    "pt": "Português",
+    "en": "English"
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "description": "A página que você procura não existe ou foi movida.",
+    "back": "Voltar para o início"
+  },
+  "admin": {
+    "login": {
+      "title": "Painel administrativo",
+      "subtitle": "Entre para gerenciar o conteúdo do site.",
+      "email": "E-mail",
+      "password": "Senha",
+      "submit": "Entrar",
+      "submitting": "Entrando…",
+      "error": "E-mail ou senha inválidos."
+    },
+    "nav": {
+      "dashboard": "Visão geral",
+      "leads": "Contatos",
+      "projects": "Portfólio",
+      "services": "Serviços",
+      "testimonials": "Depoimentos",
+      "team": "Time",
+      "signOut": "Sair"
+    },
+    "dashboard": {
+      "title": "Visão geral",
+      "welcome": "Olá, {name}",
+      "newLeads": "Novos contatos",
+      "totalProjects": "Projetos publicados",
+      "totalServices": "Serviços ativos",
+      "recentLeads": "Contatos recentes"
+    },
+    "leads": {
+      "title": "Contatos recebidos",
+      "empty": "Nenhum contato ainda.",
+      "emptyFiltered": "Nenhum contato corresponde a esses filtros.",
+      "type": "Tipo",
+      "name": "Nome",
+      "email": "E-mail",
+      "message": "Mensagem",
+      "status": "Status",
+      "receivedAt": "Recebido em",
+      "markContacted": "Marcar como respondido",
+      "archive": "Arquivar",
+      "typeContact": "Contato",
+      "typeCareer": "Vaga",
+      "statusNew": "Novo",
+      "statusContacted": "Respondido",
+      "statusArchived": "Arquivado",
+      "filterType": "Filtrar por tipo",
+      "filterTypeAll": "Todos os tipos",
+      "filterStatus": "Filtrar por status",
+      "filterStatusAll": "Todos os status",
+      "filterTag": "Filtrar por tag",
+      "filterTagAll": "Todas as tags",
+      "filterClear": "Limpar filtros",
+      "addTag": "Adicionar tag",
+      "removeTag": "Remover tag {tag}"
+    },
+    "projects": {
+      "title": "Portfólio",
+      "new": "Novo projeto",
+      "editTitle": "Editar: {title}",
+      "empty": "Nenhum projeto ainda. Crie o primeiro.",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "deleteConfirm": "Excluir \"{title}\"? Esta ação não pode ser desfeita.",
+      "statusPublished": "Publicado",
+      "statusDraft": "Rascunho",
+      "sectionBasics": "Informações básicas",
+      "sectionMedia": "Imagens e tags",
+      "sectionContent": "Conteúdo ({locale})",
+      "sectionVisibility": "Visibilidade",
+      "slug": "Slug",
+      "slugHint": "Usado na URL: /portfolio/seu-slug",
+      "clientName": "Nome do cliente",
+      "year": "Ano",
+      "order": "Ordem",
+      "orderHint": "Números menores aparecem primeiro.",
+      "coverImage": "URL da imagem de capa",
+      "gallery": "URLs das imagens da galeria",
+      "galleryHint": "Uma URL de imagem por linha.",
+      "tags": "Tags",
+      "tagsHint": "Separadas por vírgula, ex.: Branding, Social Media.",
+      "titleField": "Título",
+      "category": "Categoria",
+      "summary": "Resumo",
+      "content": "Texto",
+      "contentHint": "Um parágrafo por linha.",
+      "featured": "Destaque na página inicial",
+      "published": "Publicado (visível no site)",
+      "create": "Criar projeto",
+      "save": "Salvar alterações",
+      "saving": "Salvando…",
+      "cancel": "Cancelar",
+      "error": {
+        "unauthorized": "Sua sessão expirou. Entre novamente.",
+        "invalid": "Verifique os campos e tente novamente.",
+        "slug_taken": "Esse slug já está em uso. Escolha outro.",
+        "unknown": "Algo deu errado. Tente novamente."
+      }
+    }
+  }
+}

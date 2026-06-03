@@ -1,0 +1,257 @@
+{
+  "metadata": {
+    "defaultTitle": "{brand} — Communication, strategy and performance",
+    "titleTemplate": "%s · {brand}",
+    "description": "A communication agency that transforms brands through strategy, performance and creativity.",
+    "keywords": "agency, advertising, marketing, social media, branding, paid traffic"
+  },
+  "nav": {
+    "about": "About",
+    "services": "Services",
+    "portfolio": "Portfolio",
+    "careers": "Work with us",
+    "contact": "Contact",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "common": {
+    "talkToUs": "Talk to us",
+    "startProject": "Start a project",
+    "viewWork": "View work",
+    "viewAllProjects": "View all projects",
+    "viewCase": "View case",
+    "learnMore": "Learn more",
+    "sendWhatsapp": "Message on WhatsApp",
+    "backHome": "Back to home",
+    "loading": "Loading…"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "{years} years in the market",
+      "titleLead": "We transform brands with",
+      "rotating": ["strategy", "performance", "creativity"],
+      "subtitle": "We're a full-service communication studio: from identity to traffic, from content to results.",
+      "primaryCta": "Start a project",
+      "secondaryCta": "See our work"
+    },
+    "services": {
+      "eyebrow": "What we do",
+      "title": "End-to-end services",
+      "subtitle": "Everything your brand needs to grow, in one place."
+    },
+    "portfolio": {
+      "eyebrow": "Portfolio",
+      "title": "Work that speaks for us",
+      "subtitle": "Selected cases from brands that trusted us."
+    },
+    "stats": {
+      "title": "Numbers that tell our story"
+    },
+    "clients": {
+      "title": "Brands that trust us"
+    },
+    "testimonials": {
+      "eyebrow": "Testimonials",
+      "title": "What people say about us",
+      "subtitle": "The satisfaction of those who work with us."
+    },
+    "team": {
+      "eyebrow": "Team",
+      "title": "People who make it happen",
+      "subtitle": "Specialists passionate about brands."
+    },
+    "cta": {
+      "title": "Ready to transform your brand?",
+      "subtitle": "Tell us your challenge. We handle the strategy, the execution and the results.",
+      "button": "Get started"
+    }
+  },
+  "about": {
+    "title": "About us",
+    "subtitle": "Strategy, creativity and performance since {foundedYear}.",
+    "lead": "We're a full-service communication studio. We blend data and creativity to build brands that sell and that last.",
+    "missionTitle": "Our mission",
+    "mission": "To turn brands into references through strategy, content and performance — with transparency and results.",
+    "valuesTitle": "What we believe",
+    "values": [
+      { "title": "Strategy first", "description": "Every deliverable starts from a clear, measurable goal." },
+      { "title": "Creativity with purpose", "description": "Beautiful ideas that also perform." },
+      { "title": "Transparency", "description": "Clear reports and honest conversations, always." }
+    ]
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "subtitle": "Cases from brands that grow with us.",
+    "empty": "New cases coming soon.",
+    "client": "Client",
+    "year": "Year",
+    "category": "Category",
+    "tags": "Deliverables",
+    "nextProject": "Next case",
+    "ctaTitle": "Want a case like this for your brand?",
+    "ctaButton": "Let's talk"
+  },
+  "contact": {
+    "title": "Let's talk",
+    "subtitle": "Tell us about your project. We reply within one business day.",
+    "infoTitle": "Other ways to reach us",
+    "labels": {
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "address": "Address"
+    },
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone (optional)",
+      "company": "Company (optional)",
+      "message": "Message",
+      "messagePlaceholder": "Tell us a bit about your challenge…",
+      "submit": "Send message",
+      "submitting": "Sending…",
+      "success": "Message sent! We'll be in touch soon.",
+      "error": "We couldn't send it right now. Please try again or message us on WhatsApp."
+    }
+  },
+  "careers": {
+    "title": "Work with us",
+    "subtitle": "Love brands, data and creativity? Send us your portfolio.",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone (optional)",
+      "role": "Role of interest",
+      "portfolio": "Portfolio link (optional)",
+      "message": "Tell us about you",
+      "messagePlaceholder": "Your experience, what drives you…",
+      "submit": "Send application",
+      "submitting": "Sending…",
+      "success": "Application received! We'll review it and get back to you.",
+      "error": "We couldn't send it right now. Please try again later."
+    }
+  },
+  "validation": {
+    "nameMin": "Enter your name (min. 2 characters).",
+    "emailInvalid": "Enter a valid email.",
+    "messageMin": "Write a message (min. 10 characters).",
+    "required": "This field is required."
+  },
+  "footer": {
+    "tagline": "Communication that transforms brands.",
+    "navTitle": "Navigation",
+    "contactTitle": "Contact",
+    "socialTitle": "Social",
+    "rights": "All rights reserved.",
+    "registration": "Reg. {value}",
+    "mapTitle": "Our location on the map"
+  },
+  "localeSwitcher": {
+    "label": "Language",
+    "pt": "Português",
+    "en": "English"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist or has moved.",
+    "back": "Back to home"
+  },
+  "admin": {
+    "login": {
+      "title": "Admin panel",
+      "subtitle": "Sign in to manage the site content.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "error": "Invalid email or password."
+    },
+    "nav": {
+      "dashboard": "Overview",
+      "leads": "Leads",
+      "projects": "Portfolio",
+      "services": "Services",
+      "testimonials": "Testimonials",
+      "team": "Team",
+      "signOut": "Sign out"
+    },
+    "dashboard": {
+      "title": "Overview",
+      "welcome": "Hi, {name}",
+      "newLeads": "New leads",
+      "totalProjects": "Published projects",
+      "totalServices": "Active services",
+      "recentLeads": "Recent leads"
+    },
+    "leads": {
+      "title": "Received leads",
+      "empty": "No leads yet.",
+      "emptyFiltered": "No leads match these filters.",
+      "type": "Type",
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "status": "Status",
+      "receivedAt": "Received at",
+      "markContacted": "Mark as contacted",
+      "archive": "Archive",
+      "typeContact": "Contact",
+      "typeCareer": "Career",
+      "statusNew": "New",
+      "statusContacted": "Contacted",
+      "statusArchived": "Archived",
+      "filterType": "Filter by type",
+      "filterTypeAll": "All types",
+      "filterStatus": "Filter by status",
+      "filterStatusAll": "All statuses",
+      "filterTag": "Filter by tag",
+      "filterTagAll": "All tags",
+      "filterClear": "Clear filters",
+      "addTag": "Add tag",
+      "removeTag": "Remove tag {tag}"
+    },
+    "projects": {
+      "title": "Portfolio",
+      "new": "New project",
+      "editTitle": "Edit: {title}",
+      "empty": "No projects yet. Create your first one.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete \"{title}\"? This cannot be undone.",
+      "statusPublished": "Published",
+      "statusDraft": "Draft",
+      "sectionBasics": "Basics",
+      "sectionMedia": "Images & tags",
+      "sectionContent": "Content ({locale})",
+      "sectionVisibility": "Visibility",
+      "slug": "Slug",
+      "slugHint": "Used in the URL: /portfolio/your-slug",
+      "clientName": "Client name",
+      "year": "Year",
+      "order": "Order",
+      "orderHint": "Lower numbers appear first.",
+      "coverImage": "Cover image URL",
+      "gallery": "Gallery image URLs",
+      "galleryHint": "One image URL per line.",
+      "tags": "Tags",
+      "tagsHint": "Comma-separated, e.g. Branding, Social Media.",
+      "titleField": "Title",
+      "category": "Category",
+      "summary": "Summary",
+      "content": "Body",
+      "contentHint": "One paragraph per line.",
+      "featured": "Featured on the home page",
+      "published": "Published (visible on the site)",
+      "create": "Create project",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "error": {
+        "unauthorized": "Your session expired. Please sign in again.",
+        "invalid": "Please check the fields and try again.",
+        "slug_taken": "That slug is already in use. Choose another.",
+        "unknown": "Something went wrong. Please try again."
+      }
+    }
+  }
+}

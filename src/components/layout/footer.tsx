@@ -1,0 +1,121 @@
+import { getTranslations } from "next-intl/server";
+import { Instagram, Linkedin, Music2, Facebook } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { Logo } from "@/components/layout/logo";
+import { Container } from "@/components/ui/container";
+import { siteConfig, fullAddress, mapEmbedUrl } from "@/config/site";
+
+const socialIcons = {
+  instagram: Instagram,
+  tiktok: Music2,
+  linkedin: Linkedin,
+  facebook: Facebook,
+} as const;
+
+export async function Footer() {
+  const t = await getTranslations("footer");
+  const tn = await getTranslations("nav");
+  const year = new Date().getFullYear();
+
+  const socials = Object.entries(siteConfig.social).filter(
+    ([, url]) => Boolean(url),
+  ) as [keyof typeof socialIcons, string][];
+
+  const address = fullAddress();
+  const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  const mapSrc = mapEmbedUrl();
+
+  return (
+    <footer className="mt-auto border-t border-border bg-muted/30">
+      <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex flex-col gap-3">
+          <Logo />
+          <p className="max-w-xs text-sm text-muted-foreground">
+            {t("tagline")}
+          </p>
+        </div>
+
+        <nav aria-label={t("navTitle")} className="flex flex-col gap-3">
+          <h3 className="text-sm font-semibold">{t("navTitle")}</h3>
+          {siteConfig.nav.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {tn(item.key)}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex flex-col gap-3">
+          <h3 className="text-sm font-semibold">{t("contactTitle")}</h3>
+          <a
+            href={`mailto:${siteConfig.contact.email}`}
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {siteConfig.contact.email}
+          </a>
+          <span className="text-sm text-muted-foreground">
+            {siteConfig.contact.phone}
+          </span>
+          <a
+            href={mapsLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {siteConfig.contact.address.street}
+            <br />
+            {siteConfig.contact.address.city} — {siteConfig.contact.address.region}
+          </a>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h3 className="text-sm font-semibold">{t("socialTitle")}</h3>
+          <div className="flex gap-3">
+            {socials.map(([key, url]) => {
+              const Icon = socialIcons[key];
+              return (
+                <a
+                  key={key}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={key}
+                  className="inline-flex size-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-brand hover:text-brand"
+                >
+                  <Icon className="size-4" />
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </Container>
+
+      <div className="border-t border-border">
+        <Container className="py-10">
+          <iframe
+            title={t("mapTitle")}
+            src={mapSrc}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+            className="h-64 w-full rounded-2xl border border-border"
+          />
+        </Container>
+      </div>
+
+      <div className="border-t border-border">
+        <Container className="flex flex-col gap-1 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            © {year} {siteConfig.legalName}. {t("rights")}
+          </p>
+          {siteConfig.registration ? (
+            <p>{t("registration", { value: siteConfig.registration })}</p>
+          ) : null}
+        </Container>
+      </div>
+    </footer>
+  );
+}

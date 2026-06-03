@@ -1,0 +1,170 @@
+// Prisma schema for the n8x marketing platform.
+// Bilingual content is stored as JSON maps shaped like { "pt": "...", "en": "..." }
+// and resolved per-request via src/lib/i18n helpers. See src/lib/content.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(EDITOR)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+// ---------------------------------------------------------------------------
+// Marketing content (managed via the admin CMS)
+// ---------------------------------------------------------------------------
+
+/// A service the agency offers (social media, branding, etc.).
+model Service {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  icon        String // lucide-react icon name, e.g. "Megaphone"
+  title       Json // LocalizedText
+  description Json // LocalizedText
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, order])
+  @@map("services")
+}
+
+/// A portfolio case study.
+model Project {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  clientName String
+  category   Json // LocalizedText
+  year       Int
+  coverImage String
+  gallery    String[] @default([])
+  tags       String[] @default([])
+  title      Json // LocalizedText
+  summary    Json // LocalizedText
+  content    Json // LocalizedRichText (array of paragraphs per locale)
+  featured   Boolean  @default(false)
+  published  Boolean  @default(true)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([published, featured, order])
+  @@map("projects")
+}
+
+/// A client logo shown in the "they trust us" strip.
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String
+  website   String?
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("clients")
+}
+
+/// A client testimonial / quote.
+model Testimonial {
+  id         String   @id @default(cuid())
+  authorName String
+  company    String
+  avatarUrl  String?
+  rating     Int      @default(5)
+  role       Json // LocalizedText
+  quote      Json // LocalizedText
+  order      Int      @default(0)
+  published  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+/// A member of the team.
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  photoUrl  String?
+  socials   Json     @default("{}") // { instagram?, linkedin?, ... }
+  role      Json // LocalizedText
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("team_members")
+}
+
+/// A headline statistic / animated counter.
+model Stat {
+  id        String   @id @default(cuid())
+  key       String   @unique // "years", "logos", "clients", "ads"
+  value     Int
+  suffix    String   @default("")
+  label     Json // LocalizedText
+  order     Int      @default(0)
+  published Boolean  @default(true)
+
+  @@map("stats")
+}
+
+// ---------------------------------------------------------------------------
+// Leads (contact + careers form submissions)
+// ---------------------------------------------------------------------------
+
+enum LeadType {
+  CONTACT
+  CAREER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  ARCHIVED
+}
+
+model Lead {
+  id        String     @id @default(cuid())
+  type      LeadType   @default(CONTACT)
+  status    LeadStatus @default(NEW)
+  name      String
+  email     String
+  phone     String?
+  company   String? // for CONTACT
+  role      String? // desired role, for CAREER
+  portfolio String? // link, for CAREER
+  message   String
+  tags      String[]   @default([]) // free-form labels applied by admins for triage
+  locale    String     @default("pt")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([type, status, createdAt])
+  @@map("leads")
+}
