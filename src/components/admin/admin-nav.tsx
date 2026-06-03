@@ -1,13 +1,25 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { LayoutDashboard, Inbox, FolderKanban } from "lucide-react";
+import {
+  LayoutDashboard,
+  Inbox,
+  FolderKanban,
+  Sparkles,
+  Building2,
+  Quote,
+  Users,
+} from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/admin", key: "dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/projects", key: "projects", icon: FolderKanban, exact: false },
+  { href: "/admin/services", key: "services", icon: Sparkles, exact: false },
+  { href: "/admin/clients", key: "clients", icon: Building2, exact: false },
+  { href: "/admin/testimonials", key: "testimonials", icon: Quote, exact: false },
+  { href: "/admin/team", key: "team", icon: Users, exact: false },
   { href: "/admin/leads", key: "leads", icon: Inbox, exact: false },
 ] as const;
 

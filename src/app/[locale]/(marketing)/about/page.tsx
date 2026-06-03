@@ -1,10 +1,16 @@
 import { resolveLocale } from "@/i18n/routing";
+import { richTags } from "@/i18n/rich";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Check } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Section } from "@/components/ui/section";
+import { Team } from "@/components/sections/team";
 import { siteConfig } from "@/config/site";
+
+// The team section is managed in the admin CMS, so render fresh per request
+// (same approach as the home page).
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -34,7 +40,7 @@ export default async function AboutPage({
       />
       <Section>
         <p className="max-w-3xl text-pretty text-xl leading-relaxed">
-          {t("lead")}
+          {t.rich("lead", richTags)}
         </p>
 
         <div className="mt-16 grid gap-12 lg:grid-cols-2">
@@ -64,6 +70,8 @@ export default async function AboutPage({
           </div>
         </div>
       </Section>
+
+      <Team locale={locale} />
     </>
   );
 }

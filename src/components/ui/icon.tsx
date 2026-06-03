@@ -23,6 +23,9 @@ const icons: Record<string, LucideIcon> = {
   Target,
 };
 
+/** The icon names available to `Service.icon`, for admin pickers and validation. */
+export const iconNames = Object.keys(icons);
+
 export function Icon({
   name,
   className,

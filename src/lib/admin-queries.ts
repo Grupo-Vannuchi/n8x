@@ -1,5 +1,14 @@
 import "server-only";
-import type { Lead, LeadStatus, LeadType, Project } from "@prisma/client";
+import type {
+  Client,
+  Lead,
+  LeadStatus,
+  LeadType,
+  Project,
+  Service,
+  TeamMember,
+  Testimonial,
+} from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type DashboardStats = {
@@ -58,4 +67,50 @@ export async function getAdminProjects(): Promise<Project[]> {
 
 export async function getProjectById(id: string): Promise<Project | null> {
   return prisma.project.findUnique({ where: { id } });
+}
+
+/** All services (published and drafts) for the admin list, in display order. */
+export async function getAdminServices(): Promise<Service[]> {
+  return prisma.service.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+export async function getServiceById(id: string): Promise<Service | null> {
+  return prisma.service.findUnique({ where: { id } });
+}
+
+/** All clients (published and drafts) for the admin list, in display order. */
+export async function getAdminClients(): Promise<Client[]> {
+  return prisma.client.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+export async function getClientById(id: string): Promise<Client | null> {
+  return prisma.client.findUnique({ where: { id } });
+}
+
+/** All team members (published and drafts) for the admin list, in display order. */
+export async function getAdminTeam(): Promise<TeamMember[]> {
+  return prisma.teamMember.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+export async function getTeamMemberById(id: string): Promise<TeamMember | null> {
+  return prisma.teamMember.findUnique({ where: { id } });
+}
+
+/** All testimonials (published and drafts) for the admin list, in display order. */
+export async function getAdminTestimonials(): Promise<Testimonial[]> {
+  return prisma.testimonial.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+export async function getTestimonialById(
+  id: string,
+): Promise<Testimonial | null> {
+  return prisma.testimonial.findUnique({ where: { id } });
 }
