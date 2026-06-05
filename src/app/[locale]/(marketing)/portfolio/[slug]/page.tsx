@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
+import { RichText } from "@/components/rich-text";
 import { buttonVariants } from "@/components/ui/button";
 import { getProjectBySlug } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
@@ -88,13 +89,10 @@ export default async function ProjectPage({
         </div>
 
         <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_280px]">
-          <div className="flex flex-col gap-5 text-pretty leading-relaxed">
-            {project.content.map((paragraph, i) => (
-              <p key={i} className="text-base sm:text-lg">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <RichText
+            blocks={project.content}
+            className="flex flex-col gap-5 text-pretty"
+          />
 
           <aside className="flex flex-col gap-6 lg:border-l lg:border-border lg:pl-8">
             <dl className="flex flex-col gap-4">
