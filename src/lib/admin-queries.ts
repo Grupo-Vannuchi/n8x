@@ -6,6 +6,7 @@ import type {
   LeadType,
   Project,
   Service,
+  Stat,
   TeamMember,
   Testimonial,
 } from "@prisma/client";
@@ -113,4 +114,15 @@ export async function getTestimonialById(
   id: string,
 ): Promise<Testimonial | null> {
   return prisma.testimonial.findUnique({ where: { id } });
+}
+
+/** All stats (published and drafts) for the admin list, in display order. */
+export async function getAdminStats(): Promise<Stat[]> {
+  return prisma.stat.findMany({
+    orderBy: [{ order: "asc" }, { key: "asc" }],
+  });
+}
+
+export async function getStatById(id: string): Promise<Stat | null> {
+  return prisma.stat.findUnique({ where: { id } });
 }

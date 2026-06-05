@@ -9,6 +9,7 @@ import {
   Building2,
   Quote,
   Users,
+  BarChart3,
 } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const items = [
   { href: "/admin/clients", key: "clients", icon: Building2, exact: false },
   { href: "/admin/testimonials", key: "testimonials", icon: Quote, exact: false },
   { href: "/admin/team", key: "team", icon: Users, exact: false },
+  { href: "/admin/stats", key: "stats", icon: BarChart3, exact: false },
   { href: "/admin/leads", key: "leads", icon: Inbox, exact: false },
 ] as const;
 

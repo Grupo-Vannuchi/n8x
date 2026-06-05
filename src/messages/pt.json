@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "defaultTitle": "{brand} — Comunicação, estratégia e performance",
+    "defaultTitle": "{brand} — Agência de Marketing Estratégico",
     "titleTemplate": "%s · {brand}",
-    "description": "Agência de comunicação que transforma marcas com estratégia, performance e criatividade.",
+    "description": "A N8X Marketing é uma agência de marketing digital especializada em estratégia, conteúdo, posicionamento de marca e crescimento previsível para empresas.",
     "keywords": "agência, publicidade, marketing, social media, branding, tráfego pago"
   },
   "nav": {
@@ -28,16 +28,16 @@
   "home": {
     "hero": {
       "eyebrow": "Há {years} anos no mercado",
-      "titleLead": "Transformamos marcas com",
-      "rotating": ["estratégia", "performance", "criatividade"],
-      "subtitle": "Somos um estúdio de comunicação completo: da identidade ao tráfego, do conteúdo ao resultado.",
+      "titleLead": "Agência de marketing estratégico",
+      "rotating": ["Focada em crescimento previsível!"],
+      "subtitle": "A N8X Marketing usa a estratégia de Ideal Customer Profile (ICP) para encontrar, abordar e engajar clientes ideais todos os dias.",
       "primaryCta": "Começar um projeto",
       "secondaryCta": "Conhecer trabalhos"
     },
     "services": {
       "eyebrow": "O que fazemos",
-      "title": "Serviços de ponta a ponta",
-      "subtitle": "Tudo o que sua marca precisa para crescer, em um só lugar."
+      "title": "Soluções completas",
+      "subtitle": "marketing digital para empresas que querem decolar!"
     },
     "portfolio": {
       "eyebrow": "Portfólio",
@@ -174,6 +174,7 @@
       "clients": "Clientes",
       "testimonials": "Depoimentos",
       "team": "Time",
+      "stats": "Estatísticas",
       "signOut": "Sair"
     },
     "dashboard": {
@@ -383,6 +384,40 @@
       "error": {
         "unauthorized": "Sua sessão expirou. Entre novamente.",
         "invalid": "Verifique os campos e tente novamente.",
+        "unknown": "Algo deu errado. Tente novamente."
+      }
+    },
+    "stats": {
+      "title": "Estatísticas",
+      "new": "Nova estatística",
+      "editTitle": "Editar: {title}",
+      "empty": "Nenhuma estatística ainda. Crie a primeira.",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "deleteConfirm": "Excluir \"{title}\"? Esta ação não pode ser desfeita.",
+      "statusPublished": "Publicado",
+      "statusDraft": "Rascunho",
+      "sectionBasics": "Informações básicas",
+      "sectionContent": "Conteúdo ({locale})",
+      "sectionVisibility": "Visibilidade",
+      "key": "Chave",
+      "keyHint": "Identificador interno da estatística (letras minúsculas e hífens).",
+      "value": "Valor",
+      "valueHint": "O número exibido no contador animado.",
+      "suffix": "Sufixo",
+      "suffixHint": "Símbolo após o número, ex.: \"+\", \"%\" ou \"k\".",
+      "order": "Ordem",
+      "orderHint": "Números menores aparecem primeiro.",
+      "labelField": "Rótulo",
+      "published": "Publicado (visível no site)",
+      "create": "Criar estatística",
+      "save": "Salvar alterações",
+      "saving": "Salvando…",
+      "cancel": "Cancelar",
+      "error": {
+        "unauthorized": "Sua sessão expirou. Entre novamente.",
+        "invalid": "Verifique os campos e tente novamente.",
+        "key_taken": "Essa chave já está em uso. Escolha outra.",
         "unknown": "Algo deu errado. Tente novamente."
       }
     }

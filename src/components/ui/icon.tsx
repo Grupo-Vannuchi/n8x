@@ -6,6 +6,8 @@ import {
   TrendingUp,
   Target,
   Sparkles,
+  FileSearchIcon,
+  Cpu,
   type LucideIcon,
 } from "lucide-react";
 
@@ -21,6 +23,8 @@ const icons: Record<string, LucideIcon> = {
   Megaphone,
   TrendingUp,
   Target,
+  FileSearchIcon,
+  Cpu,
 };
 
 /** The icon names available to `Service.icon`, for admin pickers and validation. */

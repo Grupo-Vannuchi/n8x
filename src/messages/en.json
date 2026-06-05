@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "defaultTitle": "{brand} — Communication, strategy and performance",
+    "defaultTitle": "{brand} — Strategic Marketing Agency",
     "titleTemplate": "%s · {brand}",
-    "description": "A communication agency that transforms brands through strategy, performance and creativity.",
+    "description": "N8X Marketing is a digital marketing agency specializing in strategic marketing, content creation, brand positioning, and predictable business growth.",
     "keywords": "agency, advertising, marketing, social media, branding, paid traffic"
   },
   "nav": {
@@ -28,16 +28,16 @@
   "home": {
     "hero": {
       "eyebrow": "{years} years in the market",
-      "titleLead": "We transform brands with",
-      "rotating": ["strategy", "performance", "creativity"],
-      "subtitle": "We're a full-service communication studio: from identity to traffic, from content to results.",
+      "titleLead": "Your brand",
+      "rotating": ["Speaks out, and N8X sets the tone!"],
+      "subtitle": "N8X Marketing uses the Ideal Customer Profile (ICP) strategy to find, approach, and engage your ideal customers every day.",
       "primaryCta": "Start a project",
       "secondaryCta": "See our work"
     },
     "services": {
       "eyebrow": "What we do",
-      "title": "End-to-end services",
-      "subtitle": "Everything your brand needs to grow, in one place."
+      "title": "Complete solutions",
+      "subtitle": "digital marketing for businesses that want to take off!"
     },
     "portfolio": {
       "eyebrow": "Portfolio",
@@ -174,6 +174,7 @@
       "clients": "Clients",
       "testimonials": "Testimonials",
       "team": "Team",
+      "stats": "Stats",
       "signOut": "Sign out"
     },
     "dashboard": {
@@ -383,6 +384,40 @@
       "error": {
         "unauthorized": "Your session expired. Please sign in again.",
         "invalid": "Please check the fields and try again.",
+        "unknown": "Something went wrong. Please try again."
+      }
+    },
+    "stats": {
+      "title": "Stats",
+      "new": "New stat",
+      "editTitle": "Edit: {title}",
+      "empty": "No stats yet. Create your first one.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete \"{title}\"? This cannot be undone.",
+      "statusPublished": "Published",
+      "statusDraft": "Draft",
+      "sectionBasics": "Basics",
+      "sectionContent": "Content ({locale})",
+      "sectionVisibility": "Visibility",
+      "key": "Key",
+      "keyHint": "The stat's internal identifier (lowercase letters and hyphens).",
+      "value": "Value",
+      "valueHint": "The number shown in the animated counter.",
+      "suffix": "Suffix",
+      "suffixHint": "Symbol after the number, e.g. \"+\", \"%\" or \"k\".",
+      "order": "Order",
+      "orderHint": "Lower numbers appear first.",
+      "labelField": "Label",
+      "published": "Published (visible on the site)",
+      "create": "Create stat",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "error": {
+        "unauthorized": "Your session expired. Please sign in again.",
+        "invalid": "Please check the fields and try again.",
+        "key_taken": "That key is already in use. Choose another.",
         "unknown": "Something went wrong. Please try again."
       }
     }
