@@ -67,17 +67,72 @@
     }
   },
   "about": {
-    "title": "About us",
-    "subtitle": "Strategy, creativity and performance since {foundedYear}.",
-    "lead": "We're a full-service communication studio. We blend data and creativity to build brands that sell and that last.",
-    "missionTitle": "Our mission",
-    "mission": "To turn brands into references through strategy, content and performance — with transparency and results.",
-    "valuesTitle": "What we believe",
-    "values": [
-      { "title": "Strategy first", "description": "Every deliverable starts from a clear, measurable goal." },
-      { "title": "Creativity with purpose", "description": "Beautiful ideas that also perform." },
-      { "title": "Transparency", "description": "Clear reports and honest conversations, always." }
-    ]
+    "title": "Full-service digital marketing agency for companies that want to grow with predictability",
+    "metaDescription": "N8X Marketing is a digital marketing agency that combines strategy, social media management, paid traffic, audiovisual production and AI to position brands with consistency and results.",
+    "subtitle": "Strategy, content and brand positioning since {foundedYear}.",
+    "lead": "N8X Marketing is a digital marketing agency that combines <b>strategy, social media management, paid traffic, audiovisual production and artificial intelligence</b> to position brands with consistency and results. We work with companies that want to go beyond \"just posting\" and are looking for a structured marketing operation, driven by data and aligned with business goals.",
+    "practice": {
+      "title": "What we do in practice",
+      "intro": "We act as a complete marketing team for your business, connecting <b>strategic planning</b> with daily execution. This includes:",
+      "items": [
+        "Brand, audience and competitor diagnosis",
+        "Defining positioning and communication tone",
+        "Social media management (mainly Instagram, Facebook and LinkedIn)",
+        "Paid traffic with a focus on ROI (Meta Ads and Google Ads)",
+        "Scripting, filming and editing of professional videos and photos",
+        "Landing pages and simple funnels for lead capture",
+        "AI applied to marketing to gain scale without losing the brand's creative voice"
+      ]
+    },
+    "services": {
+      "title": "Main digital marketing services we offer",
+      "intro": "Among the services most requested by our clients are:",
+      "items": [
+        "Social media management with editorial calendar, design creation, copywriting and metrics tracking",
+        "Paid traffic management focused on generating leads, orders and real business opportunities",
+        "Audiovisual production (photo and video) for campaigns, ads, digital menus and brand positioning",
+        "Page optimization, simple landing page structures and sales funnels",
+        "AI implementation in marketing to speed up testing of creatives, scripts and ad variations"
+      ]
+    },
+    "audience": {
+      "title": "Who N8X Marketing is the right agency for",
+      "intro": "We're the ideal choice for companies that need a <b>full-service digital marketing agency</b> with a business mindset, not just post production. We work with:",
+      "items": [
+        "Local businesses that want to be a reference in their region",
+        "Bars, restaurants and nightclubs that thrive on foot traffic",
+        "Offices, construction firms, engineering companies and B2B services",
+        "Brands that already invest in media but can't clearly see the return",
+        "Companies that need to turn followers into customers"
+      ],
+      "note": "If you're looking for a <b>marketing agency in Santos</b> or the Baixada Santista region with a strategic eye and constant execution, N8X was built exactly for that scenario."
+    },
+    "whyFullService": {
+      "title": "Why work with a full-service digital marketing agency",
+      "p1": "By hiring a full-service digital marketing agency like N8X, your company gains a team that handles your <b>brand positioning, digital presence and demand generation</b> from start to finish. Instead of dealing with several different vendors, you have a single integrated operation, aligned with clear goals.",
+      "p2": "That means more consistency in communication, less rework, clearer data reading and decisions based on results — not guesswork. For businesses that need to grow with predictability, this integrated vision is essential."
+    },
+    "timing": {
+      "title": "How to know it's the right time to invest in digital marketing",
+      "intro": "A few signs show it's time to have an agency supporting your operation:",
+      "items": [
+        "You rely only on referrals or organic reach",
+        "You've already invested in ads but don't know exactly what worked",
+        "Your Instagram doesn't convey your company's real potential",
+        "There's no clear calendar of actions, campaigns or launches",
+        "Your marketing efforts don't talk to your sales team"
+      ],
+      "note": "If you recognize yourself in some of these points, it's a good time to talk to a <b>specialized marketing agency</b> that brings strategic vision and execution to your day-to-day."
+    },
+    "contactCta": {
+      "title": "Talk to N8X Marketing",
+      "paragraphs": [
+        "Want to understand how N8X can help your brand position itself better and generate more results with digital marketing? Get in touch through the site form or talk directly with our team on WhatsApp.",
+        "We'll analyze your company's moment, your goals and your current communication scenario to build an action plan that makes sense for your business — no empty promises, with strategy, execution and data reading."
+      ],
+      "tagline": "Your brand sets the message, N8X sets the tone."
+    },
+    "disclaimer": "N8X Marketing (N8X, N8X Company and N8 Company) is the group's digital marketing agency, focused on strategy, paid traffic and content."
   },
   "portfolio": {
     "title": "Portfolio",

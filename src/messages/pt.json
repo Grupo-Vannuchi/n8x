@@ -67,17 +67,72 @@
     }
   },
   "about": {
-    "title": "Quem somos",
-    "subtitle": "Estratégia, criatividade e performance desde {foundedYear}.",
-    "lead": "Somos um estúdio de comunicação completo. Unimos dados e criatividade para construir marcas que vendem e que ficam.",
-    "missionTitle": "Nossa missão",
-    "mission": "Transformar marcas em referências por meio de estratégia, conteúdo e performance — com transparência e resultado.",
-    "valuesTitle": "No que acreditamos",
-    "values": [
-      { "title": "Estratégia primeiro", "description": "Toda entrega nasce de um objetivo claro e mensurável." },
-      { "title": "Criatividade com propósito", "description": "Ideias bonitas que também performam." },
-      { "title": "Transparência", "description": "Relatórios claros e conversas honestas, sempre." }
-    ]
+    "title": "Agência de marketing digital full service para empresas que querem crescer com previsibilidade",
+    "metaDescription": "A N8X Marketing é uma agência de marketing digital que integra estratégia, gestão de redes sociais, tráfego pago, produção audiovisual e inteligência artificial para posicionar marcas com consistência e resultado.",
+    "subtitle": "Estratégia, conteúdo e posicionamento de marca desde {foundedYear}.",
+    "lead": "A N8X Marketing é uma agência de marketing digital que integra <b>estratégia, gestão de redes sociais, tráfego pago, produção audiovisual e inteligência artificial</b> para posicionar marcas com consistência e resultado. Atendemos empresas que querem ir além de \"só postar\" e buscam uma operação de marketing estruturada, orientada por dados e alinhada aos objetivos de negócio.",
+    "practice": {
+      "title": "O que fazemos na prática",
+      "intro": "Atuamos como um time de marketing completo para o seu negócio, conectando <b>planejamento estratégico</b> com execução diária. Isso inclui:",
+      "items": [
+        "Diagnóstico de marca, público e concorrência",
+        "Definição de posicionamento e linha de comunicação",
+        "Gestão de redes sociais (principalmente Instagram, Facebook e LinkedIn)",
+        "Tráfego pago com foco em ROI (Meta Ads e Google Ads)",
+        "Roteiro, captação e edição de vídeos e fotos profissionais",
+        "Landing pages e funis simples para captação de leads",
+        "IA aplicada ao marketing para ganhar escala sem perder a linha criativa da marca"
+      ]
+    },
+    "services": {
+      "title": "Principais serviços de marketing digital que oferecemos",
+      "intro": "Entre os serviços mais demandados pelos nossos clientes estão:",
+      "items": [
+        "Gestão de redes sociais com calendário editorial, criação de artes, textos e acompanhamento de métricas",
+        "Gestão de tráfego pago focada em geração de leads, pedidos e oportunidades reais de negócio",
+        "Produção audiovisual (foto e vídeo) para campanhas, anúncios, cardápios digitais e posicionamento de marca",
+        "Otimização de páginas, estruturas simples de landing page e funil de vendas",
+        "Implementação de IA no marketing para acelerar testes de criativos, roteiros e variações de anúncios"
+      ]
+    },
+    "audience": {
+      "title": "Para quem a N8X Marketing é a agência certa",
+      "intro": "Somos a escolha ideal para empresas que precisam de uma <b>agência de marketing digital full service</b> com visão de negócio, e não apenas produção de post. Atendemos:",
+      "items": [
+        "Negócios locais que querem ser referência na região",
+        "Bares, restaurantes e casas noturnas que vivem de movimento",
+        "Escritórios, construtoras, empresas de engenharia e serviços B2B",
+        "Marcas que já investem em mídia, mas não enxergam claramente o retorno",
+        "Empresas que precisam transformar seguidores em clientes"
+      ],
+      "note": "Se você procura uma <b>agência de marketing em Santos</b> ou Baixada Santista com olhar estratégico e execução constante, a N8X foi pensada exatamente para esse cenário."
+    },
+    "whyFullService": {
+      "title": "Por que trabalhar com uma agência de marketing digital full service",
+      "p1": "Ao contratar uma agência de marketing digital full service como a N8X, sua empresa passa a contar com um time que cuida do <b>posicionamento da marca, presença digital e geração de demanda</b> do início ao fim. Em vez de lidar com vários prestadores diferentes, você tem uma única operação integrada, alinhada a metas claras.",
+      "p2": "Isso significa mais consistência na comunicação, menos retrabalho, leitura de dados mais clara e decisões baseadas em resultado — não em achismo. Para negócios que precisam crescer com previsibilidade, essa visão integrada é fundamental."
+    },
+    "timing": {
+      "title": "Como saber se é o momento certo de investir em marketing digital",
+      "intro": "Alguns sinais mostram que está na hora de ter uma agência acompanhando sua operação:",
+      "items": [
+        "Você depende apenas de indicação ou movimento orgânico",
+        "Já investiu em anúncios, mas não sabe exatamente o que funcionou",
+        "Seu Instagram não transmite o potencial real da sua empresa",
+        "Não existe um calendário claro de ações, campanhas ou lançamentos",
+        "As ações de marketing não conversam com o comercial"
+      ],
+      "note": "Se você se reconhece em alguns desses pontos, é um bom momento para conversar com uma <b>agência de marketing especializada</b> que traga visão estratégica e execução para o dia a dia."
+    },
+    "contactCta": {
+      "title": "Fale com a N8X Marketing",
+      "paragraphs": [
+        "Quer entender como a N8X pode ajudar sua marca a se posicionar melhor e gerar mais resultados com marketing digital? Entre em contato pelo formulário do site ou fale diretamente com nossa equipe pelo WhatsApp.",
+        "Vamos analisar o momento da sua empresa, seus objetivos e o cenário atual de comunicação para construir um plano de ação que faça sentido para o seu negócio — sem promessas vazias, com estratégia, execução e leitura de dados."
+      ],
+      "tagline": "Sua marca transmite, a N8X dá o tom."
+    },
+    "disclaimer": "N8X Marketing (N8X, N8X Company e N8 Company) é a agência de marketing digital do grupo, com foco em estratégia, tráfego pago e conteúdo."
   },
   "portfolio": {
     "title": "Portfólio",

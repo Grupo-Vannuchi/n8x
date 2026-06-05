@@ -18,8 +18,8 @@ function LogoRow({
       aria-hidden={clone || undefined}
       className={clone ? "marquee-clone flex shrink-0" : "flex shrink-0"}
     >
-      {clients.map((client, i) => (
-        <li key={`${client.id}-${i}`} className="flex shrink-0 justify-center px-8">
+      {clients.map((client, i) => {
+        const logo = (
           <Image
             src={client.logoUrl}
             alt={client.name}
@@ -27,8 +27,27 @@ function LogoRow({
             height={70}
             className="h-12 w-auto opacity-60 grayscale transition duration-300 hover:scale-105 hover:opacity-100 hover:grayscale-0"
           />
-        </li>
-      ))}
+        );
+        return (
+          <li key={`${client.id}-${i}`} className="flex shrink-0 justify-center px-8">
+            {client.website ? (
+              <a
+                href={client.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={client.name}
+                // The cloned row is aria-hidden, so keep its links out of the tab order.
+                tabIndex={clone ? -1 : undefined}
+                className="inline-flex"
+              >
+                {logo}
+              </a>
+            ) : (
+              logo
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }
