@@ -19,6 +19,7 @@
     "startProject": "Start a project",
     "viewWork": "View work",
     "viewAllProjects": "View all projects",
+    "viewAllServices": "View all services",
     "viewCase": "View case",
     "learnMore": "Learn more",
     "sendWhatsapp": "Message on WhatsApp",
@@ -145,6 +146,14 @@
     "nextProject": "Next case",
     "ctaTitle": "Want a case like this for your brand?",
     "ctaButton": "Let's talk"
+  },
+  "services": {
+    "title": "Services",
+    "subtitle": "Complete digital marketing solutions for businesses that want to take off.",
+    "empty": "New services coming soon.",
+    "ctaTitle": "Ready to grow with this service?",
+    "ctaButton": "Let's talk",
+    "viewAll": "View all services"
   },
   "contact": {
     "title": "Let's talk",
@@ -332,6 +341,9 @@
       "orderHint": "Lower numbers appear first.",
       "titleField": "Title",
       "description": "Description",
+      "content": "Body",
+      "contentHint": "One paragraph per line. Shown on the service's own page.",
+      "featured": "Featured on the home page",
       "published": "Published (visible on the site)",
       "create": "Create service",
       "save": "Save changes",

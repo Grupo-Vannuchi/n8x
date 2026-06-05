@@ -2,18 +2,36 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/layout/logo";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { siteConfig } from "@/config/site";
+import { siteConfig, type NavKey } from "@/config/site";
 
-export function Header() {
+export type DropdownLink = {
+  slug: string;
+  title: string;
+};
+
+export function Header({
+  portfolioLinks = [],
+  serviceLinks = [],
+}: {
+  portfolioLinks?: DropdownLink[];
+  serviceLinks?: DropdownLink[];
+}) {
   const t = useTranslations("nav");
   const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
+  const [openKey, setOpenKey] = useState<NavKey | null>(null);
+
+  /** Per-nav-key child links that turn an item into a dropdown. */
+  const dropdowns: Partial<Record<NavKey, DropdownLink[]>> = {
+    services: serviceLinks,
+    portfolio: portfolioLinks,
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -24,15 +42,47 @@ export function Header() {
           className="hidden items-center gap-8 md:flex"
           aria-label="Primary"
         >
-          {siteConfig.nav.map((item) => (
-            <Link
-              key={item.key}
-              href={item.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {t(item.key)}
-            </Link>
-          ))}
+          {siteConfig.nav.map((item) => {
+            const links = dropdowns[item.key] ?? [];
+
+            if (links.length === 0) {
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {t(item.key)}
+                </Link>
+              );
+            }
+
+            return (
+              <div key={item.key} className="group relative">
+                <Link
+                  href={item.href}
+                  className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground group-focus-within:text-foreground"
+                >
+                  {t(item.key)}
+                  <ChevronDown className="size-4 transition-transform group-hover:rotate-180" />
+                </Link>
+                <div className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                  <ul className="min-w-56 max-w-72 rounded-md border border-border bg-background p-1 shadow-lg">
+                    {links.map((link) => (
+                      <li key={link.slug}>
+                        <Link
+                          href={`${item.href}/${link.slug}`}
+                          className="block truncate rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                          {link.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            );
+          })}
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
@@ -56,16 +106,68 @@ export function Header() {
       {open ? (
         <div className="border-t border-border bg-background md:hidden">
           <Container className="flex flex-col gap-1 py-4">
-            {siteConfig.nav.map((item) => (
-              <Link
-                key={item.key}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="rounded-md px-2 py-2.5 text-base font-medium hover:bg-muted"
-              >
-                {t(item.key)}
-              </Link>
-            ))}
+            {siteConfig.nav.map((item) => {
+              const links = dropdowns[item.key] ?? [];
+
+              if (links.length === 0) {
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-2 py-2.5 text-base font-medium hover:bg-muted"
+                  >
+                    {t(item.key)}
+                  </Link>
+                );
+              }
+
+              const expanded = openKey === item.key;
+
+              return (
+                <div key={item.key}>
+                  <div className="flex items-center">
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="flex-1 rounded-md px-2 py-2.5 text-base font-medium hover:bg-muted"
+                    >
+                      {t(item.key)}
+                    </Link>
+                    <button
+                      type="button"
+                      aria-expanded={expanded}
+                      aria-label={t(item.key)}
+                      onClick={() =>
+                        setOpenKey((k) => (k === item.key ? null : item.key))
+                      }
+                      className="inline-flex size-10 items-center justify-center rounded-md hover:bg-muted"
+                    >
+                      <ChevronDown
+                        className={`size-5 transition-transform ${
+                          expanded ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  {expanded ? (
+                    <ul className="ml-2 flex flex-col gap-0.5 border-l border-border pl-2">
+                      {links.map((link) => (
+                        <li key={link.slug}>
+                          <Link
+                            href={`${item.href}/${link.slug}`}
+                            onClick={() => setOpen(false)}
+                            className="block truncate rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            {link.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              );
+            })}
             <div className="mt-3 flex items-center justify-between">
               <LocaleSwitcher />
               <Link

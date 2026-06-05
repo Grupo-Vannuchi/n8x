@@ -43,12 +43,14 @@ model Service {
   icon        String // lucide-react icon name, e.g. "Megaphone"
   title       Json // LocalizedText
   description Json // LocalizedText
+  content     Json     @default("{}") // LocalizedRichText (array of paragraphs per locale)
+  featured    Boolean  @default(false)
   order       Int      @default(0)
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([published, order])
+  @@index([published, featured, order])
   @@map("services")
 }
 

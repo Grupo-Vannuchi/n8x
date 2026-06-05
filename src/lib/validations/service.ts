@@ -24,6 +24,18 @@ const localizedText = z.object(
   ) as Record<Locale, z.ZodString>,
 );
 
+/** `{ pt: string[], en: string[] }` — an ordered list of paragraphs per locale. */
+const localizedRichText = z.object(
+  Object.fromEntries(
+    locales.map((l) => [
+      l,
+      l === defaultLocale
+        ? z.array(z.string().trim().min(1)).min(1, "Add at least one paragraph")
+        : z.array(z.string().trim().min(1)),
+    ]),
+  ) as Record<Locale, z.ZodArray<z.ZodString>>,
+);
+
 /** Lowercase, hyphen-separated slug (e.g. "social-media"). */
 const slug = z
   .string()
@@ -38,6 +50,8 @@ export const serviceSchema = z.object({
   order: z.coerce.number().int().min(0).max(9999),
   title: localizedText,
   description: localizedText,
+  content: localizedRichText,
+  featured: z.boolean(),
   published: z.boolean(),
 });
 

@@ -139,6 +139,19 @@ export function ServiceForm({
               />
               <FieldError>{errors.description?.[locale]?.message}</FieldError>
             </div>
+            <div>
+              <Label htmlFor={`content-${locale}`}>{t("content")}</Label>
+              <Textarea
+                id={`content-${locale}`}
+                className="min-h-40"
+                {...register(
+                  `content.${locale}` as const,
+                  locale === locales[0] ? required : {},
+                )}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">{t("contentHint")}</p>
+              <FieldError>{errors.content?.[locale]?.message}</FieldError>
+            </div>
           </div>
         </fieldset>
       ))}
@@ -146,10 +159,16 @@ export function ServiceForm({
       {/* Flags */}
       <fieldset className="rounded-xl border border-border bg-card p-5">
         <legend className="px-1 text-sm font-semibold">{t("sectionVisibility")}</legend>
-        <label className="flex items-center gap-3 text-sm">
-          <input type="checkbox" className="size-4 accent-brand" {...register("published")} />
-          {t("published")}
-        </label>
+        <div className="flex flex-col gap-3">
+          <label className="flex items-center gap-3 text-sm">
+            <input type="checkbox" className="size-4 accent-brand" {...register("published")} />
+            {t("published")}
+          </label>
+          <label className="flex items-center gap-3 text-sm">
+            <input type="checkbox" className="size-4 accent-brand" {...register("featured")} />
+            {t("featured")}
+          </label>
+        </div>
       </fieldset>
 
       {serverError ? (

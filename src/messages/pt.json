@@ -19,6 +19,7 @@
     "startProject": "Começar um projeto",
     "viewWork": "Ver trabalhos",
     "viewAllProjects": "Ver todos os projetos",
+    "viewAllServices": "Ver todos os serviços",
     "viewCase": "Ver case",
     "learnMore": "Saiba mais",
     "sendWhatsapp": "Chamar no WhatsApp",
@@ -145,6 +146,14 @@
     "nextProject": "Próximo case",
     "ctaTitle": "Quer um case assim para a sua marca?",
     "ctaButton": "Vamos conversar"
+  },
+  "services": {
+    "title": "Serviços",
+    "subtitle": "Soluções completas de marketing digital para negócios que querem decolar.",
+    "empty": "Em breve, novos serviços por aqui.",
+    "ctaTitle": "Pronto para crescer com esse serviço?",
+    "ctaButton": "Vamos conversar",
+    "viewAll": "Ver todos os serviços"
   },
   "contact": {
     "title": "Vamos conversar",
@@ -332,6 +341,9 @@
       "orderHint": "Números menores aparecem primeiro.",
       "titleField": "Título",
       "description": "Descrição",
+      "content": "Texto",
+      "contentHint": "Um parágrafo por linha. Exibido na página do serviço.",
+      "featured": "Destaque na página inicial",
       "published": "Publicado (visível no site)",
       "create": "Criar serviço",
       "save": "Salvar alterações",

@@ -11,11 +11,16 @@ export type ServiceActionResult =
   | { ok: false; error: "unauthorized" | "invalid" | "slug_taken" | "unknown" };
 
 /** Admin routes are localized (pt unprefixed, en under /en); services are also
- * listed on the home page. Revalidate every affected path. */
-function revalidateServicePaths(): void {
-  for (const path of ["/admin/services", "/"]) {
+ * listed on the home page and on the public services pages. Revalidate every
+ * affected path. */
+function revalidateServicePaths(slug?: string): void {
+  for (const path of ["/admin/services", "/", "/services"]) {
     revalidatePath(path);
     revalidatePath(`/en${path}`);
+  }
+  if (slug) {
+    revalidatePath(`/services/${slug}`);
+    revalidatePath(`/en/services/${slug}`);
   }
 }
 
@@ -27,6 +32,8 @@ function toData(input: ServiceInput) {
     order: input.order,
     title: input.title,
     description: input.description,
+    content: input.content,
+    featured: input.featured,
     published: input.published,
   };
 }
@@ -43,7 +50,7 @@ export async function createService(
 
   try {
     const service = await prisma.service.create({ data: toData(parsed.data) });
-    revalidateServicePaths();
+    revalidateServicePaths(service.slug);
     return { ok: true, id: service.id };
   } catch (error) {
     if (
@@ -73,7 +80,7 @@ export async function updateService(
       where: { id },
       data: toData(parsed.data),
     });
-    revalidateServicePaths();
+    revalidateServicePaths(service.slug);
     return { ok: true, id: service.id };
   } catch (error) {
     if (
@@ -93,8 +100,8 @@ export async function deleteService(id: string): Promise<{ ok: boolean }> {
   if (!user) return { ok: false };
 
   try {
-    await prisma.service.delete({ where: { id } });
-    revalidateServicePaths();
+    const service = await prisma.service.delete({ where: { id } });
+    revalidateServicePaths(service.slug);
     return { ok: true };
   } catch (error) {
     console.error("Failed to delete service", error);

@@ -19,6 +19,11 @@ export type ServiceView = {
   icon: string;
   title: string;
   description: string;
+  featured: boolean;
+};
+
+export type ServiceDetailView = ServiceView & {
+  content: string[];
 };
 
 export type ProjectCardView = {
@@ -73,10 +78,17 @@ export type ClientView = {
 };
 
 export const getServices = cache(
-  async (locale: Locale): Promise<ServiceView[]> => {
+  async (
+    locale: Locale,
+    options: { featuredOnly?: boolean; take?: number } = {},
+  ): Promise<ServiceView[]> => {
     const rows = await prisma.service.findMany({
-      where: { published: true },
+      where: {
+        published: true,
+        ...(options.featuredOnly ? { featured: true } : {}),
+      },
       orderBy: { order: "asc" },
+      take: options.take,
     });
     return rows.map((s) => ({
       id: s.id,
@@ -84,9 +96,40 @@ export const getServices = cache(
       icon: s.icon,
       title: localize(s.title, locale),
       description: localize(s.description, locale),
+      featured: s.featured,
     }));
   },
 );
+
+export const getServiceBySlug = cache(
+  async (
+    locale: Locale,
+    slug: string,
+  ): Promise<ServiceDetailView | null> => {
+    const s = await prisma.service.findFirst({
+      where: { slug, published: true },
+    });
+    if (!s) return null;
+    return {
+      id: s.id,
+      slug: s.slug,
+      icon: s.icon,
+      title: localize(s.title, locale),
+      description: localize(s.description, locale),
+      content: localizeRich(s.content, locale),
+      featured: s.featured,
+    };
+  },
+);
+
+/** Slugs of all published services, for `generateStaticParams`. */
+export const getServiceSlugs = cache(async (): Promise<string[]> => {
+  const rows = await prisma.service.findMany({
+    where: { published: true },
+    select: { slug: true },
+  });
+  return rows.map((r) => r.slug);
+});
 
 export const getProjects = cache(
   async (

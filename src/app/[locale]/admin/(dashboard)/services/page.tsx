@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Star } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -47,6 +47,12 @@ export default async function AdminServicesPage({
                     <span className="font-semibold">
                       {localize(service.title, locale)}
                     </span>
+                    {service.featured ? (
+                      <Star
+                        className="size-4 fill-accent text-accent"
+                        aria-label={t("featured")}
+                      />
+                    ) : null}
                     <span
                       className={cn(
                         "rounded-full px-2 py-0.5 text-xs font-medium",

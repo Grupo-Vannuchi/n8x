@@ -105,7 +105,7 @@ export const siteConfig: SiteConfig = {
 
   nav: [
     { key: "about", href: "/about" },
-    { key: "services", href: "/#services" },
+    { key: "services", href: "/services" },
     { key: "portfolio", href: "/portfolio" },
     { key: "careers", href: "/careers" },
     { key: "contact", href: "/contact" },

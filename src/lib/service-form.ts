@@ -17,13 +17,23 @@ export type ServiceFormValues = {
   slug: string;
   icon: string;
   order: string;
+  featured: boolean;
   published: boolean;
   title: LocalizedStrings;
   description: LocalizedStrings;
+  /** One paragraph per line, per locale. */
+  content: LocalizedStrings;
 };
 
 function blankLocalized(): LocalizedStrings {
   return Object.fromEntries(locales.map((l) => [l, ""])) as LocalizedStrings;
+}
+
+function linesToArray(value: string): string[] {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 /** Read a `LocalizedText` JSON value into a complete per-locale string map. */
@@ -34,10 +44,27 @@ function readLocalizedText(value: unknown): LocalizedStrings {
   ) as LocalizedStrings;
 }
 
+/** Read a `LocalizedRichText` JSON value into newline-joined paragraphs. */
+function readLocalizedRich(value: unknown): LocalizedStrings {
+  const obj = (value ?? {}) as Record<string, unknown>;
+  return Object.fromEntries(
+    locales.map((l) => {
+      const arr = Array.isArray(obj[l]) ? (obj[l] as unknown[]) : [];
+      return [l, arr.filter((p): p is string => typeof p === "string").join("\n")];
+    }),
+  ) as LocalizedStrings;
+}
+
 function trimLocalized(value: LocalizedStrings): LocalizedStrings {
   return Object.fromEntries(
     locales.map((l) => [l, value[l].trim()]),
   ) as LocalizedStrings;
+}
+
+function richFromLocalized(value: LocalizedStrings): Record<Locale, string[]> {
+  return Object.fromEntries(
+    locales.map((l) => [l, linesToArray(value[l])]),
+  ) as Record<Locale, string[]>;
 }
 
 /** Blank form, used by the "new service" page. Defaults to published. */
@@ -46,9 +73,11 @@ export function emptyServiceForm(): ServiceFormValues {
     slug: "",
     icon: "",
     order: "0",
+    featured: false,
     published: true,
     title: blankLocalized(),
     description: blankLocalized(),
+    content: blankLocalized(),
   };
 }
 
@@ -57,9 +86,11 @@ type ServiceRow = {
   slug: string;
   icon: string;
   order: number;
+  featured: boolean;
   published: boolean;
   title: unknown;
   description: unknown;
+  content: unknown;
 };
 
 /** Pre-fill the form from a stored service (edit page). */
@@ -68,9 +99,11 @@ export function serviceToForm(service: ServiceRow): ServiceFormValues {
     slug: service.slug,
     icon: service.icon,
     order: String(service.order),
+    featured: service.featured,
     published: service.published,
     title: readLocalizedText(service.title),
     description: readLocalizedText(service.description),
+    content: readLocalizedRich(service.content),
   };
 }
 
@@ -80,8 +113,10 @@ export function formToInput(values: ServiceFormValues): ServiceInput {
     slug: values.slug.trim(),
     icon: values.icon.trim(),
     order: Number(values.order),
+    featured: values.featured,
     published: values.published,
     title: trimLocalized(values.title),
     description: trimLocalized(values.description),
+    content: richFromLocalized(values.content),
   };
 }

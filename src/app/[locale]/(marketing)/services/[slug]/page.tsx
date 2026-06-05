@@ -1,0 +1,103 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { Container } from "@/components/ui/container";
+import { Section } from "@/components/ui/section";
+import { Icon } from "@/components/ui/icon";
+import { buttonVariants } from "@/components/ui/button";
+import { getServiceBySlug } from "@/lib/queries";
+import { resolveLocale } from "@/i18n/routing";
+
+type Params = { locale: string; slug: string };
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<Params>;
+}): Promise<Metadata> {
+  const { locale: rawLocale, slug } = await params;
+  const locale = resolveLocale(rawLocale);
+  const service = await getServiceBySlug(locale, slug);
+  if (!service) return {};
+  return {
+    title: service.title,
+    description: service.description,
+    openGraph: {
+      title: service.title,
+      description: service.description,
+    },
+  };
+}
+
+export default async function ServicePage({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  const { locale: rawLocale, slug } = await params;
+  const locale = resolveLocale(rawLocale);
+  setRequestLocale(locale);
+  const t = await getTranslations("services");
+  const service = await getServiceBySlug(locale, slug);
+
+  if (!service) notFound();
+
+  return (
+    <article>
+      <div className="border-b border-border bg-muted/30">
+        <Container className="py-12 sm:py-16">
+          <Link
+            href="/services"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" />
+            {t("title")}
+          </Link>
+          <span className="inline-flex size-14 items-center justify-center rounded-xl bg-brand/10 text-brand">
+            <Icon name={service.icon} className="size-7" />
+          </span>
+          <h1 className="mt-6 max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">
+            {service.title}
+          </h1>
+          <p className="mt-4 max-w-2xl text-pretty text-lg text-muted-foreground">
+            {service.description}
+          </p>
+        </Container>
+      </div>
+
+      {service.content.length > 0 ? (
+        <Container className="py-12 sm:py-16">
+          <div className="mx-auto flex max-w-3xl flex-col gap-5 text-pretty leading-relaxed">
+            {service.content.map((paragraph, i) => (
+              <p key={i} className="text-base sm:text-lg">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </Container>
+      ) : null}
+
+      <Section className="bg-muted/30">
+        <div className="flex flex-col items-center gap-5 text-center">
+          <h2 className="text-balance text-2xl font-bold sm:text-3xl">
+            {t("ctaTitle")}
+          </h2>
+          <Link href="/contact" className={buttonVariants({ size: "lg" })}>
+            {t("ctaButton")}
+            <ArrowRight className="size-5" />
+          </Link>
+          <Link
+            href="/services"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {t("viewAll")}
+          </Link>
+        </div>
+      </Section>
+    </article>
+  );
+}
