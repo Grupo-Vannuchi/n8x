@@ -342,7 +342,7 @@
       "titleField": "Título",
       "description": "Descrição",
       "content": "Texto",
-      "contentHint": "Um parágrafo por linha. Exibido na página do serviço.",
+      "contentHint": "Um bloco por linha. Aceita **negrito**, *itálico*, títulos ## e ###, listas com - e [links](/caminho).",
       "featured": "Destaque na página inicial",
       "published": "Publicado (visível no site)",
       "create": "Criar serviço",

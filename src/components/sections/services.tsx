@@ -11,7 +11,7 @@ import type { Locale } from "@/i18n/routing";
 export async function Services({ locale }: { locale: Locale }) {
   const t = await getTranslations("home.services");
   const tc = await getTranslations("common");
-  const services = await getServices(locale, { featuredOnly: true, take: 6 });
+  const services = await getServices(locale, { featuredOnly: true, take: 8 });
 
   if (services.length === 0) return null;
 

@@ -342,7 +342,7 @@
       "titleField": "Title",
       "description": "Description",
       "content": "Body",
-      "contentHint": "One paragraph per line. Shown on the service's own page.",
+      "contentHint": "One block per line. Supports **bold**, *italic*, ## and ### headings, - lists and [links](/path).",
       "featured": "Featured on the home page",
       "published": "Published (visible on the site)",
       "create": "Create service",

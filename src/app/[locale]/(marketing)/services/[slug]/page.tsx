@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Icon } from "@/components/ui/icon";
+import { RichText } from "@/components/rich-text";
 import { buttonVariants } from "@/components/ui/button";
 import { getServiceBySlug } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
@@ -71,13 +72,10 @@ export default async function ServicePage({
 
       {service.content.length > 0 ? (
         <Container className="py-12 sm:py-16">
-          <div className="mx-auto flex max-w-3xl flex-col gap-5 text-pretty leading-relaxed">
-            {service.content.map((paragraph, i) => (
-              <p key={i} className="text-base sm:text-lg">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <RichText
+            blocks={service.content}
+            className="mx-auto flex max-w-3xl flex-col gap-5 text-pretty"
+          />
         </Container>
       ) : null}
 

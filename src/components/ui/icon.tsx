@@ -8,6 +8,12 @@ import {
   Sparkles,
   FileSearchIcon,
   Cpu,
+  Share2,
+  Bot,
+  Globe,
+  Workflow,
+  Printer,
+  Video,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,6 +31,12 @@ const icons: Record<string, LucideIcon> = {
   Target,
   FileSearchIcon,
   Cpu,
+  Share2,
+  Bot,
+  Globe,
+  Workflow,
+  Printer,
+  Video,
 };
 
 /** The icon names available to `Service.icon`, for admin pickers and validation. */
