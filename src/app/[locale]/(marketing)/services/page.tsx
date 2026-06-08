@@ -6,8 +6,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { Section } from "@/components/ui/section";
 import { getServices } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
-
-export const dynamic = "force-dynamic";
+import { localeAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -16,7 +15,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = resolveLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: "services" });
-  return { title: t("title"), description: t("subtitle") };
+  return {
+    title: t("title"),
+    description: t("subtitle"),
+    alternates: localeAlternates(locale, "/services"),
+  };
 }
 
 export default async function ServicesPage({

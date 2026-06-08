@@ -1,4 +1,5 @@
 import { resolveLocale } from "@/i18n/routing";
+import { localeAlternates } from "@/lib/seo";
 import { richTags } from "@/i18n/rich";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -12,10 +13,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { Team } from "@/components/sections/team";
 import { siteConfig, whatsappLink } from "@/config/site";
 
-// The team section is managed in the admin CMS, so render fresh per request
-// (same approach as the home page).
-export const dynamic = "force-dynamic";
-
 export async function generateMetadata({
   params,
 }: {
@@ -23,7 +20,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = resolveLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: "about" });
-  return { title: t("title"), description: t("metaDescription") };
+  return {
+    title: t("title"),
+    description: t("metaDescription"),
+    alternates: localeAlternates(locale, "/about"),
+  };
 }
 
 /** Brand-checkmarked list used to render the bullet groups on this page. */

@@ -9,12 +9,22 @@ import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
 import { RichText } from "@/components/rich-text";
 import { buttonVariants } from "@/components/ui/button";
-import { getProjectBySlug } from "@/lib/queries";
+import { getProjectBySlug, getProjectSlugs } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
+import { localeAlternates } from "@/lib/seo";
 
 type Params = { locale: string; slug: string };
 
-export const dynamic = "force-dynamic";
+// Prerender every published project (per locale). New/edited projects are
+// rendered on demand and cached, then refreshed via the `projects` tag.
+// Resilient to the DB being unavailable at build time — falls back to on-demand.
+export async function generateStaticParams() {
+  try {
+    return (await getProjectSlugs()).map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -28,6 +38,7 @@ export async function generateMetadata({
   return {
     title: project.title,
     description: project.summary,
+    alternates: localeAlternates(locale, `/portfolio/${slug}`),
     openGraph: {
       title: project.title,
       description: project.summary,

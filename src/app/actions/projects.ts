@@ -1,26 +1,25 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { tags } from "@/lib/cache";
 import { projectSchema, type ProjectInput } from "@/lib/validations/project";
 
 export type ProjectActionResult =
   | { ok: true; id: string }
   | { ok: false; error: "unauthorized" | "invalid" | "slug_taken" | "unknown" };
 
-/** Admin routes are localized (pt unprefixed, en under /en); public portfolio
- * pages and the home page list projects too. Revalidate every affected path. */
-function revalidateProjectPaths(slug?: string): void {
-  for (const path of ["/admin/projects", "/", "/portfolio"]) {
-    revalidatePath(path);
-    revalidatePath(`/en${path}`);
-  }
-  if (slug) {
-    revalidatePath(`/portfolio/${slug}`);
-    revalidatePath(`/en/portfolio/${slug}`);
-  }
+/** Projects render on the home page, the portfolio list and each project page.
+ * One content tag invalidates every cached page that reads them, in any locale
+ * — no need to enumerate paths. (Admin pages are auth-gated, hence dynamic.) */
+function revalidateProjects(): void {
+  // Read-your-own-writes: `updateTag` expires the tag immediately so the next
+  // request to any page that reads it fetches fresh data, rather than the
+  // stale-while-revalidate serve of `revalidateTag(tag, "max")`. Admin edits
+  // must show up on the public site on the very next visit, not the one after.
+  updateTag(tags.projects);
 }
 
 /** Persist a project's bilingual + scalar fields. Shared by create and update. */
@@ -54,7 +53,7 @@ export async function createProject(
 
   try {
     const project = await prisma.project.create({ data: toData(parsed.data) });
-    revalidateProjectPaths(project.slug);
+    revalidateProjects();
     return { ok: true, id: project.id };
   } catch (error) {
     if (
@@ -84,7 +83,7 @@ export async function updateProject(
       where: { id },
       data: toData(parsed.data),
     });
-    revalidateProjectPaths(project.slug);
+    revalidateProjects();
     return { ok: true, id: project.id };
   } catch (error) {
     if (
@@ -104,8 +103,8 @@ export async function deleteProject(id: string): Promise<{ ok: boolean }> {
   if (!user) return { ok: false };
 
   try {
-    const project = await prisma.project.delete({ where: { id } });
-    revalidateProjectPaths(project.slug);
+    await prisma.project.delete({ where: { id } });
+    revalidateProjects();
     return { ok: true };
   } catch (error) {
     console.error("Failed to delete project", error);

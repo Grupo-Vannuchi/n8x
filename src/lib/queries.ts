@@ -1,7 +1,8 @@
 import "server-only";
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { localize, localizeRich } from "@/lib/content";
+import { tags, CONTENT_REVALIDATE_SECONDS } from "@/lib/cache";
 import type { Locale } from "@/i18n/routing";
 
 /**
@@ -9,9 +10,12 @@ import type { Locale } from "@/i18n/routing";
  *
  * Each function reads published content from Postgres and resolves bilingual
  * JSON fields to plain strings for the requested locale, returning view-ready
- * objects. Wrapped in React `cache` so repeated calls within one request (e.g.
- * a page and its metadata) hit the database only once.
+ * objects. Wrapped in `unstable_cache` so the rendered pages can be statically
+ * cached (ISR): results are tagged per content type and invalidated on demand
+ * by the admin actions via `revalidateTag`, with a 1-day time-based fallback.
  */
+
+const revalidate = CONTENT_REVALIDATE_SECONDS;
 
 export type ServiceView = {
   id: string;
@@ -77,7 +81,7 @@ export type ClientView = {
   website: string | null;
 };
 
-export const getServices = cache(
+export const getServices = unstable_cache(
   async (
     locale: Locale,
     options: { featuredOnly?: boolean; take?: number } = {},
@@ -99,13 +103,12 @@ export const getServices = cache(
       featured: s.featured,
     }));
   },
+  ["services", "list"],
+  { tags: [tags.services], revalidate },
 );
 
-export const getServiceBySlug = cache(
-  async (
-    locale: Locale,
-    slug: string,
-  ): Promise<ServiceDetailView | null> => {
+export const getServiceBySlug = unstable_cache(
+  async (locale: Locale, slug: string): Promise<ServiceDetailView | null> => {
     const s = await prisma.service.findFirst({
       where: { slug, published: true },
     });
@@ -120,18 +123,24 @@ export const getServiceBySlug = cache(
       featured: s.featured,
     };
   },
+  ["services", "detail"],
+  { tags: [tags.services], revalidate },
 );
 
 /** Slugs of all published services, for `generateStaticParams`. */
-export const getServiceSlugs = cache(async (): Promise<string[]> => {
-  const rows = await prisma.service.findMany({
-    where: { published: true },
-    select: { slug: true },
-  });
-  return rows.map((r) => r.slug);
-});
+export const getServiceSlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    const rows = await prisma.service.findMany({
+      where: { published: true },
+      select: { slug: true },
+    });
+    return rows.map((r) => r.slug);
+  },
+  ["services", "slugs"],
+  { tags: [tags.services], revalidate },
+);
 
-export const getProjects = cache(
+export const getProjects = unstable_cache(
   async (
     locale: Locale,
     options: { featuredOnly?: boolean; take?: number } = {},
@@ -146,13 +155,12 @@ export const getProjects = cache(
     });
     return rows.map(toProjectCard(locale));
   },
+  ["projects", "list"],
+  { tags: [tags.projects], revalidate },
 );
 
-export const getProjectBySlug = cache(
-  async (
-    locale: Locale,
-    slug: string,
-  ): Promise<ProjectDetailView | null> => {
+export const getProjectBySlug = unstable_cache(
+  async (locale: Locale, slug: string): Promise<ProjectDetailView | null> => {
     const p = await prisma.project.findFirst({
       where: { slug, published: true },
     });
@@ -163,18 +171,24 @@ export const getProjectBySlug = cache(
       content: localizeRich(p.content, locale),
     };
   },
+  ["projects", "detail"],
+  { tags: [tags.projects], revalidate },
 );
 
 /** Slugs of all published projects, for `generateStaticParams`. */
-export const getProjectSlugs = cache(async (): Promise<string[]> => {
-  const rows = await prisma.project.findMany({
-    where: { published: true },
-    select: { slug: true },
-  });
-  return rows.map((r) => r.slug);
-});
+export const getProjectSlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    const rows = await prisma.project.findMany({
+      where: { published: true },
+      select: { slug: true },
+    });
+    return rows.map((r) => r.slug);
+  },
+  ["projects", "slugs"],
+  { tags: [tags.projects], revalidate },
+);
 
-export const getTestimonials = cache(
+export const getTestimonials = unstable_cache(
   async (locale: Locale): Promise<TestimonialView[]> => {
     const rows = await prisma.testimonial.findMany({
       where: { published: true },
@@ -190,9 +204,11 @@ export const getTestimonials = cache(
       quote: localize(t.quote, locale),
     }));
   },
+  ["testimonials"],
+  { tags: [tags.testimonials], revalidate },
 );
 
-export const getTeam = cache(
+export const getTeam = unstable_cache(
   async (locale: Locale): Promise<TeamMemberView[]> => {
     const rows = await prisma.teamMember.findMany({
       where: { published: true },
@@ -206,9 +222,11 @@ export const getTeam = cache(
       socials: (m.socials as Record<string, string>) ?? {},
     }));
   },
+  ["team"],
+  { tags: [tags.team], revalidate },
 );
 
-export const getStats = cache(
+export const getStats = unstable_cache(
   async (locale: Locale): Promise<StatView[]> => {
     const rows = await prisma.stat.findMany({
       where: { published: true },
@@ -222,20 +240,26 @@ export const getStats = cache(
       label: localize(s.label, locale),
     }));
   },
+  ["stats"],
+  { tags: [tags.stats], revalidate },
 );
 
-export const getClients = cache(async (): Promise<ClientView[]> => {
-  const rows = await prisma.client.findMany({
-    where: { published: true },
-    orderBy: { order: "asc" },
-  });
-  return rows.map((c) => ({
-    id: c.id,
-    name: c.name,
-    logoUrl: c.logoUrl,
-    website: c.website,
-  }));
-});
+export const getClients = unstable_cache(
+  async (): Promise<ClientView[]> => {
+    const rows = await prisma.client.findMany({
+      where: { published: true },
+      orderBy: { order: "asc" },
+    });
+    return rows.map((c) => ({
+      id: c.id,
+      name: c.name,
+      logoUrl: c.logoUrl,
+      website: c.website,
+    }));
+  },
+  ["clients"],
+  { tags: [tags.clients], revalidate },
+);
 
 function toProjectCard(locale: Locale) {
   return (p: {

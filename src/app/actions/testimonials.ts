@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { tags } from "@/lib/cache";
 import {
   testimonialSchema,
   type TestimonialInput,
@@ -12,13 +13,15 @@ export type TestimonialActionResult =
   | { ok: true; id: string }
   | { ok: false; error: "unauthorized" | "invalid" | "unknown" };
 
-/** Admin routes are localized (pt unprefixed, en under /en); testimonials are
- * also shown on the home page. Revalidate every affected path. */
-function revalidateTestimonialPaths(): void {
-  for (const path of ["/admin/testimonials", "/"]) {
-    revalidatePath(path);
-    revalidatePath(`/en${path}`);
-  }
+/** Testimonials render on the home page. One content tag invalidates every
+ * cached page that reads them, in any locale. (Admin pages are auth-gated,
+ * hence dynamic.) */
+function revalidateTestimonials(): void {
+  // Read-your-own-writes: `updateTag` expires the tag immediately so the next
+  // request to any page that reads it fetches fresh data, rather than the
+  // stale-while-revalidate serve of `revalidateTag(tag, "max")`. Admin edits
+  // must show up on the public site on the very next visit, not the one after.
+  updateTag(tags.testimonials);
 }
 
 /** Persist a testimonial's fields. Shared by create and update. */
@@ -47,7 +50,7 @@ export async function createTestimonial(
 
   try {
     const t = await prisma.testimonial.create({ data: toData(parsed.data) });
-    revalidateTestimonialPaths();
+    revalidateTestimonials();
     return { ok: true, id: t.id };
   } catch (error) {
     console.error("Failed to create testimonial", error);
@@ -71,7 +74,7 @@ export async function updateTestimonial(
       where: { id },
       data: toData(parsed.data),
     });
-    revalidateTestimonialPaths();
+    revalidateTestimonials();
     return { ok: true, id: t.id };
   } catch (error) {
     console.error("Failed to update testimonial", error);
@@ -86,7 +89,7 @@ export async function deleteTestimonial(id: string): Promise<{ ok: boolean }> {
 
   try {
     await prisma.testimonial.delete({ where: { id } });
-    revalidateTestimonialPaths();
+    revalidateTestimonials();
     return { ok: true };
   } catch (error) {
     console.error("Failed to delete testimonial", error);

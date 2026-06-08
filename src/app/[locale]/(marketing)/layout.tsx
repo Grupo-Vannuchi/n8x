@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { WhatsappButton } from "@/components/layout/whatsapp-button";
+import { OrganizationJsonLd } from "@/components/json-ld";
 import { getProjects, getServices } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
 
@@ -24,6 +25,7 @@ export default async function MarketingLayout({
 
   return (
     <>
+      <OrganizationJsonLd />
       <Header portfolioLinks={portfolioLinks} serviceLinks={serviceLinks} />
       <main className="flex-1">{children}</main>
       <Footer />
