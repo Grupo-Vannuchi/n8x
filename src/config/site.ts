@@ -113,14 +113,14 @@ export const siteConfig: SiteConfig = {
 
   theme: {
     light: {
-      brand: "#ff6700ff",
+      brand: "#0B0050",
       brandForeground: "#ffffff",
       accent: "#f59e0b",
       background: "#e0e0e0",
       foreground: "#0a0a0a",
     },
     dark: {
-      brand: "#ff6700ff",
+      brand: "#4D9CFB",
       brandForeground: "#0a0a0a",
       accent: "#fbbf24",
       background: "#0a0a0a",

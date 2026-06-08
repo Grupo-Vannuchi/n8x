@@ -1,14 +1,19 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/config/site";
 
 // Default social share image for every route (Open Graph + Twitter). Routes can
-// override by adding their own opengraph-image file deeper in the tree.
+// override by adding their own opengraph-image file deeper in the tree. The
+// background matches the brand mark's navy field (#0b0050) so the centred logo
+// blends seamlessly into the canvas.
 export const alt = siteConfig.name;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpengraphImage() {
-  const { brand, background, foreground } = siteConfig.theme.dark;
+export default async function OpengraphImage() {
+  const logo = await readFile(join(process.cwd(), "public/n8x-logo.png"));
+  const logoSrc = `data:image/png;base64,${logo.toString("base64")}`;
 
   return new ImageResponse(
     (
@@ -17,29 +22,19 @@ export default function OpengraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
-          padding: "80px",
-          background,
-          color: foreground,
-          fontFamily: "sans-serif",
+          background: "#0b0050",
         }}
       >
-        <div
-          style={{
-            width: 96,
-            height: 12,
-            background: brand,
-            borderRadius: 999,
-            marginBottom: 48,
-          }}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoSrc}
+          alt=""
+          width={560}
+          height={560}
+          style={{ objectFit: "contain" }}
         />
-        <div style={{ fontSize: 96, fontWeight: 700, letterSpacing: "-0.03em" }}>
-          {siteConfig.name}
-        </div>
-        <div style={{ marginTop: 24, fontSize: 40, color: brand, fontWeight: 600 }}>
-          {siteConfig.legalName}
-        </div>
       </div>
     ),
     { ...size },
