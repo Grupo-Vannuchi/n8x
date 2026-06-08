@@ -11,7 +11,9 @@ import { RichText } from "@/components/rich-text";
 import { buttonVariants } from "@/components/ui/button";
 import { getProjectBySlug, getProjectSlugs } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
-import { localeAlternates } from "@/lib/seo";
+import { localeAlternates, localizedUrl } from "@/lib/seo";
+import { siteConfig } from "@/config/site";
+import { BreadcrumbJsonLd, CreativeWorkJsonLd } from "@/components/json-ld";
 
 type Params = { locale: string; slug: string };
 
@@ -57,6 +59,7 @@ export default async function ProjectPage({
   setRequestLocale(locale);
   const t = await getTranslations("portfolio");
   const tc = await getTranslations("common");
+  const tn = await getTranslations("nav");
   const project = await getProjectBySlug(locale, slug);
 
   if (!project) notFound();
@@ -69,6 +72,25 @@ export default async function ProjectPage({
 
   return (
     <article>
+      <CreativeWorkJsonLd
+        locale={locale}
+        slug={slug}
+        name={project.title}
+        description={project.summary}
+        image={project.coverImage}
+        year={project.year}
+        category={project.category}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: siteConfig.name, url: localizedUrl(locale) },
+          { name: tn("portfolio"), url: localizedUrl(locale, "/portfolio") },
+          {
+            name: project.title,
+            url: localizedUrl(locale, `/portfolio/${slug}`),
+          },
+        ]}
+      />
       <div className="border-b border-border bg-muted/30">
         <Container className="py-12 sm:py-16">
           <Link

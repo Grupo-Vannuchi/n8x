@@ -10,7 +10,9 @@ import { RichText } from "@/components/rich-text";
 import { buttonVariants } from "@/components/ui/button";
 import { getServiceBySlug, getServiceSlugs } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
-import { localeAlternates } from "@/lib/seo";
+import { localeAlternates, localizedUrl } from "@/lib/seo";
+import { siteConfig } from "@/config/site";
+import { BreadcrumbJsonLd, ServiceJsonLd } from "@/components/json-ld";
 
 type Params = { locale: string; slug: string };
 
@@ -34,14 +36,12 @@ export async function generateMetadata({
   const locale = resolveLocale(rawLocale);
   const service = await getServiceBySlug(locale, slug);
   if (!service) return {};
+  // No explicit `openGraph`: og:title/description derive from title/description
+  // and og:image falls back to the shared `[locale]/opengraph-image.tsx`.
   return {
     title: service.title,
     description: service.description,
     alternates: localeAlternates(locale, `/services/${slug}`),
-    openGraph: {
-      title: service.title,
-      description: service.description,
-    },
   };
 }
 
@@ -54,12 +54,29 @@ export default async function ServicePage({
   const locale = resolveLocale(rawLocale);
   setRequestLocale(locale);
   const t = await getTranslations("services");
+  const tn = await getTranslations("nav");
   const service = await getServiceBySlug(locale, slug);
 
   if (!service) notFound();
 
   return (
     <article>
+      <ServiceJsonLd
+        locale={locale}
+        slug={slug}
+        name={service.title}
+        description={service.description}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: siteConfig.name, url: localizedUrl(locale) },
+          { name: tn("services"), url: localizedUrl(locale, "/services") },
+          {
+            name: service.title,
+            url: localizedUrl(locale, `/services/${slug}`),
+          },
+        ]}
+      />
       <div className="border-b border-border bg-muted/30">
         <Container className="py-12 sm:py-16">
           <Link

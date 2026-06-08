@@ -17,6 +17,9 @@ import type { Locale } from "@/i18n/routing";
 
 const revalidate = CONTENT_REVALIDATE_SECONDS;
 
+/** A content row reduced to what the sitemap needs: its slug and last edit. */
+export type SitemapEntry = { slug: string; updatedAt: Date };
+
 export type ServiceView = {
   id: string;
   slug: string;
@@ -140,6 +143,19 @@ export const getServiceSlugs = unstable_cache(
   { tags: [tags.services], revalidate },
 );
 
+/** Slug + last-modified date of every published service, for the sitemap. */
+export const getServiceSitemapEntries = unstable_cache(
+  async (): Promise<SitemapEntry[]> => {
+    const rows = await prisma.service.findMany({
+      where: { published: true },
+      select: { slug: true, updatedAt: true },
+    });
+    return rows.map((r) => ({ slug: r.slug, updatedAt: r.updatedAt }));
+  },
+  ["services", "sitemap"],
+  { tags: [tags.services], revalidate },
+);
+
 export const getProjects = unstable_cache(
   async (
     locale: Locale,
@@ -185,6 +201,19 @@ export const getProjectSlugs = unstable_cache(
     return rows.map((r) => r.slug);
   },
   ["projects", "slugs"],
+  { tags: [tags.projects], revalidate },
+);
+
+/** Slug + last-modified date of every published project, for the sitemap. */
+export const getProjectSitemapEntries = unstable_cache(
+  async (): Promise<SitemapEntry[]> => {
+    const rows = await prisma.project.findMany({
+      where: { published: true },
+      select: { slug: true, updatedAt: true },
+    });
+    return rows.map((r) => ({ slug: r.slug, updatedAt: r.updatedAt }));
+  },
+  ["projects", "sitemap"],
   { tags: [tags.projects], revalidate },
 );
 

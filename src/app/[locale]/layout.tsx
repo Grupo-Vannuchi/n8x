@@ -40,17 +40,17 @@ export async function generateMetadata({
     description: t("description"),
     keywords: t("keywords"),
     applicationName: siteConfig.name,
+    // og/twitter title + description are intentionally omitted: Next derives
+    // them from each page's `title`/`description`, so every route gets its own
+    // social copy instead of the site default. The shared OG image comes from
+    // `[locale]/opengraph-image.tsx` (inherited unless a page sets its own).
     openGraph: {
       type: "website",
       siteName: siteConfig.name,
-      title: t("defaultTitle", { brand: siteConfig.name }),
-      description: t("description"),
       locale,
     },
     twitter: {
       card: "summary_large_image",
-      title: t("defaultTitle", { brand: siteConfig.name }),
-      description: t("description"),
     },
   };
 }

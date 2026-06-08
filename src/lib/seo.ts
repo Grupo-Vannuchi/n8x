@@ -19,6 +19,16 @@ export function languageAlternates(path = ""): Record<string, string> {
 }
 
 /**
+ * Resolve a stored asset reference (which may be a relative path like
+ * `/uploads/x.jpg` or an already-absolute `https://…` URL) to an absolute URL.
+ * JSON-LD and social images must be absolute, unlike `next/image` `src` values.
+ */
+export function absoluteUrl(pathOrUrl: string): string {
+  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+  return `${base}${pathOrUrl.startsWith("/") ? "" : "/"}${pathOrUrl}`;
+}
+
+/**
  * `alternates` block for a page's `generateMetadata`: a self-referencing
  * canonical for the current locale plus hreflang links for every locale.
  * Pass the page's path without the locale prefix, e.g. `"/about"` (home = "").
