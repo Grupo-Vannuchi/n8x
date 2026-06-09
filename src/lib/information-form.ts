@@ -17,6 +17,7 @@ type LocalizedStrings = Record<Locale, string>;
 export type InformationFormValues = {
   slug: string;
   icon: string;
+  image: string;
   order: string;
   featured: boolean;
   published: boolean;
@@ -73,6 +74,7 @@ export function emptyInformationForm(): InformationFormValues {
   return {
     slug: "",
     icon: "",
+    image: "",
     order: "0",
     featured: false,
     published: true,
@@ -86,6 +88,7 @@ export function emptyInformationForm(): InformationFormValues {
 type InformationRow = {
   slug: string;
   icon: string;
+  image: string;
   order: number;
   featured: boolean;
   published: boolean;
@@ -99,6 +102,7 @@ export function informationToForm(information: InformationRow): InformationFormV
   return {
     slug: information.slug,
     icon: information.icon,
+    image: information.image,
     order: String(information.order),
     featured: information.featured,
     published: information.published,
@@ -113,6 +117,7 @@ export function formToInput(values: InformationFormValues): InformationInput {
   return {
     slug: values.slug.trim(),
     icon: values.icon.trim(),
+    image: values.image.trim(),
     order: Number(values.order),
     featured: values.featured,
     published: values.published,

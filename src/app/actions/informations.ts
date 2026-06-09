@@ -30,6 +30,7 @@ function toData(input: InformationInput) {
   return {
     slug: input.slug,
     icon: input.icon,
+    image: input.image,
     order: input.order,
     title: input.title,
     description: input.description,

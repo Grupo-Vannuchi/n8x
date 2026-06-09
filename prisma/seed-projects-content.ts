@@ -52,24 +52,29 @@ type Case = {
 const cases: Case[] = [
   {
     slug: "moraes-vannuchi",
+    category: { pt: "Engenharia", en: "Engineering" },
+    summary: {
+      pt: "Posicionamento e presença digital para uma empresa de engenharia gerar contatos qualificados.",
+      en: "Positioning and digital presence for an engineering company to generate qualified leads.",
+    },
     intro: {
-      pt: "O **Moraes Vannuchi** queria deixar de ser mais um restaurante para se tornar referência gastronômica na cidade.",
-      en: "**Moraes Vannuchi** wanted to evolve from just another restaurant into a culinary reference in the city.",
+      pt: "A **Moraes Vannuchi** é uma empresa de engenharia que queria comunicar autoridade técnica e atrair novos contratos pelo digital.",
+      en: "**Moraes Vannuchi** is an engineering company that wanted to convey technical authority and win new contracts online.",
     },
     challenge: {
-      pt: "A marca não comunicava a qualidade da experiência no salão e dependia quase só do boca a boca.",
-      en: "The brand didn't communicate the quality of its dining experience and relied almost entirely on word of mouth.",
+      pt: "A empresa tinha forte know-how técnico, mas pouca presença digital para gerar contatos qualificados.",
+      en: "The company had strong technical know-how but little digital presence to generate qualified leads.",
     },
     result: {
-      pt: "Com o rebranding e a operação digital integrada, o **movimento do salão dobrou** e o delivery cresceu de forma consistente.",
-      en: "With the rebrand and an integrated digital operation, **in-store traffic doubled** and delivery grew consistently.",
+      pt: "Com posicionamento, site e conteúdo técnico, a Moraes Vannuchi passou a gerar um **fluxo constante de oportunidades**.",
+      en: "With positioning, a website and technical content, Moraes Vannuchi began generating a **steady flow of opportunities**.",
     },
   },
   {
     slug: "conecta",
     intro: {
-      pt: "O **Conecta Expocenter** precisava lotar a agenda e atrair um fluxo constante de novos clientes.",
-      en: "**Conecta Expocenter** needed to fill its calendar and attract a steady flow of new clients.",
+      pt: "O **Conecta Expocenter** é um centro de eventos que precisava lotar a agenda e atrair um fluxo constante de novos clientes.",
+      en: "**Conecta Expocenter** is an events center that needed to fill its calendar and attract a steady flow of new clients.",
     },
     challenge: {
       pt: "Faltava previsibilidade na captação e uma presença digital à altura da estrutura do espaço.",
@@ -83,46 +88,46 @@ const cases: Case[] = [
   {
     slug: "bar-goias",
     intro: {
-      pt: "O **Bar Goiás** buscava se posicionar como destino e profissionalizar a captação de eventos.",
-      en: "**Bar Goiás** wanted to position itself as a destination and professionalize its event bookings.",
+      pt: "O **Bar Goiás** é um restaurante que queria atrair mais clientes e se tornar referência na cidade.",
+      en: "**Bar Goiás** is a restaurant that wanted to attract more diners and become a reference in the city.",
     },
     challenge: {
-      pt: "Sem site e sem um posicionamento claro, os contatos chegavam desqualificados e dispersos.",
-      en: "With no website and no clear positioning, leads arrived unqualified and scattered.",
+      pt: "O movimento dependia quase só do boca a boca e a presença digital não refletia a qualidade da casa.",
+      en: "Traffic relied almost entirely on word of mouth, and the digital presence didn't reflect the quality of the place.",
     },
     result: {
-      pt: "O novo posicionamento e o site otimizado passaram a gerar um **pipeline qualificado de vendas** todos os meses.",
-      en: "The new positioning and optimized website began generating a **qualified sales pipeline** every month.",
+      pt: "Com gestão de redes e conteúdo audiovisual, o **movimento aumentou** e a casa passou a ter fila nos fins de semana.",
+      en: "With social media management and audiovisual content, **foot traffic grew** and the restaurant gained weekend queues.",
     },
   },
   {
     slug: "sate-conceito",
     intro: {
-      pt: "A **Sate Conceito** queria escalar as vendas online com previsibilidade e margem saudável.",
-      en: "**Sate Conceito** wanted to scale online sales with predictability and a healthy margin.",
+      pt: "A **Sate Conceito** é uma empresa de móveis que queria escalar as vendas com previsibilidade e margem saudável.",
+      en: "**Sate Conceito** is a furniture company that wanted to scale sales with predictability and a healthy margin.",
     },
     challenge: {
-      pt: "O e-commerce investia em anúncios sem controle do custo de aquisição de clientes.",
-      en: "The e-commerce was investing in ads without controlling its customer acquisition cost.",
+      pt: "A empresa investia em anúncios sem controle do custo de aquisição e sem um funil estruturado.",
+      en: "The company invested in ads without controlling acquisition cost or having a structured funnel.",
     },
     result: {
-      pt: "A operação de mídia paga **reduziu o CAC** e **triplicou o faturamento** da loja online.",
-      en: "The paid-media operation **cut the CAC** and **tripled the revenue** of the online store.",
+      pt: "A operação de mídia paga e automação **reduziu o CAC** e aumentou de forma consistente as vendas de móveis.",
+      en: "The paid-media and automation operation **cut the CAC** and consistently increased furniture sales.",
     },
   },
   {
     slug: "coronata",
     intro: {
-      pt: "A **Coronata** precisava preencher as turmas do próximo ciclo dentro do prazo de matrículas.",
-      en: "**Coronata** needed to fill the next cycle's classes within the enrollment window.",
+      pt: "A **Coronata** é um restaurante que queria encher as mesas e fortalecer a marca na região.",
+      en: "**Coronata** is a restaurant that wanted to fill its tables and strengthen its brand in the region.",
     },
     challenge: {
-      pt: "A captação de alunos era sazonal e dependia quase só de indicações.",
-      en: "Student acquisition was seasonal and relied almost entirely on referrals.",
+      pt: "O movimento era irregular e a marca não transmitia toda a qualidade da experiência.",
+      en: "Traffic was irregular and the brand didn't convey the full quality of the experience.",
     },
     result: {
-      pt: "A campanha de matrículas **lotou as turmas antes do prazo**, com custo por lead abaixo do esperado.",
-      en: "The enrollment campaign **filled the classes ahead of schedule**, with a cost per lead below expectations.",
+      pt: "Com conteúdo, campanhas e posicionamento, as **mesas passaram a lotar** com mais frequência.",
+      en: "With content, campaigns and positioning, the **tables began filling up** more often.",
     },
   },
   {
@@ -133,8 +138,8 @@ const cases: Case[] = [
       en: "Personal brand building and digital presence with audiovisual content and social media management.",
     },
     intro: {
-      pt: "O **Thiago Vannuchi** queria construir uma marca pessoal forte e relevante no ambiente digital.",
-      en: "**Thiago Vannuchi** wanted to build a strong, relevant personal brand in the digital space.",
+      pt: "O **Thiago Vannuchi**, dono do grupo, queria construir uma marca pessoal forte e relevante no ambiente digital.",
+      en: "**Thiago Vannuchi**, the group's owner, wanted to build a strong, relevant personal brand in the digital space.",
     },
     challenge: {
       pt: "Faltava consistência de conteúdo e uma identidade que traduzisse a sua autoridade.",
@@ -147,34 +152,34 @@ const cases: Case[] = [
   },
   {
     slug: "kalili",
-    category: { pt: "Branding", en: "Branding" },
+    category: { pt: "Restaurante", en: "Restaurant" },
     summary: {
-      pt: "Criação de marca e estratégia de posicionamento construídas do zero.",
-      en: "Brand creation and positioning strategy built from scratch.",
+      pt: "Branding e presença digital para um restaurante nascer com identidade forte.",
+      en: "Branding and digital presence for a restaurant to launch with a strong identity.",
     },
     intro: {
-      pt: "A **Kalili** chegou até a N8X para construir uma marca do zero, com identidade e posicionamento próprios.",
-      en: "**Kalili** came to N8X to build a brand from scratch, with its own identity and positioning.",
+      pt: "O **Kalili** é um restaurante que chegou até a N8X para nascer com uma marca e um posicionamento fortes.",
+      en: "**Kalili** is a restaurant that came to N8X to launch with a strong brand and positioning.",
     },
     challenge: {
-      pt: "Era preciso definir propósito, identidade visual e voz da marca antes de ir ao mercado.",
-      en: "Purpose, visual identity and brand voice had to be defined before going to market.",
+      pt: "Era preciso definir identidade visual, cardápio e voz da marca antes da inauguração.",
+      en: "Visual identity, menu and brand voice had to be defined before opening.",
     },
     result: {
-      pt: "A Kalili nasceu com uma **identidade sólida** e um posicionamento claro para crescer com consistência.",
-      en: "Kalili launched with a **solid identity** and clear positioning to grow consistently.",
+      pt: "O Kalili abriu com uma **identidade sólida** e presença digital pronta para atrair clientes.",
+      en: "Kalili opened with a **solid identity** and a digital presence ready to attract diners.",
     },
   },
   {
     slug: "vannuchi-group",
-    category: { pt: "Corporativo", en: "Corporate" },
+    category: { pt: "Conglomerado", en: "Conglomerate" },
     summary: {
-      pt: "Identidade corporativa e estratégia de marca para um grupo de empresas.",
-      en: "Corporate identity and brand strategy for a group of companies.",
+      pt: "Identidade e estratégia de marca para o conglomerado que reúne as empresas do grupo.",
+      en: "Brand identity and strategy for the conglomerate that unites the group's companies.",
     },
     intro: {
-      pt: "O **Vannuchi Group** precisava unificar a comunicação de suas empresas sob uma marca forte.",
-      en: "**Vannuchi Group** needed to unify the communication of its companies under one strong brand.",
+      pt: "O **Grupo Vannuchi** é um conglomerado de empresas que precisava unificar a comunicação sob uma marca forte.",
+      en: "**Vannuchi Group** is a conglomerate that needed to unify its companies' communication under one strong brand.",
     },
     challenge: {
       pt: "As unidades do grupo comunicavam de formas diferentes, sem uma identidade em comum.",
@@ -187,18 +192,18 @@ const cases: Case[] = [
   },
   {
     slug: "vannuchi",
-    category: { pt: "Corporativo", en: "Corporate" },
+    category: { pt: "Engenharia", en: "Engineering" },
     summary: {
-      pt: "Campanha institucional e produção audiovisual para fortalecer a marca.",
-      en: "Institutional campaign and audiovisual production to strengthen the brand.",
+      pt: "Campanha institucional e produção audiovisual para a empresa de engenharia fortalecer a marca.",
+      en: "Institutional campaign and audiovisual production for the engineering company to strengthen its brand.",
     },
     intro: {
-      pt: "A **Vannuchi** buscava fortalecer a percepção da marca com uma campanha institucional sólida.",
-      en: "**Vannuchi** sought to strengthen its brand perception with a solid institutional campaign.",
+      pt: "A **Vannuchi** é uma empresa de engenharia que buscava fortalecer sua marca com uma campanha institucional sólida.",
+      en: "**Vannuchi** is an engineering company that sought to strengthen its brand with a solid institutional campaign.",
     },
     challenge: {
-      pt: "A marca tinha reconhecimento, mas pouca presença audiovisual e digital.",
-      en: "The brand had recognition but little audiovisual and digital presence.",
+      pt: "A empresa tinha reputação técnica, mas pouca presença audiovisual e digital.",
+      en: "The company had a technical reputation but little audiovisual and digital presence.",
     },
     result: {
       pt: "A campanha institucional **fortaleceu a marca** e ampliou consideravelmente o seu alcance digital.",

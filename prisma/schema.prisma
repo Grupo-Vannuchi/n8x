@@ -60,6 +60,7 @@ model Information {
   id          String   @id @default(cuid())
   slug        String   @unique
   icon        String // lucide-react icon name, e.g. "Info"
+  image       String   @default("") // thematic cover image URL (shown on the card)
   title       Json // LocalizedText
   description Json // LocalizedText
   content     Json     @default("{}") // LocalizedRichText (array of paragraphs per locale)

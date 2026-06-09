@@ -42,7 +42,7 @@ export default async function InformationsPage({
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {informations.map((information, i) => (
               <Reveal key={information.id} delay={(i % 3) * 90} className="h-full">
-                <InformationCard information={information} />
+                <InformationCard information={information} viewLabel={t("view")} />
               </Reveal>
             ))}
           </div>

@@ -48,6 +48,7 @@ const slug = z
 export const informationSchema = z.object({
   slug,
   icon: z.string().trim().min(1).max(50),
+  image: z.string().trim().max(500),
   order: z.coerce.number().int().min(0).max(9999),
   title: localizedText,
   description: localizedText,

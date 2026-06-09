@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
@@ -105,6 +106,18 @@ export default async function InformationPage({
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
           {/* Article */}
           <div className="min-w-0">
+            {information.image ? (
+              <div className="relative mb-8 aspect-[21/9] overflow-hidden rounded-2xl bg-brand/10">
+                <Image
+                  src={information.image}
+                  alt=""
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 800px, 100vw"
+                  className="object-cover"
+                />
+              </div>
+            ) : null}
             <span className="inline-flex size-14 items-center justify-center rounded-xl bg-brand/10 text-brand">
               <Icon name={information.icon} className="size-7" />
             </span>
@@ -162,7 +175,11 @@ export default async function InformationPage({
             </h2>
             <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((item) => (
-                <InformationCard key={item.id} information={item} />
+                <InformationCard
+                  key={item.id}
+                  information={item}
+                  viewLabel={t("view")}
+                />
               ))}
             </div>
           </section>

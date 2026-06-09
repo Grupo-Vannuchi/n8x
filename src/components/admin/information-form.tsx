@@ -108,6 +108,15 @@ export function InformationForm({
             <Input id="order" type="number" inputMode="numeric" {...register("order")} />
             <p className="mt-1 text-xs text-muted-foreground">{t("orderHint")}</p>
           </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="image">{t("image")}</Label>
+            <Input
+              id="image"
+              placeholder="https://…"
+              {...register("image")}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">{t("imageHint")}</p>
+          </div>
         </div>
       </fieldset>
 

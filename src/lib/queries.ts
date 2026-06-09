@@ -37,6 +37,7 @@ export type InformationView = {
   id: string;
   slug: string;
   icon: string;
+  image: string;
   title: string;
   description: string;
   featured: boolean;
@@ -186,6 +187,7 @@ export const getInformations = unstable_cache(
       id: i.id,
       slug: i.slug,
       icon: i.icon,
+      image: i.image,
       title: localize(i.title, locale),
       description: localize(i.description, locale),
       featured: i.featured,
@@ -208,6 +210,7 @@ export const getInformationBySlug = unstable_cache(
       id: i.id,
       slug: i.slug,
       icon: i.icon,
+      image: i.image,
       title: localize(i.title, locale),
       description: localize(i.description, locale),
       content: localizeRich(i.content, locale),
