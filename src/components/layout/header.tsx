@@ -6,6 +6,11 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/layout/logo";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import {
+  InformationMenu,
+  type InformationLink,
+} from "@/components/layout/information-menu";
+import { Icon } from "@/components/ui/icon";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { siteConfig, type NavKey } from "@/config/site";
@@ -18,9 +23,11 @@ export type DropdownLink = {
 export function Header({
   portfolioLinks = [],
   serviceLinks = [],
+  informationLinks = [],
 }: {
   portfolioLinks?: DropdownLink[];
   serviceLinks?: DropdownLink[];
+  informationLinks?: InformationLink[];
 }) {
   const t = useTranslations("nav");
   const tc = useTranslations("common");
@@ -66,7 +73,7 @@ export function Header({
                   {t(item.key)}
                   <ChevronDown className="size-4 transition-transform group-hover:rotate-180" />
                 </Link>
-                <div className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                <div className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100">
                   <ul className="min-w-56 max-w-72 rounded-md border border-border bg-background p-1 shadow-lg">
                     {links.map((link) => (
                       <li key={link.slug}>
@@ -85,11 +92,12 @@ export function Header({
           })}
         </nav>
 
-        <div className="hidden items-center gap-4 md:flex">
+        <div className="hidden items-center gap-3 md:flex">
           <LocaleSwitcher />
           <Link href="/contact" className={buttonVariants({ size: "sm" })}>
             {tc("talkToUs")}
           </Link>
+          <InformationMenu links={informationLinks} />
         </div>
 
         <button
@@ -168,7 +176,29 @@ export function Header({
                 </div>
               );
             })}
-            <div className="mt-3 flex items-center justify-between">
+            {informationLinks.length > 0 ? (
+              <div className="mt-2 border-t border-border pt-2">
+                <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("information")}
+                </p>
+                <ul className="flex flex-col gap-0.5">
+                  {informationLinks.map((link) => (
+                    <li key={link.slug}>
+                      <Link
+                        href={`/informations/${link.slug}`}
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Icon name={link.icon} className="size-4 shrink-0" />
+                        <span className="truncate">{link.title}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
               <LocaleSwitcher />
               <Link
                 href="/contact"

@@ -14,6 +14,12 @@ import {
   Workflow,
   Printer,
   Video,
+  Info,
+  BookOpen,
+  FileText,
+  Newspaper,
+  ShieldCheck,
+  Building2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,6 +43,12 @@ const icons: Record<string, LucideIcon> = {
   Workflow,
   Printer,
   Video,
+  Info,
+  BookOpen,
+  FileText,
+  Newspaper,
+  ShieldCheck,
+  Building2,
 };
 
 /** The icon names available to `Service.icon`, for admin pickers and validation. */

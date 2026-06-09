@@ -1,6 +1,7 @@
 import "server-only";
 import type {
   Client,
+  Information,
   Lead,
   LeadStatus,
   LeadType,
@@ -79,6 +80,19 @@ export async function getAdminServices(): Promise<Service[]> {
 
 export async function getServiceById(id: string): Promise<Service | null> {
   return prisma.service.findUnique({ where: { id } });
+}
+
+/** All informations (published and drafts) for the admin list, in display order. */
+export async function getAdminInformations(): Promise<Information[]> {
+  return prisma.information.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+export async function getInformationById(
+  id: string,
+): Promise<Information | null> {
+  return prisma.information.findUnique({ where: { id } });
 }
 
 /** All clients (published and drafts) for the admin list, in display order. */

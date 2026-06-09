@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { buildInformations } from "./seed-informations";
 
 const prisma = new PrismaClient();
 
@@ -82,6 +83,101 @@ const services = [
     description: t(
       "Planejamento orientado a dados, do diagnóstico ao plano de ação.",
       "Data-driven planning, from diagnosis to action plan.",
+    ),
+  },
+];
+
+const informations = [
+  {
+    slug: "company-history",
+    icon: "BookOpen",
+    order: 1,
+    title: t("Nossa história", "Our history"),
+    description: t(
+      "Como a N8X nasceu e evoluiu até se tornar uma agência full service.",
+      "How N8X was born and grew into a full-service agency.",
+    ),
+    content: tr(
+      [
+        "## Onde tudo começou",
+        "A N8X surgiu da vontade de unir estratégia, criatividade e dados em uma única operação de marketing.",
+        "Desde então, ajudamos dezenas de marcas a crescer com previsibilidade e consistência.",
+      ],
+      [
+        "## Where it all began",
+        "N8X was born from the desire to unite strategy, creativity and data in a single marketing operation.",
+        "Since then, we've helped dozens of brands grow with predictability and consistency.",
+      ],
+    ),
+  },
+  {
+    slug: "how-we-work",
+    icon: "Workflow",
+    order: 2,
+    title: t("Como trabalhamos", "How we work"),
+    description: t(
+      "Nosso processo, do diagnóstico inicial à execução e leitura de resultados.",
+      "Our process, from initial diagnosis to execution and results reading.",
+    ),
+    content: tr(
+      [
+        "Começamos com um diagnóstico completo de marca, público e concorrência.",
+        "Em seguida, definimos o posicionamento e construímos um plano de ação mensal.",
+        "- Planejamento estratégico",
+        "- Execução de conteúdo e tráfego",
+        "- Acompanhamento de métricas e ajustes",
+      ],
+      [
+        "We start with a complete diagnosis of brand, audience and competitors.",
+        "Then we define positioning and build a monthly action plan.",
+        "- Strategic planning",
+        "- Content and traffic execution",
+        "- Metrics tracking and adjustments",
+      ],
+    ),
+  },
+  {
+    slug: "privacy-policy",
+    icon: "ShieldCheck",
+    order: 3,
+    title: t("Política de privacidade", "Privacy policy"),
+    description: t(
+      "Como tratamos e protegemos os dados coletados no site.",
+      "How we handle and protect the data collected on the site.",
+    ),
+    content: tr(
+      [
+        "Levamos a privacidade a sério e tratamos seus dados conforme a LGPD.",
+        "Os dados enviados pelos formulários são usados apenas para contato comercial.",
+      ],
+      [
+        "We take privacy seriously and handle your data in accordance with applicable law.",
+        "Data submitted through forms is used solely for business contact.",
+      ],
+    ),
+  },
+  {
+    slug: "frequently-asked-questions",
+    icon: "Info",
+    order: 4,
+    title: t("Perguntas frequentes", "Frequently asked questions"),
+    description: t(
+      "Respostas rápidas para as dúvidas mais comuns sobre os nossos serviços.",
+      "Quick answers to the most common questions about our services.",
+    ),
+    content: tr(
+      [
+        "### Vocês atendem empresas de qualquer segmento?",
+        "Sim. Adaptamos a estratégia ao momento e ao mercado de cada cliente.",
+        "### Existe contrato mínimo?",
+        "Trabalhamos com ciclos mensais, com foco em resultado e transparência.",
+      ],
+      [
+        "### Do you work with companies in any segment?",
+        "Yes. We adapt the strategy to each client's moment and market.",
+        "### Is there a minimum contract?",
+        "We work in monthly cycles, focused on results and transparency.",
+      ],
     ),
   },
 ];
@@ -344,6 +440,17 @@ async function main() {
     });
   }
   console.log(`✓ ${services.length} services`);
+
+  // The 4 evergreen entries above plus the generated marketing-theme catalog.
+  const allInformations = [...informations, ...buildInformations()];
+  for (const i of allInformations) {
+    await prisma.information.upsert({
+      where: { slug: i.slug },
+      update: i,
+      create: i,
+    });
+  }
+  console.log(`✓ ${allInformations.length} informations`);
 
   for (const p of projects) {
     await prisma.project.upsert({

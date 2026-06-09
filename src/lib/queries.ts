@@ -33,6 +33,19 @@ export type ServiceDetailView = ServiceView & {
   content: string[];
 };
 
+export type InformationView = {
+  id: string;
+  slug: string;
+  icon: string;
+  title: string;
+  description: string;
+  featured: boolean;
+};
+
+export type InformationDetailView = InformationView & {
+  content: string[];
+};
+
 export type ProjectCardView = {
   id: string;
   slug: string;
@@ -154,6 +167,81 @@ export const getServiceSitemapEntries = unstable_cache(
   },
   ["services", "sitemap"],
   { tags: [tags.services], revalidate },
+);
+
+export const getInformations = unstable_cache(
+  async (
+    locale: Locale,
+    options: { featuredOnly?: boolean; take?: number } = {},
+  ): Promise<InformationView[]> => {
+    const rows = await prisma.information.findMany({
+      where: {
+        published: true,
+        ...(options.featuredOnly ? { featured: true } : {}),
+      },
+      orderBy: { order: "asc" },
+      take: options.take,
+    });
+    return rows.map((i) => ({
+      id: i.id,
+      slug: i.slug,
+      icon: i.icon,
+      title: localize(i.title, locale),
+      description: localize(i.description, locale),
+      featured: i.featured,
+    }));
+  },
+  ["informations", "list"],
+  { tags: [tags.informations], revalidate },
+);
+
+export const getInformationBySlug = unstable_cache(
+  async (
+    locale: Locale,
+    slug: string,
+  ): Promise<InformationDetailView | null> => {
+    const i = await prisma.information.findFirst({
+      where: { slug, published: true },
+    });
+    if (!i) return null;
+    return {
+      id: i.id,
+      slug: i.slug,
+      icon: i.icon,
+      title: localize(i.title, locale),
+      description: localize(i.description, locale),
+      content: localizeRich(i.content, locale),
+      featured: i.featured,
+    };
+  },
+  ["informations", "detail"],
+  { tags: [tags.informations], revalidate },
+);
+
+/** Slugs of all published informations, for `generateStaticParams`. */
+export const getInformationSlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    const rows = await prisma.information.findMany({
+      where: { published: true },
+      select: { slug: true },
+    });
+    return rows.map((r) => r.slug);
+  },
+  ["informations", "slugs"],
+  { tags: [tags.informations], revalidate },
+);
+
+/** Slug + last-modified date of every published information, for the sitemap. */
+export const getInformationSitemapEntries = unstable_cache(
+  async (): Promise<SitemapEntry[]> => {
+    const rows = await prisma.information.findMany({
+      where: { published: true },
+      select: { slug: true, updatedAt: true },
+    });
+    return rows.map((r) => ({ slug: r.slug, updatedAt: r.updatedAt }));
+  },
+  ["informations", "sitemap"],
+  { tags: [tags.informations], revalidate },
 );
 
 export const getProjects = unstable_cache(

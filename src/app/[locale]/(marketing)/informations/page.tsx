@@ -1,0 +1,53 @@
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { PageHeader } from "@/components/page-header";
+import { InformationCard } from "@/components/information-card";
+import { Reveal } from "@/components/ui/reveal";
+import { Section } from "@/components/ui/section";
+import { getInformations } from "@/lib/queries";
+import { resolveLocale } from "@/i18n/routing";
+import { localeAlternates } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const locale = resolveLocale((await params).locale);
+  const t = await getTranslations({ locale, namespace: "informations" });
+  return {
+    title: t("title"),
+    description: t("subtitle"),
+    alternates: localeAlternates(locale, "/informations"),
+  };
+}
+
+export default async function InformationsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const locale = resolveLocale((await params).locale);
+  setRequestLocale(locale);
+  const t = await getTranslations("informations");
+  const informations = await getInformations(locale);
+
+  return (
+    <>
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <Section>
+        {informations.length === 0 ? (
+          <p className="text-center text-muted-foreground">{t("empty")}</p>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {informations.map((information, i) => (
+              <Reveal key={information.id} delay={(i % 3) * 90} className="h-full">
+                <InformationCard information={information} />
+              </Reveal>
+            ))}
+          </div>
+        )}
+      </Section>
+    </>
+  );
+}

@@ -54,6 +54,25 @@ model Service {
   @@map("services")
 }
 
+/// An informational entry (knowledge base / "Informações"): listed in the navbar
+/// burger menu and rendered as a standalone article with a sidebar of siblings.
+model Information {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  icon        String // lucide-react icon name, e.g. "Info"
+  title       Json // LocalizedText
+  description Json // LocalizedText
+  content     Json     @default("{}") // LocalizedRichText (array of paragraphs per locale)
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, featured, order])
+  @@map("informations")
+}
+
 /// A portfolio case study.
 model Project {
   id         String   @id @default(cuid())

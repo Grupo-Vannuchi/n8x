@@ -131,6 +131,32 @@ export function ServiceJsonLd({
   return <JsonLd data={data} />;
 }
 
+/** `Article` schema for an information detail page, published by the agency. */
+export function ArticleJsonLd({
+  locale,
+  slug,
+  name,
+  description,
+}: {
+  locale: Locale;
+  slug: string;
+  name: string;
+  description: string;
+}) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: name,
+    description,
+    url: localizedUrl(locale, `/informations/${slug}`),
+    inLanguage: locale,
+    author: { "@id": ORG_ID },
+    publisher: { "@id": ORG_ID },
+  };
+
+  return <JsonLd data={data} />;
+}
+
 /** `CreativeWork` schema for a portfolio case study, created by the agency. */
 export function CreativeWorkJsonLd({
   locale,

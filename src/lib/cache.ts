@@ -8,6 +8,7 @@
  */
 export const tags = {
   services: "services",
+  informations: "informations",
   projects: "projects",
   testimonials: "testimonials",
   team: "team",
