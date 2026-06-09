@@ -4,10 +4,11 @@ This repo has a saved restore point: the committed code **plus** an exact databa
 dump at [`prisma/backups/snapshot.sql`](prisma/backups/snapshot.sql).
 
 Snapshot contents (data): 1 admin user, **150 informations**, **8 services**,
-**10 portfolio projects** (with corrected categories; cover images are picsum
-placeholders), no clients/testimonials/team/stats.
+**10 portfolio projects** and **13 clients** — all with **real cover/logo images**
+(Google Drive `lh3.googleusercontent.com` URLs set via the admin). No
+testimonials/team/stats.
 
-Git tag for this exact state: **`snapshot-2026-06-09`**.
+Git tag for this exact state: **`snapshot-2026-06-09`** (moves to the latest save).
 
 ## Initiate the system (bring it back exactly)
 
@@ -32,8 +33,9 @@ If you'd rather regenerate the data from code (e.g. fresh DB, no dump):
 npm run db:migrate            # apply schema
 npm run db:seed               # admin user + 150 informations
 npx tsx prisma/seed-services.ts          # 8 services
-npx tsx prisma/seed-projects.ts          # 10 project base records
+npx tsx prisma/seed-projects.ts          # 10 project base records (real Drive covers)
 npx tsx prisma/seed-projects-content.ts  # project case content
+npx tsx prisma/seed-clients.ts           # 13 clients (real Drive logos)
 ```
 
 ## Re-save a new snapshot later

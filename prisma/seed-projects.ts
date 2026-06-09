@@ -7,15 +7,29 @@ import { PrismaClient } from "@prisma/client";
  * Then run `npx tsx prisma/seed-projects-content.ts` to fill the rich content.
  *
  * NOTE: these records were reconstructed after the original admin-created rows
- * were lost. Client names, business categories, summaries and titles are real;
- * the COVER IMAGES are placeholders (picsum) — replace them with the real photos
- * via the admin (/admin/projects). `year` and `tags` are best-effort.
+ * were lost. Client names, business categories, summaries, titles and the real
+ * Google Drive COVER IMAGES (set via the admin) are captured here. `year` and
+ * `tags` are best-effort.
  */
 
 const prisma = new PrismaClient();
 
 const t = (pt: string, en: string) => ({ pt, en });
-const cover = (slug: string) => `https://picsum.photos/seed/${slug}/1200/800`;
+const drive = (id: string) => `https://lh3.googleusercontent.com/d/${id}`;
+
+/** Real cover images (Google Drive) uploaded via the admin, keyed by slug. */
+const covers: Record<string, string> = {
+  "moraes-vannuchi": drive("1p6Gr4AiLllqRYq03NG0KbRpwNMJNMl5W"),
+  conecta: drive("1UZwfVIDYahxOBv4n_5P9Ulo19J2Dgj66"),
+  "bar-goias": drive("1qEh6_DdO0tSZwm11eyL7Xn_yRLAczspP"),
+  "sate-conceito": drive("171_T6di-FAC4-YYuX0ewAlaOwZoZaZbI"),
+  coronata: drive("1pVACF0mn6_zE_PDfHtRg4JoEdPTXhHHa"),
+  "thiago-vannuchi": drive("16dr9KYVVkM-Y-ItljsXgEFwSmiAzT3wj"),
+  kalili: drive("1_QRxdjLCgtlywHC-Oxsptr690GMWqbJV"),
+  "vannuchi-group": drive("1xcyP9rhGATp4KPN0WFS2J_xwZ9tVgDtI"),
+  vannuchi: drive("1J8i2qBYAZSqA3I5TV0xubTY6BQyW4FWQ"),
+  "sushi-loko": drive("1ii47AvlLC2KKKm1a_XUT7PP9EBr2UuLz"),
+};
 
 const projects = [
   {
@@ -166,7 +180,7 @@ async function main() {
       clientName: p.clientName,
       category: p.category,
       year: p.year,
-      coverImage: cover(p.slug),
+      coverImage: covers[p.slug],
       tags: p.tags,
       title: p.title,
       summary: p.summary,
