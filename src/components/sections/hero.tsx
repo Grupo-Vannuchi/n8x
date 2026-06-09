@@ -1,52 +1,42 @@
 import { getTranslations } from "next-intl/server";
-import { ArrowRight } from "lucide-react";
-import { Link } from "@/i18n/navigation";
-import { Container } from "@/components/ui/container";
-import { Reveal } from "@/components/ui/reveal";
-import { buttonVariants } from "@/components/ui/button";
 import { yearsInBusiness } from "@/config/site";
+import { HeroCarousel, type HeroSlide } from "@/components/sections/hero-carousel";
+
+/**
+ * Background images for the hero carousel — generic marketing/office stock from
+ * Unsplash (host allowlisted in next.config). One per slide, matched by index to
+ * the localized copy in `home.hero.slides`.
+ */
+const slideImages = [
+  // Marketing team meeting
+  "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1920&q=70",
+  // Modern office interior
+  "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1920&q=70",
+  // Marketing analytics / data
+  "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1920&q=70",
+];
 
 export async function Hero() {
   const t = await getTranslations("home.hero");
-  const rotating = t.raw("rotating") as string[];
+  const copy = t.raw("slides") as { title: string; subtitle: string }[];
+
+  const slides: HeroSlide[] = copy.map((slide, i) => ({
+    ...slide,
+    image: slideImages[i % slideImages.length],
+  }));
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Decorative brand gradient */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 size-[42rem] -translate-x-1/2 rounded-full bg-brand/15 blur-3xl"
-      />
-      <Container className="relative flex flex-col items-center gap-8 py-24 text-center sm:py-32">
-        <Reveal as="span" className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground">
-          <span className="size-2 animate-pulse rounded-full bg-brand" aria-hidden />
-          {t("eyebrow", { years: yearsInBusiness() })}
-        </Reveal>
-
-        <Reveal as="h1" delay={80} className="max-w-4xl text-balance text-4xl font-bold tracking-tight sm:text-6xl">
-          {t("titleLead")}{" "}
-          <span className="text-brand">
-            {rotating.join(" · ")}
-          </span>
-        </Reveal>
-
-        <Reveal as="p" delay={160} className="max-w-2xl text-pretty text-lg text-muted-foreground">
-          {t("subtitle")}
-        </Reveal>
-
-        <Reveal delay={240} className="flex flex-col gap-3 sm:flex-row">
-          <Link href="/contact" className={buttonVariants({ size: "lg", className: "group" })}>
-            {t("primaryCta")}
-            <ArrowRight className="size-5 transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
-          <Link
-            href="/portfolio"
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            {t("secondaryCta")}
-          </Link>
-        </Reveal>
-      </Container>
-    </section>
+    <HeroCarousel
+      slides={slides}
+      eyebrow={t("eyebrow", { years: yearsInBusiness() })}
+      primaryCta={t("primaryCta")}
+      secondaryCta={t("secondaryCta")}
+      labels={{
+        carousel: t("carouselLabel"),
+        prev: t("prevSlide"),
+        next: t("nextSlide"),
+        goTo: slides.map((_, i) => t("goToSlide", { n: i + 1 })),
+      }}
+    />
   );
 }

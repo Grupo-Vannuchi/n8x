@@ -34,7 +34,25 @@
       "rotating": ["Focada em crescimento previsível!"],
       "subtitle": "A N8X Marketing usa a estratégia de Ideal Customer Profile (ICP) para encontrar, abordar e engajar clientes ideais todos os dias.",
       "primaryCta": "Começar um projeto",
-      "secondaryCta": "Conhecer trabalhos"
+      "secondaryCta": "Conhecer trabalhos",
+      "carouselLabel": "Destaques",
+      "prevSlide": "Slide anterior",
+      "nextSlide": "Próximo slide",
+      "goToSlide": "Ir para o slide {n}",
+      "slides": [
+        {
+          "title": "Marketing que faz sua marca crescer",
+          "subtitle": "Estratégia, conteúdo e tráfego pago em uma operação integrada e focada em resultado."
+        },
+        {
+          "title": "Conteúdo e redes sociais que vendem",
+          "subtitle": "Transformamos sua audiência em clientes com conteúdo consistente e com a cara da marca."
+        },
+        {
+          "title": "Campanhas orientadas a dados, resultado de verdade",
+          "subtitle": "Mídia paga e análise para escalar seu negócio com previsibilidade."
+        }
+      ]
     },
     "services": {
       "eyebrow": "O que fazemos",

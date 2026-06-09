@@ -34,7 +34,25 @@
       "rotating": ["Speaks out, and N8X sets the tone!"],
       "subtitle": "N8X Marketing uses the Ideal Customer Profile (ICP) strategy to find, approach, and engage your ideal customers every day.",
       "primaryCta": "Start a project",
-      "secondaryCta": "See our work"
+      "secondaryCta": "See our work",
+      "carouselLabel": "Highlights",
+      "prevSlide": "Previous slide",
+      "nextSlide": "Next slide",
+      "goToSlide": "Go to slide {n}",
+      "slides": [
+        {
+          "title": "Marketing that makes your brand grow",
+          "subtitle": "Strategy, content and paid traffic in one integrated operation, focused on results."
+        },
+        {
+          "title": "Content and social media that sell",
+          "subtitle": "We turn your audience into customers with consistent, on-brand content."
+        },
+        {
+          "title": "Data-driven campaigns, real results",
+          "subtitle": "Paid media and analytics to scale your business with predictability."
+        }
+      ]
     },
     "services": {
       "eyebrow": "What we do",
