@@ -8,6 +8,7 @@ import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icon";
 import { RichText } from "@/components/rich-text";
 import { InformationCard } from "@/components/information-card";
+import { InformationGallery } from "@/components/information-gallery";
 import { ServiceRegions } from "@/components/service-regions";
 import {
   getInformationBySlug,
@@ -173,15 +174,13 @@ export default async function InformationPage({
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
               {t("relatedTitle")}
             </h2>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {related.map((item) => (
-                <InformationCard
-                  key={item.id}
-                  information={item}
-                  viewLabel={t("view")}
-                />
-              ))}
-            </div>
+            <InformationGallery items={informations}>
+              <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {related.map((item) => (
+                  <InformationCard key={item.id} information={item} />
+                ))}
+              </div>
+            </InformationGallery>
           </section>
         ) : null}
 

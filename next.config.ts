@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "picsum.photos" },
+      // Per-information cover images: on-topic keyword + a unique lock per entry.
+      { protocol: "https", hostname: "loremflickr.com" },
       // Google Drive images: use the lh3.googleusercontent.com/d/<FILE_ID> form,
       // NOT the drive.google.com/file/d/<ID>/view share link.
       { protocol: "https", hostname: "lh3.googleusercontent.com" },

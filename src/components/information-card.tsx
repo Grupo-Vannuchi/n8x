@@ -1,52 +1,70 @@
+"use client";
+
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link2, Image as ImageIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Icon } from "@/components/ui/icon";
+import { useInformationGallery } from "@/components/information-gallery";
 import type { InformationView } from "@/lib/queries";
 
 /**
- * Information catalog card: a thematic cover image with the topic icon badged on
- * it, the title and description below, and a "Ver" call-to-action. The whole card
- * links to the detail page (the reference site behaves the same way). `viewLabel`
- * is passed in already localized so this stays a server component.
+ * Information catalog card, matching the reference site's design: the cover image
+ * fills the whole card under a brand-colour tint, with the title overlaid top-left
+ * and two round actions bottom-left —
+ *   • link button  → navigates to the information's detail page (its slug)
+ *   • image button → opens the shared lightbox carousel at this image
+ * (see InformationGallery, which renders the single modal for the whole grid).
  */
 export function InformationCard({
   information,
-  viewLabel,
 }: {
   information: InformationView;
-  viewLabel: string;
 }) {
-  return (
-    <Link
-      href={`/informations/${information.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg focus-visible:shadow-lg"
-    >
-      <div className="relative aspect-[16/10] overflow-hidden bg-brand/10">
-        {information.image ? (
-          <Image
-            src={information.image}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : null}
-        <span className="absolute left-3 top-3 inline-flex size-9 items-center justify-center rounded-lg bg-background/85 text-brand backdrop-blur">
-          <Icon name={information.icon} className="size-5" />
-        </span>
-      </div>
+  const t = useTranslations("informations");
+  const gallery = useInformationGallery();
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <h3 className="text-balance text-lg font-semibold">{information.title}</h3>
-        <p className="line-clamp-3 text-sm text-muted-foreground">
-          {information.description}
-        </p>
-        <span className="mt-auto inline-flex items-center gap-1.5 pt-1 text-sm font-medium text-brand">
-          {viewLabel}
-          <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
-        </span>
+  const actionClass =
+    "inline-flex size-10 items-center justify-center rounded-full border border-white/80 text-white transition-colors hover:bg-white hover:text-brand focus-visible:bg-white focus-visible:text-brand focus-visible:outline-none";
+
+  return (
+    <div className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-brand">
+      {information.image ? (
+        <Image
+          src={information.image}
+          alt=""
+          fill
+          sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      ) : null}
+
+      {/* Brand tint over the photo (keeps the title legible). */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-br from-brand/90 to-brand/60 transition-opacity duration-300 group-hover:opacity-90"
+      />
+
+      <h3 className="absolute inset-x-0 top-0 max-w-[88%] text-balance p-5 text-lg font-bold leading-snug text-white">
+        {information.title}
+      </h3>
+
+      <div className="absolute bottom-0 left-0 flex items-center gap-2 p-5">
+        <Link
+          href={`/informations/${information.slug}`}
+          aria-label={t("view")}
+          className={actionClass}
+        >
+          <Link2 className="size-5" />
+        </Link>
+        <button
+          type="button"
+          onClick={() => gallery?.openAt(information.slug)}
+          aria-label={t("viewImage")}
+          className={actionClass}
+        >
+          <ImageIcon className="size-5" />
+        </button>
       </div>
-    </Link>
+    </div>
   );
 }

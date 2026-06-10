@@ -219,32 +219,39 @@ const ICONS: Record<Cat, string> = {
   performance: "TrendingUp",
 };
 
-/** Thematic cover image per category (Unsplash; host allowlisted in next.config). */
-const IMG = (id: string) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1200&q=70`;
-
-const IMAGES: Record<Cat, string> = {
-  mkt: IMG("photo-1557838923-2985c318be48"),
-  local: IMG("photo-1449034446853-66c86144b0ad"),
-  nicho: IMG("photo-1486406146926-c627a92ad1ab"),
-  sites: IMG("photo-1467232004584-a241de8bcf5d"),
-  seo: IMG("photo-1432888498266-38ffec3eaf0a"),
-  conteudo: IMG("photo-1499750310107-5fef28a66643"),
-  social: IMG("photo-1611162617474-5b21e879e113"),
-  instagram: IMG("photo-1611926653458-09294b3142bf"),
-  tiktok: IMG("photo-1611162616475-46b635cb6868"),
-  youtube: IMG("photo-1574717024653-61fd2cf4d44d"),
-  linkedin: IMG("photo-1573497491208-6b1acb260507"),
-  b2b: IMG("photo-1454165804606-c3d57bc86b40"),
-  comercial: IMG("photo-1556155092-490a1ba16284"),
-  ia: IMG("photo-1677442136019-21780ecad995"),
-  portfolio: IMG("photo-1551836022-d5d88e9218df"),
-  foto: IMG("photo-1452780212940-6f5c0d14d848"),
-  video: IMG("photo-1492619375914-88005aa9e8fb"),
-  drone: IMG("photo-1473968512647-3e447244af8f"),
-  audiovisual: IMG("photo-1574717024653-61fd2cf4d44d"),
-  performance: IMG("photo-1551288049-bebda4e38f71"),
+/**
+ * Cover images come from LoremFlickr (host allowlisted in next.config). Each
+ * category maps to an on-topic keyword so the photo relates to the title, and a
+ * per-entry `lock` (the entry's index) makes every one of the cover images
+ * distinct — no two informations share the same picture. Keywords are picked to
+ * reliably return an image (e.g. "marketing" is avoided — it 500s on LoremFlickr).
+ */
+const PHOTO_TAG: Record<Cat, string> = {
+  mkt: "advertising",
+  local: "city",
+  nicho: "business",
+  sites: "website",
+  seo: "seo",
+  conteudo: "content",
+  social: "social-media",
+  instagram: "instagram",
+  tiktok: "tiktok",
+  youtube: "youtube",
+  linkedin: "linkedin",
+  b2b: "handshake",
+  comercial: "sales",
+  ia: "artificial-intelligence",
+  portfolio: "presentation",
+  foto: "photography",
+  video: "videography",
+  drone: "drone",
+  audiovisual: "camera",
+  performance: "growth",
 };
+
+/** Unique, on-topic cover image URL for an entry (lock = entry index). */
+const coverImage = (cat: Cat, lock: number) =>
+  `https://loremflickr.com/1200/800/${PHOTO_TAG[cat]}?lock=${lock}`;
 
 /** Content family per category (categories sharing the same article copy). */
 type Family =
@@ -577,7 +584,7 @@ export function buildInformations(): SeedInformation[] {
     return {
       slug,
       icon: ICONS[cat],
-      image: IMAGES[cat],
+      image: coverImage(cat, index + 1),
       order: index + 10,
       title: { pt: titlePt, en: titleEn },
       description: {
