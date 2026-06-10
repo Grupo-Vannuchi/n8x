@@ -44,3 +44,24 @@ npx tsx prisma/seed-clients.ts           # 13 clients (real Drive logos)
 npm run db:dump               # overwrites prisma/backups/snapshot.sql
 git add -A && git commit -m "snapshot: <what changed>"
 ```
+
+## Production deploy — Supabase (DB) + Render (app)
+
+Prisma uses **two** connections: `DATABASE_URL` (runtime) and `DIRECT_URL`
+(migrations) — see `.env.example` and `prisma/schema.prisma`.
+
+1. **Supabase**: create the project; from Settings → Database → Connection string,
+   take the **pooled** URL (port 6543, add `?pgbouncer=true`) for `DATABASE_URL`
+   and the **direct** URL (port 5432) for `DIRECT_URL`.
+2. **Load data into Supabase** (once), either:
+   - exact dump: `cat prisma/backups/snapshot.sql | docker exec -i n8x-marketing-db psql "<DIRECT_URL>"`, or
+   - from code: `npx prisma migrate deploy` then run the seeders (see above).
+3. **Render**: deploy via [`render.yaml`](render.yaml) (Blueprint). Set the secret
+   env vars (`DATABASE_URL`, `DIRECT_URL`, `SESSION_SECRET`, `NEXT_PUBLIC_SITE_URL`)
+   in the dashboard. Build runs `prisma generate` (postinstall); `prisma migrate
+   deploy` runs as the pre-deploy step.
+
+> Keep Render at **1 instance** — the content cache (`revalidateTag`/`updateTag`)
+> is per-instance, so with multiple instances admin edits only refresh the one
+> that served them until the time-based fallback. Scaling out needs a shared
+> cache handler (e.g. Redis).

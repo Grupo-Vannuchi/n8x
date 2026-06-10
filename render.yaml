@@ -1,0 +1,39 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Database lives on Supabase; this service is the Next.js app on Render.
+# On Render: New + → Blueprint → pick this repo. Render reads this file.
+# Before the first deploy, set the secret env vars (sync:false) in the dashboard.
+services:
+  - type: web
+    name: n8x
+    runtime: node
+    plan: starter # "free" sleeps after inactivity; "starter" stays warm
+    region: virginia # closest Render region to Brazil — keep near your Supabase region
+    branch: main
+    # Keep at 1 instance: the content cache (revalidateTag/updateTag) is
+    # per-instance, so admin edits only refresh the instance that served them.
+    # Scaling >1 needs a shared cache handler (see SNAPSHOT.md).
+    numInstances: 1
+    buildCommand: npm install && npm run build # postinstall runs `prisma generate`
+    # Apply DB migrations on every deploy (uses DIRECT_URL). Pre-deploy commands
+    # require a paid plan; on free, move `npx prisma migrate deploy` into buildCommand.
+    preDeployCommand: npx prisma migrate deploy
+    startCommand: npm run start # `next start` binds to Render's $PORT automatically
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Supabase POOLED connection (Supavisor/pgBouncer), port 6543, with
+      # `?pgbouncer=true` — used by the app at runtime.
+      - key: DATABASE_URL
+        sync: false
+      # Supabase DIRECT connection, port 5432 — used by `prisma migrate deploy`.
+      - key: DIRECT_URL
+        sync: false
+      # 32+ char secret: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+      - key: SESSION_SECRET
+        sync: false
+      # Public site URL, e.g. https://n8x.onrender.com (used for canonical/sitemap/OG)
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false

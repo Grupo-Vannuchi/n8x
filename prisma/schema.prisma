@@ -8,7 +8,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // Runtime connection. On Supabase use the pooled (Supavisor/pgBouncer) URL on
+  // port 6543 with `?pgbouncer=true`. Locally it's the direct Postgres URL.
   url      = env("DATABASE_URL")
+  // Direct connection used by `prisma migrate`/`db push` (migrations can't run
+  // through the transaction pooler). On Supabase this is the 5432 direct URL;
+  // locally it's the same as DATABASE_URL.
+  directUrl = env("DIRECT_URL")
 }
 
 // ---------------------------------------------------------------------------

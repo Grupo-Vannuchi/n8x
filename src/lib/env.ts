@@ -10,6 +10,12 @@ import { z } from "zod";
  */
 const serverSchema = z.object({
   DATABASE_URL: z.string().url("DATABASE_URL must be a valid connection string"),
+  // Direct (non-pooled) connection for Prisma Migrate. Only used by the Prisma
+  // CLI, not at runtime — optional so the app still boots without it.
+  DIRECT_URL: z
+    .string()
+    .url("DIRECT_URL must be a valid connection string")
+    .optional(),
   SESSION_SECRET: z
     .string()
     .min(32, "SESSION_SECRET must be at least 32 characters for HS256 signing"),
