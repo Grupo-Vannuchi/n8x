@@ -45,23 +45,28 @@ npm run db:dump               # overwrites prisma/backups/snapshot.sql
 git add -A && git commit -m "snapshot: <what changed>"
 ```
 
-## Production deploy — Supabase (DB) + Render (app)
+## Production deploy — Supabase (DB) + Vercel (app)
 
 Prisma uses **two** connections: `DATABASE_URL` (runtime) and `DIRECT_URL`
 (migrations) — see `.env.example` and `prisma/schema.prisma`.
 
-1. **Supabase**: create the project; from Settings → Database → Connection string,
-   take the **pooled** URL (port 6543, add `?pgbouncer=true`) for `DATABASE_URL`
-   and the **direct** URL (port 5432) for `DIRECT_URL`.
+1. **Supabase**: create the project; from Connect → ORMs → Prisma,
+   take the **pooled** URL (port 6543, with `?pgbouncer=true`) for `DATABASE_URL`
+   and the **session pooler** URL (port 5432) for `DIRECT_URL`. URL-encode special
+   chars in the password (e.g. `@` → `%40`). Region used: `sa-east-1` (São Paulo).
 2. **Load data into Supabase** (once), either:
-   - exact dump: `cat prisma/backups/snapshot.sql | docker exec -i n8x-marketing-db psql "<DIRECT_URL>"`, or
+   - exact dump: `psql "<DIRECT_URL>" -f prisma/backups/snapshot.sql`, or
    - from code: `npx prisma migrate deploy` then run the seeders (see above).
-3. **Render**: deploy via [`render.yaml`](render.yaml) (Blueprint). Set the secret
+3. **Vercel**: import the GitHub repo. Build runs `prisma generate` (postinstall);
+   [`vercel.json`](vercel.json) pins the app to the `gru1` (São Paulo) region —
+   same as Supabase — and runs `prisma migrate deploy` before `next build`. Set the
    env vars (`DATABASE_URL`, `DIRECT_URL`, `SESSION_SECRET`, `NEXT_PUBLIC_SITE_URL`)
-   in the dashboard. Build runs `prisma generate` (postinstall); `prisma migrate
-   deploy` runs as the pre-deploy step.
+   in Project Settings → Environment Variables. `NEXT_PUBLIC_SITE_URL` is inlined
+   at build time, so set it before the first build.
+4. **Domain**: point `n8xmarketing.com.br` (registered at Hostinger) at Vercel —
+   add the domain in Vercel Project → Settings → Domains and set the DNS records it
+   shows in the Hostinger DNS zone. Update `NEXT_PUBLIC_SITE_URL` to the final URL.
 
-> Keep Render at **1 instance** — the content cache (`revalidateTag`/`updateTag`)
-> is per-instance, so with multiple instances admin edits only refresh the one
-> that served them until the time-based fallback. Scaling out needs a shared
-> cache handler (e.g. Redis).
+> On Vercel the content cache (`revalidateTag`/`updateTag`) is handled by Vercel's
+> distributed cache, so admin edits propagate across all serverless instances — no
+> single-instance constraint like a self-hosted Node process would have.
