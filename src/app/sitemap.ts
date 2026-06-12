@@ -20,6 +20,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/portfolio",
     "/contact",
     "/careers",
+    "/terms",
+    "/privacy",
   ].map((path) => ({ path, lastModified: now }));
 
   let projectEntries: Entry[] = [];

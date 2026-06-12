@@ -244,7 +244,9 @@
     "socialTitle": "Social",
     "rights": "All rights reserved.",
     "registration": "Reg. {value}",
-    "mapTitle": "Our location on the map"
+    "mapTitle": "Our location on the map",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy"
   },
   "localeSwitcher": {
     "label": "Language",

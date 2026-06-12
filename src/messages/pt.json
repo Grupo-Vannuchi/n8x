@@ -244,7 +244,9 @@
     "socialTitle": "Redes",
     "rights": "Todos os direitos reservados.",
     "registration": "CNPJ {value}",
-    "mapTitle": "Nossa localização no mapa"
+    "mapTitle": "Nossa localização no mapa",
+    "terms": "Termos de Uso",
+    "privacy": "Política de Privacidade"
   },
   "localeSwitcher": {
     "label": "Idioma",

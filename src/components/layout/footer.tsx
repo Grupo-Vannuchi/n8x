@@ -107,13 +107,27 @@ export async function Footer() {
       </div>
 
       <div className="border-t border-border">
-        <Container className="flex flex-col gap-1 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <Container className="flex flex-col gap-3 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {year} {siteConfig.legalName}. {t("rights")}
           </p>
-          {siteConfig.registration ? (
-            <p>{t("registration", { value: siteConfig.registration })}</p>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <Link
+              href="/terms"
+              className="transition-colors hover:text-foreground"
+            >
+              {t("terms")}
+            </Link>
+            <Link
+              href="/privacy"
+              className="transition-colors hover:text-foreground"
+            >
+              {t("privacy")}
+            </Link>
+            {siteConfig.registration ? (
+              <span>{t("registration", { value: siteConfig.registration })}</span>
+            ) : null}
+          </div>
         </Container>
       </div>
     </footer>
