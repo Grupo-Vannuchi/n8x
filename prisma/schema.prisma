@@ -196,3 +196,155 @@ model Lead {
   @@index([type, status, createdAt])
   @@map("leads")
 }
+
+// ---------------------------------------------------------------------------
+// Funnels (link-shared conversational lead-capture quizzes)
+// ---------------------------------------------------------------------------
+// Funnels are single-language (the `locale` is chosen at creation and all copy
+// is stored as plain strings, NOT the bilingual LocalizedText JSON used by the
+// marketing CMS). They are public but unlisted: never in nav/sitemap, noindex.
+
+enum FunnelType {
+  MEETING // ends with a Google Calendar scheduler
+  BONUS // ends with a button to download a PDF
+  MESSAGE // ends by sending a WhatsApp message
+}
+
+enum FunnelStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum FunnelOutcome {
+  COMPLETED
+  MEETING_BOOKED
+  BONUS_DOWNLOADED
+  MESSAGE_SENT
+}
+
+enum WhatsappStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+/// A conversational lead-capture quiz, shared via direct link. Single-language.
+model Funnel {
+  id     String       @id @default(cuid())
+  slug   String       @unique
+  locale String       @default("pt") // "pt" | "en", chosen at creation
+  name   String // internal admin label
+  type   FunnelType
+  status FunnelStatus @default(DRAFT)
+
+  /// Editable snapshot of the standard lead-capture opening (FunnelDefaultStep[]),
+  /// copied from the global FunnelDefaultTemplate at creation and overridable.
+  defaultBlock Json @default("[]")
+
+  /// Personalized WhatsApp sent on completion. Supports {NOME} / {CARGO} tokens.
+  completionMessage String
+
+  // --- MEETING config ---
+  meetingDurationMinutes Int?    @default(30)
+  meetingSlotStartHour   Int?    @default(9) // local time, meetingTimezone
+  meetingSlotEndHour     Int?    @default(18)
+  meetingDaysAhead       Int?    @default(14)
+  meetingTimezone        String? @default("America/Sao_Paulo")
+
+  // --- BONUS config ---
+  bonusUrl         String? // Google Drive PDF link
+  bonusButtonLabel String?
+
+  // --- MESSAGE config ---
+  messageBody String? // WhatsApp body sent at the end (MESSAGE type)
+
+  questions   FunnelQuestion[]
+  submissions FunnelSubmission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, type])
+  @@map("funnels")
+}
+
+/// A custom single-choice (buttons) question that runs after the default block.
+model FunnelQuestion {
+  id       String   @id @default(cuid())
+  funnelId String
+  funnel   Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  order    Int      @default(0)
+  prompt   String
+  options  String[] @default([]) // ordered single-choice labels
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([funnelId, order])
+  @@map("funnel_questions")
+}
+
+/// A completed run of a funnel by one visitor (the captured lead + answers).
+model FunnelSubmission {
+  id       String @id @default(cuid())
+  funnelId String
+  funnel   Funnel @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+
+  // Captured by the default block
+  name      String
+  role      String? // {CARGO}
+  phone     String? // raw as entered
+  phoneE164 String? // normalized for WhatsApp
+  email     String?
+
+  /// Custom-question answers: [{ questionId, prompt, answer }]
+  answers Json @default("[]")
+
+  outcome FunnelOutcome @default(COMPLETED)
+
+  // MEETING
+  meetingStartAt DateTime?
+  googleEventId  String?
+
+  // WhatsApp completion-message delivery
+  whatsappStatus WhatsappStatus @default(PENDING)
+  whatsappError  String?
+
+  /// Client-generated idempotency key — guards against double submits.
+  submissionToken String @unique
+
+  locale    String   @default("pt")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([funnelId, createdAt])
+  @@map("funnel_submissions")
+}
+
+/// OAuth tokens for the single company Google account (one row). Used by
+/// MEETING funnels to read free/busy and create calendar events.
+model GoogleAccount {
+  id           String    @id @default(cuid())
+  email        String? // connected account, for display
+  accessToken  String?
+  refreshToken String? // the durable credential
+  expiryDate   DateTime?
+  calendarId   String    @default("primary")
+  scope        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("google_account")
+}
+
+/// Editable GLOBAL default lead-capture block — one row per locale. The admin
+/// "edit default" screen edits this; new funnels copy `steps` into defaultBlock.
+model FunnelDefaultTemplate {
+  id        String   @id @default(cuid())
+  locale    String   @unique // "pt" | "en"
+  steps     Json     @default("[]") // FunnelDefaultStep[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("funnel_default_templates")
+}

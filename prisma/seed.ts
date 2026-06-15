@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { buildInformations } from "./seed-informations";
+import { seedFunnelDefaults } from "./seed-funnel-defaults";
 
 const prisma = new PrismaClient();
 
@@ -32,6 +33,8 @@ async function main() {
     });
   }
   console.log(`✓ ${informations.length} informations`);
+
+  await seedFunnelDefaults(prisma);
 }
 
 main()

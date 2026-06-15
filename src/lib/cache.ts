@@ -14,6 +14,7 @@ export const tags = {
   team: "team",
   stats: "stats",
   clients: "clients",
+  funnels: "funnels",
 } as const;
 
 /**
