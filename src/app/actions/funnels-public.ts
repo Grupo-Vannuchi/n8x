@@ -2,6 +2,9 @@
 
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { sendText, isEvolutionConfigured } from "@/lib/evolution";
+import { normalizePhoneBR } from "@/lib/phone";
+import { interpolateTokens } from "@/lib/funnel-runtime";
 import {
   funnelSubmissionSchema,
   type FunnelSubmissionInput,
@@ -39,18 +42,33 @@ export async function submitFunnel(
     });
     if (existing) return { ok: true };
 
-    await prisma.funnelSubmission.create({
+    const phoneE164 = normalizePhoneBR(data.phone);
+
+    // The submission is the durable record — write it first, before any send.
+    const submission = await prisma.funnelSubmission.create({
       data: {
         funnelId: funnel.id,
         name: data.name,
         role: data.role || null,
         phone: data.phone || null,
+        phoneE164,
         email: data.email || null,
         answers: data.answers as unknown as Prisma.InputJsonValue,
-        outcome: "COMPLETED",
+        outcome: funnel.type === "MESSAGE" ? "MESSAGE_SENT" : "COMPLETED",
         submissionToken: data.submissionToken,
         locale: funnel.locale,
       },
+    });
+
+    // WhatsApp is best-effort and must never fail the submission.
+    await deliverWhatsapp({
+      submissionId: submission.id,
+      phoneE164,
+      name: data.name,
+      role: data.role,
+      completionMessage: funnel.completionMessage,
+      // The MESSAGE-type funnel's specific deliverable, defined per funnel.
+      messageBody: funnel.type === "MESSAGE" ? funnel.messageBody : null,
     });
 
     return { ok: true };
@@ -64,5 +82,53 @@ export async function submitFunnel(
     }
     console.error("Failed to submit funnel", error);
     return { ok: false, error: "unknown" };
+  }
+}
+
+/** Best-effort WhatsApp delivery + status write. Never throws. */
+async function deliverWhatsapp(args: {
+  submissionId: string;
+  phoneE164: string | null;
+  name: string;
+  role?: string;
+  completionMessage: string;
+  messageBody: string | null;
+}): Promise<void> {
+  const tokens = { name: args.name, role: args.role };
+
+  if (!args.phoneE164) return markWhatsapp(args.submissionId, "FAILED", "no_phone");
+  if (!isEvolutionConfigured())
+    return markWhatsapp(args.submissionId, "FAILED", "not_configured");
+
+  // Primary: the per-funnel completion message (every funnel type).
+  const primary = await sendText(
+    args.phoneE164,
+    interpolateTokens(args.completionMessage, tokens),
+  );
+
+  // MESSAGE funnels also deliver their specific message body (best-effort).
+  if (args.messageBody && args.messageBody.trim()) {
+    await sendText(args.phoneE164, interpolateTokens(args.messageBody, tokens));
+  }
+
+  return markWhatsapp(
+    args.submissionId,
+    primary.ok ? "SENT" : "FAILED",
+    primary.ok ? null : primary.error,
+  );
+}
+
+async function markWhatsapp(
+  id: string,
+  status: "SENT" | "FAILED",
+  error: string | null,
+): Promise<void> {
+  try {
+    await prisma.funnelSubmission.update({
+      where: { id },
+      data: { whatsappStatus: status, whatsappError: error },
+    });
+  } catch (e) {
+    console.error("Failed to update whatsapp status", e);
   }
 }
