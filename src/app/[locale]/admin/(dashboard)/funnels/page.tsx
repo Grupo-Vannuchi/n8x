@@ -1,5 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Plus, Pencil, ExternalLink, SlidersHorizontal, CalendarClock } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  ExternalLink,
+  SlidersHorizontal,
+  CalendarClock,
+  Inbox,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { FunnelDeleteButton } from "@/components/admin/funnel-delete-button";
@@ -95,6 +102,13 @@ export default async function AdminFunnelsPage({
                   <ExternalLink className="size-4" />
                   {t("openFunnel")}
                 </a>
+                <Link
+                  href={`/admin/funnels/${funnel.id}/submissions`}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <Inbox className="size-4" />
+                  {t("openSubmissions")}
+                </Link>
                 <Link
                   href={`/admin/funnels/${funnel.id}`}
                   className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
