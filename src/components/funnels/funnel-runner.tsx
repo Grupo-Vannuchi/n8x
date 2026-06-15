@@ -7,7 +7,7 @@
 /* eslint-disable react-hooks/immutability */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/lib/funnel-runtime";
 import type { FunnelRunView } from "@/lib/queries";
 import { submitFunnel } from "@/app/actions/funnels-public";
+import { FunnelScheduler } from "@/components/funnels/funnel-scheduler";
 
 /** A single conversational node the runner walks through, in order. */
 type Node =
@@ -62,9 +63,11 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   const [awaiting, setAwaiting] = useState(false);
   const [typing, setTyping] = useState(true);
   const [draft, setDraft] = useState("");
-  const [status, setStatus] = useState<"running" | "submitting" | "done" | "error">(
-    "running",
-  );
+  const [status, setStatus] = useState<
+    "running" | "scheduling" | "submitting" | "done" | "error"
+  >("running");
+  const [bookedISO, setBookedISO] = useState<string | null>(null);
+  const [retryNotice, setRetryNotice] = useState(false);
 
   const [values, setValues] = useState<FunnelLeadValues>({});
   const [answers, setAnswers] = useState<FunnelAnswer[]>([]);
@@ -82,7 +85,9 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     const node = nodes[index];
 
     if (!node) {
-      void runSubmit();
+      // MEETING funnels schedule before persisting; others submit immediately.
+      if (funnel.type === "MEETING") setStatus("scheduling");
+      else void runSubmit();
       return;
     }
 
@@ -111,7 +116,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing, status]);
 
-  async function runSubmit() {
+  async function runSubmit(meetingStartAt?: string) {
     if (submittedRef.current) return;
     submittedRef.current = true;
     setStatus("submitting");
@@ -124,8 +129,19 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
       phone: values.phone,
       email: values.email,
       answers,
+      meetingStartAt,
     });
-    setStatus(res.ok ? "done" : "error");
+    if (res.ok) {
+      setBookedISO(meetingStartAt ?? null);
+      setStatus("done");
+    } else if (res.error === "slot_taken") {
+      // That slot was just taken — re-open the picker for another choice.
+      submittedRef.current = false;
+      setRetryNotice(true);
+      setStatus("scheduling");
+    } else {
+      setStatus("error");
+    }
   }
 
   function answerInput(field: "name" | "role" | "phone" | "email") {
@@ -185,8 +201,23 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
           </div>
         ) : null}
 
+        {status === "scheduling" ? (
+          <FunnelScheduler
+            funnelId={funnel.id}
+            retryNotice={retryNotice}
+            onConfirm={(iso) => runSubmit(iso)}
+            onUnavailable={() => runSubmit()}
+          />
+        ) : null}
+
+        {status === "submitting" ? (
+          <div className="mt-4 self-stretch rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
+            {funnel.type === "MEETING" ? t("booking") : t("submitting")}
+          </div>
+        ) : null}
+
         {status === "done" ? (
-          <FunnelCompletion funnel={funnel} />
+          <FunnelCompletion funnel={funnel} bookedISO={bookedISO} />
         ) : null}
 
         {status === "error" ? (
@@ -253,14 +284,33 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   );
 }
 
-/** The end-of-funnel screen. Type-specific endings are layered on in later phases. */
-function FunnelCompletion({ funnel }: { funnel: FunnelRunView }) {
+/** The end-of-funnel screen, varying by funnel type (bonus download, booked meeting). */
+function FunnelCompletion({
+  funnel,
+  bookedISO,
+}: {
+  funnel: FunnelRunView;
+  bookedISO: string | null;
+}) {
   const t = useTranslations("funnel");
+  const locale = useLocale();
+
+  const meetingBooked = funnel.type === "MEETING" && bookedISO;
+  const bookedLabel = bookedISO
+    ? new Date(bookedISO).toLocaleString(locale, {
+        dateStyle: "full",
+        timeStyle: "short",
+      })
+    : "";
 
   return (
     <div className="mt-4 self-stretch rounded-2xl border border-border bg-card p-6 text-center">
-      <h2 className="text-lg font-bold">{t("completionTitle")}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{t("completionText")}</p>
+      <h2 className="text-lg font-bold">
+        {meetingBooked ? t("bookedTitle") : t("completionTitle")}
+      </h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {meetingBooked ? bookedLabel : t("completionText")}
+      </p>
 
       {funnel.type === "BONUS" && funnel.bonusUrl ? (
         <a

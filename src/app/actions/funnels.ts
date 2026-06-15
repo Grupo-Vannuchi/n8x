@@ -4,6 +4,7 @@ import { updateTag } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { disconnectGoogleAccount } from "@/lib/google-calendar";
 import { tags } from "@/lib/cache";
 import {
   funnelSchema,
@@ -153,6 +154,19 @@ export async function updateFunnelDefaultTemplate(
     return { ok: true };
   } catch (error) {
     console.error("Failed to update funnel default template", error);
+    return { ok: false };
+  }
+}
+
+/** Disconnect the Google account used by MEETING funnels. Admin-only. */
+export async function disconnectGoogle(): Promise<{ ok: boolean }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false };
+  try {
+    await disconnectGoogleAccount();
+    return { ok: true };
+  } catch (error) {
+    console.error("Failed to disconnect Google", error);
     return { ok: false };
   }
 }

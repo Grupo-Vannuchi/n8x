@@ -257,7 +257,13 @@
     "errorRetry": "Something went wrong while sending. Please try again.",
     "retry": "Try again",
     "download": "Download now",
-    "notFound": "Funnel not found."
+    "notFound": "Funnel not found.",
+    "loadingSlots": "Finding available times…",
+    "scheduleTitle": "Pick the best time",
+    "slotTaken": "That time was just taken. Please pick another.",
+    "confirmSlot": "Confirm time",
+    "booking": "Booking your meeting…",
+    "bookedTitle": "Meeting booked! 📅"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -662,6 +668,12 @@
       "googleNotConnected": "No Google account connected.",
       "googleConnect": "Connect Google",
       "googleReconnect": "Reconnect",
+      "googleDisconnect": "Disconnect",
+      "googleDisconnectConfirm": "Disconnect the Google account? Meeting funnels won't schedule until you reconnect.",
+      "googleJustConnected": "Google account connected successfully.",
+      "googleConnectError": "Couldn't connect. Please try again.",
+      "googleNotConfigured": "Google integration not configured yet.",
+      "googleNotConfiguredHint": "Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the environment to enable scheduling.",
       "error": {
         "unauthorized": "Your session expired. Please sign in again.",
         "invalid": "Please check the fields and try again.",

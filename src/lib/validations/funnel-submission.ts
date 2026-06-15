@@ -21,6 +21,8 @@ export const funnelSubmissionSchema = z.object({
       }),
     )
     .max(50),
+  /** Chosen meeting slot (ISO 8601), only for MEETING funnels. */
+  meetingStartAt: z.string().datetime().optional(),
   /** Honeypot — must stay empty. */
   hp: z.string().max(0).optional(),
 });

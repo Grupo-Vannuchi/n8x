@@ -257,7 +257,13 @@
     "errorRetry": "Algo deu errado ao enviar. Tente novamente.",
     "retry": "Tentar de novo",
     "download": "Baixar agora",
-    "notFound": "Funil não encontrado."
+    "notFound": "Funil não encontrado.",
+    "loadingSlots": "Buscando horários disponíveis…",
+    "scheduleTitle": "Escolha o melhor horário",
+    "slotTaken": "Esse horário acabou de ser preenchido. Escolha outro.",
+    "confirmSlot": "Confirmar horário",
+    "booking": "Agendando sua reunião…",
+    "bookedTitle": "Reunião agendada! 📅"
   },
   "localeSwitcher": {
     "label": "Idioma",
@@ -662,6 +668,12 @@
       "googleNotConnected": "Nenhuma conta Google conectada.",
       "googleConnect": "Conectar Google",
       "googleReconnect": "Reconectar",
+      "googleDisconnect": "Desconectar",
+      "googleDisconnectConfirm": "Desconectar a conta Google? Os funis de reunião deixarão de agendar até reconectar.",
+      "googleJustConnected": "Conta Google conectada com sucesso.",
+      "googleConnectError": "Não foi possível conectar. Tente novamente.",
+      "googleNotConfigured": "Integração com o Google ainda não configurada.",
+      "googleNotConfiguredHint": "Defina GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET no ambiente para habilitar o agendamento.",
       "error": {
         "unauthorized": "Sua sessão expirou. Entre novamente.",
         "invalid": "Verifique os campos e tente novamente.",
