@@ -248,6 +248,17 @@
     "terms": "Terms of Use",
     "privacy": "Privacy Policy"
   },
+  "funnel": {
+    "placeholder": "Type your answer…",
+    "send": "Send",
+    "submitting": "Sending…",
+    "completionTitle": "All set! 🎉",
+    "completionText": "We've received your answers. We'll be in touch soon.",
+    "errorRetry": "Something went wrong while sending. Please try again.",
+    "retry": "Try again",
+    "download": "Download now",
+    "notFound": "Funnel not found."
+  },
   "localeSwitcher": {
     "label": "Language",
     "pt": "Português",

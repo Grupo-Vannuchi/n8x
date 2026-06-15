@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { localize, localizeRich } from "@/lib/content";
 import { tags, CONTENT_REVALIDATE_SECONDS } from "@/lib/cache";
 import type { Locale } from "@/i18n/routing";
+import type { FunnelDefaultStep } from "@/lib/funnel-runtime";
 
 /**
  * Content data-access layer.
@@ -379,6 +380,48 @@ export const getClients = unstable_cache(
   },
   ["clients"],
   { tags: [tags.clients], revalidate },
+);
+
+/** A funnel reduced to what the public runner needs (no server-only secrets like
+ * the completion/message bodies, which are sent server-side, never exposed). */
+export type FunnelRunView = {
+  id: string;
+  slug: string;
+  locale: string;
+  type: "MEETING" | "BONUS" | "MESSAGE";
+  defaultBlock: FunnelDefaultStep[];
+  questions: { id: string; prompt: string; options: string[] }[];
+  bonusUrl: string | null;
+  bonusButtonLabel: string | null;
+  meetingDurationMinutes: number;
+};
+
+/** A published funnel by slug, matched to its own (single) locale. */
+export const getPublishedFunnelBySlug = unstable_cache(
+  async (locale: Locale, slug: string): Promise<FunnelRunView | null> => {
+    const f = await prisma.funnel.findFirst({
+      where: { slug, status: "PUBLISHED", locale },
+      include: { questions: { orderBy: { order: "asc" } } },
+    });
+    if (!f) return null;
+    return {
+      id: f.id,
+      slug: f.slug,
+      locale: f.locale,
+      type: f.type,
+      defaultBlock: (f.defaultBlock as FunnelDefaultStep[] | null) ?? [],
+      questions: f.questions.map((q) => ({
+        id: q.id,
+        prompt: q.prompt,
+        options: q.options,
+      })),
+      bonusUrl: f.bonusUrl,
+      bonusButtonLabel: f.bonusButtonLabel,
+      meetingDurationMinutes: f.meetingDurationMinutes ?? 30,
+    };
+  },
+  ["funnels", "detail"],
+  { tags: [tags.funnels], revalidate },
 );
 
 function toProjectCard(locale: Locale) {

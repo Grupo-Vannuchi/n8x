@@ -248,6 +248,17 @@
     "terms": "Termos de Uso",
     "privacy": "Política de Privacidade"
   },
+  "funnel": {
+    "placeholder": "Digite sua resposta…",
+    "send": "Enviar",
+    "submitting": "Enviando…",
+    "completionTitle": "Tudo certo! 🎉",
+    "completionText": "Recebemos suas respostas. Em breve entraremos em contato.",
+    "errorRetry": "Algo deu errado ao enviar. Tente novamente.",
+    "retry": "Tentar de novo",
+    "download": "Baixar agora",
+    "notFound": "Funil não encontrado."
+  },
   "localeSwitcher": {
     "label": "Idioma",
     "pt": "Português",
