@@ -171,7 +171,14 @@ export async function getAvailableSlots(
   const daysAhead = funnel.meetingDaysAhead ?? 14;
 
   const now = new Date();
-  const busy = await getFreeBusy(ctx, now, addDays(now, daysAhead + 1));
+  let busy: BusyInterval[];
+  try {
+    busy = await getFreeBusy(ctx, now, addDays(now, daysAhead + 1));
+  } catch (error) {
+    // Missing scope, revoked access, API hiccup — never crash the public funnel.
+    console.error("Failed to read Google free/busy", error);
+    return [];
+  }
 
   const nowTz = new TZDate(now.getTime(), tz);
   const y = nowTz.getFullYear();
