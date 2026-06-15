@@ -29,7 +29,12 @@ const items = [
   { href: "/admin/leads", key: "leads", icon: Inbox, exact: false },
 ] as const;
 
-export function AdminNav() {
+export function AdminNav({
+  badges,
+}: {
+  /** Optional count badge per nav key (e.g. { funnels: 12 }). */
+  badges?: Partial<Record<string, number>>;
+}) {
   const t = useTranslations("admin.nav");
   const pathname = usePathname();
 
@@ -39,6 +44,7 @@ export function AdminNav() {
         const active = item.exact
           ? pathname === item.href
           : pathname.startsWith(item.href);
+        const count = badges?.[item.key] ?? 0;
         return (
           <Link
             key={item.href}
@@ -52,7 +58,12 @@ export function AdminNav() {
             )}
           >
             <item.icon className="size-4" />
-            {t(item.key)}
+            <span className="flex-1">{t(item.key)}</span>
+            {count > 0 ? (
+              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-brand/15 px-1.5 text-xs font-semibold text-brand tabular-nums">
+                {count}
+              </span>
+            ) : null}
           </Link>
         );
       })}

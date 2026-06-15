@@ -11,10 +11,12 @@ export async function AdminShell({
   user,
   locale,
   children,
+  badges,
 }: {
   user: CurrentUser;
   locale: Locale;
   children: React.ReactNode;
+  badges?: Partial<Record<string, number>>;
 }) {
   const t = await getTranslations("admin.nav");
 
@@ -25,7 +27,7 @@ export async function AdminShell({
           <Logo className="text-xl" />
         </div>
         <div className="mt-4 flex-1">
-          <AdminNav />
+          <AdminNav badges={badges} />
         </div>
         <div className="flex flex-col gap-1 border-t border-border pt-3">
           <Link
@@ -62,7 +64,7 @@ export async function AdminShell({
               </button>
             </form>
           </div>
-          <AdminNav />
+          <AdminNav badges={badges} />
         </header>
         <main className="flex-1 p-6 sm:p-8">{children}</main>
       </div>

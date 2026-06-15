@@ -602,6 +602,8 @@
       "submissions": "Submissions",
       "submissionsTitle": "Submissions — {name}",
       "submissionsEmpty": "No submissions yet.",
+      "filterAll": "All",
+      "exportCsv": "Export CSV",
       "contactLabel": "Contact",
       "answersLabel": "Answers",
       "meetingAtLabel": "Meeting booked",

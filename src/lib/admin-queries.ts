@@ -187,6 +187,11 @@ export async function getFunnelSubmissions(
   });
 }
 
+/** Total funnel submissions across all funnels (for the nav badge). */
+export async function countFunnelSubmissions(): Promise<number> {
+  return prisma.funnelSubmission.count();
+}
+
 /** The single connected Google account row, if any. */
 export async function getGoogleAccount(): Promise<GoogleAccount | null> {
   return prisma.googleAccount.findFirst();

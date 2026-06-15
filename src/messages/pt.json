@@ -602,6 +602,8 @@
       "submissions": "Envios",
       "submissionsTitle": "Envios — {name}",
       "submissionsEmpty": "Nenhum envio ainda.",
+      "filterAll": "Todos",
+      "exportCsv": "Exportar CSV",
       "contactLabel": "Contato",
       "answersLabel": "Respostas",
       "meetingAtLabel": "Reunião agendada",

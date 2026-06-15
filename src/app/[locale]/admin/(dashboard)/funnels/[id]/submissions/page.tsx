@@ -1,17 +1,27 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarClock } from "lucide-react";
+import { ArrowLeft, CalendarClock, Download } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import { getFunnelById, getFunnelSubmissions } from "@/lib/admin-queries";
 import { resolveLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 type Answer = { questionId: string; prompt: string; answer: string };
 
+const OUTCOMES = [
+  "COMPLETED",
+  "MEETING_BOOKED",
+  "BONUS_DOWNLOADED",
+  "MESSAGE_SENT",
+] as const;
+
 export default async function FunnelSubmissionsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ outcome?: string }>;
 }) {
   const { locale: rawLocale, id } = await params;
   const locale = resolveLocale(rawLocale);
@@ -21,11 +31,32 @@ export default async function FunnelSubmissionsPage({
   const funnel = await getFunnelById(id);
   if (!funnel) notFound();
 
-  const submissions = await getFunnelSubmissions(id);
+  const all = await getFunnelSubmissions(id);
+  const { outcome } = await searchParams;
+
+  // Count per outcome → only show chips for outcomes that actually occur.
+  const counts = new Map<string, number>();
+  for (const s of all) counts.set(s.outcome, (counts.get(s.outcome) ?? 0) + 1);
+  const activeOutcome = outcome && counts.has(outcome) ? outcome : null;
+  const submissions = activeOutcome
+    ? all.filter((s) => s.outcome === activeOutcome)
+    : all;
+
   const dateFmt = new Intl.DateTimeFormat(locale, {
     dateStyle: "short",
     timeStyle: "short",
   });
+
+  const base = `/admin/funnels/${id}/submissions`;
+  const exportHref = `/api/admin/funnels/${id}/export${activeOutcome ? `?outcome=${activeOutcome}` : ""}`;
+
+  const chip = (active: boolean) =>
+    cn(
+      "rounded-full px-3 py-1 text-sm font-medium transition-colors",
+      active
+        ? "bg-brand text-brand-foreground"
+        : "bg-muted text-muted-foreground hover:text-foreground",
+    );
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
@@ -37,10 +68,40 @@ export default async function FunnelSubmissionsPage({
           <ArrowLeft className="size-4" />
           {t("title")}
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t("submissionsTitle", { name: funnel.name })}
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold tracking-tight">
+            {t("submissionsTitle", { name: funnel.name })}
+          </h1>
+          {all.length > 0 ? (
+            // CSV export is an API route, not a page — plain anchor is correct.
+            // eslint-disable-next-line @next/next/no-html-link-for-pages
+            <a
+              href={exportHref}
+              className={cn(buttonVariants({ variant: "outline", size: "md" }))}
+            >
+              <Download className="size-4" />
+              {t("exportCsv")}
+            </a>
+          ) : null}
+        </div>
       </div>
+
+      {all.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          <Link href={base} className={chip(!activeOutcome)}>
+            {t("filterAll")} ({all.length})
+          </Link>
+          {OUTCOMES.filter((o) => counts.has(o)).map((o) => (
+            <Link
+              key={o}
+              href={`${base}?outcome=${o}`}
+              className={chip(activeOutcome === o)}
+            >
+              {t(`outcome_${o}`)} ({counts.get(o)})
+            </Link>
+          ))}
+        </div>
+      ) : null}
 
       {submissions.length === 0 ? (
         <p className="text-muted-foreground">{t("submissionsEmpty")}</p>
@@ -57,9 +118,7 @@ export default async function FunnelSubmissionsPage({
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold">{s.name}</span>
                     {s.role ? (
-                      <span className="text-sm text-muted-foreground">
-                        · {s.role}
-                      </span>
+                      <span className="text-sm text-muted-foreground">· {s.role}</span>
                     ) : null}
                   </div>
                   <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
