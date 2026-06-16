@@ -263,7 +263,9 @@
     "slotTaken": "That time was just taken. Please pick another.",
     "confirmSlot": "Confirm time",
     "booking": "Booking your meeting…",
-    "bookedTitle": "Meeting booked! 📅"
+    "bookedTitle": "Meeting booked! 📅",
+    "invalidPhone": "Enter a valid number with area code, e.g. (13) 99618-4401",
+    "invalidEmail": "Enter a valid email."
   },
   "localeSwitcher": {
     "label": "Language",

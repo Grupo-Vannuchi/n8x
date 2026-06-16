@@ -263,7 +263,9 @@
     "slotTaken": "Esse horário acabou de ser preenchido. Escolha outro.",
     "confirmSlot": "Confirmar horário",
     "booking": "Agendando sua reunião…",
-    "bookedTitle": "Reunião agendada! 📅"
+    "bookedTitle": "Reunião agendada! 📅",
+    "invalidPhone": "Digite um número válido com DDD, ex: (13) 99618-4401",
+    "invalidEmail": "Digite um e-mail válido."
   },
   "localeSwitcher": {
     "label": "Idioma",

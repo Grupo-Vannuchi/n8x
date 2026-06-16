@@ -24,3 +24,18 @@ export function normalizePhoneBR(raw: string | undefined | null): string | null 
 export function toWhatsappNumber(e164: string): string {
   return e164.replace(/\D/g, "");
 }
+
+/**
+ * Progressive Brazilian phone mask for funnel inputs, e.g. "(13) 99618-4401".
+ * Caps at 11 digits (DDD + 9-digit mobile); 10 digits render as a landline.
+ */
+export function maskPhoneBR(input: string): string {
+  const d = input.replace(/\D/g, "").slice(0, 11);
+  if (d.length === 0) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) {
+    return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  }
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}

@@ -15,6 +15,7 @@ import {
   type FunnelLeadValues,
   type FunnelAnswer,
 } from "@/lib/funnel-runtime";
+import { normalizePhoneBR, maskPhoneBR } from "@/lib/phone";
 import type { FunnelRunView } from "@/lib/queries";
 import { submitFunnel } from "@/app/actions/funnels-public";
 import { FunnelScheduler } from "@/components/funnels/funnel-scheduler";
@@ -54,6 +55,17 @@ const inputType: Record<string, string> = {
   email: "email",
 };
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type FieldError = "invalidPhone" | "invalidEmail";
+
+/** Validate a capture field; returns a `funnel` message key or null if ok. */
+function validateField(field: string, value: string): FieldError | null {
+  if (field === "phone" && !normalizePhoneBR(value)) return "invalidPhone";
+  if (field === "email" && !EMAIL_RE.test(value)) return "invalidEmail";
+  return null;
+}
+
 export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   const t = useTranslations("funnel");
   const nodes = useMemo(() => buildNodes(funnel), [funnel]);
@@ -63,6 +75,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   const [awaiting, setAwaiting] = useState(false);
   const [typing, setTyping] = useState(true);
   const [draft, setDraft] = useState("");
+  const [inputError, setInputError] = useState<FieldError | null>(null);
   const [status, setStatus] = useState<
     "running" | "scheduling" | "submitting" | "done" | "error"
   >("running");
@@ -147,9 +160,15 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   function answerInput(field: "name" | "role" | "phone" | "email") {
     const value = draft.trim();
     if (!value) return;
+    const error = validateField(field, value);
+    if (error) {
+      setInputError(error);
+      return;
+    }
     setValues((v) => ({ ...v, [field]: value }));
     setMessages((m) => [...m, { role: "user", text: value }]);
     setDraft("");
+    setInputError(null);
     setAwaiting(false);
     setIndex((i) => i + 1);
   }
@@ -260,24 +279,41 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
             e.preventDefault();
             answerInput(inputNode.field);
           }}
-          className="mt-4 flex items-center gap-2"
+          className="mt-4 flex flex-col gap-1.5"
         >
-          <input
-            autoFocus
-            type={inputType[inputNode.field]}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={t("placeholder")}
-            className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm focus-visible:border-brand focus-visible:outline-none"
-          />
-          <button
-            type="submit"
-            aria-label={t("send")}
-            disabled={!draft.trim()}
-            className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground transition-opacity disabled:opacity-50"
-          >
-            <Send className="size-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <input
+              autoFocus
+              type={inputType[inputNode.field]}
+              inputMode={inputNode.field === "phone" ? "numeric" : undefined}
+              value={draft}
+              onChange={(e) => {
+                const raw = e.target.value;
+                setDraft(
+                  inputNode.field === "phone" ? maskPhoneBR(raw) : raw,
+                );
+                if (inputError) setInputError(null);
+              }}
+              placeholder={
+                inputNode.field === "phone"
+                  ? "(13) 99618-4401"
+                  : t("placeholder")
+              }
+              aria-invalid={Boolean(inputError)}
+              className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm focus-visible:border-brand focus-visible:outline-none aria-[invalid=true]:border-red-500"
+            />
+            <button
+              type="submit"
+              aria-label={t("send")}
+              disabled={!draft.trim()}
+              className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground transition-opacity disabled:opacity-50"
+            >
+              <Send className="size-5" />
+            </button>
+          </div>
+          {inputError ? (
+            <p className="px-1 text-xs text-red-500">{t(inputError)}</p>
+          ) : null}
         </form>
       ) : null}
     </div>
