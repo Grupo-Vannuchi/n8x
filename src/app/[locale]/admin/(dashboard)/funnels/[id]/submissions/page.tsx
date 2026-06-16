@@ -73,8 +73,7 @@ export default async function FunnelSubmissionsPage({
             {t("submissionsTitle", { name: funnel.name })}
           </h1>
           {all.length > 0 ? (
-            // CSV export is an API route, not a page — plain anchor is correct.
-            // eslint-disable-next-line @next/next/no-html-link-for-pages
+            // CSV export is an API route (not a page) — a plain anchor is correct.
             <a
               href={exportHref}
               className={cn(buttonVariants({ variant: "outline", size: "md" }))}

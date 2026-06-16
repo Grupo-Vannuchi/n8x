@@ -1,11 +1,5 @@
 "use client";
 
-/* Imperative chat-orchestration component: the conversation effect and event
-   handlers intentionally drive state step-by-step and mutate flag refs. The
-   React Compiler's immutability heuristic flags this benign pattern, so the
-   rule is disabled for this file (correctness is unaffected). */
-/* eslint-disable react-hooks/immutability */
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Send } from "lucide-react";

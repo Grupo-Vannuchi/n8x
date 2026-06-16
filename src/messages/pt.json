@@ -265,7 +265,9 @@
     "booking": "Agendando sua reunião…",
     "bookedTitle": "Reunião agendada! 📅",
     "invalidPhone": "Digite um número válido com DDD, ex: (13) 99618-4401",
-    "invalidEmail": "Digite um e-mail válido."
+    "invalidEmail": "Digite um e-mail válido.",
+    "prevDay": "Dia anterior",
+    "nextDay": "Próximo dia"
   },
   "localeSwitcher": {
     "label": "Idioma",

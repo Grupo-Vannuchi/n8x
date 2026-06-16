@@ -5,7 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input, Textarea, Label } from "@/components/ui/field";
+import { Input, Textarea } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import { type Locale } from "@/i18n/routing";
 import {

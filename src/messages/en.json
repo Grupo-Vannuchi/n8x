@@ -265,7 +265,9 @@
     "booking": "Booking your meeting…",
     "bookedTitle": "Meeting booked! 📅",
     "invalidPhone": "Enter a valid number with area code, e.g. (13) 99618-4401",
-    "invalidEmail": "Enter a valid email."
+    "invalidEmail": "Enter a valid email.",
+    "prevDay": "Previous day",
+    "nextDay": "Next day"
   },
   "localeSwitcher": {
     "label": "Language",
