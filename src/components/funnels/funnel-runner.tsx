@@ -314,6 +314,37 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   );
 }
 
+/**
+ * Derive a preview URL and a direct-download URL from a bonus link. For Google
+ * Drive links we extract the file id and build the `uc?export=download` form
+ * (the `download` HTML attribute is ignored cross-origin, so this is what
+ * actually forces the file to download). Non-Drive links are used as-is.
+ */
+function bonusLinks(url: string): { preview: string; download: string } {
+  const match =
+    url.match(/\/d\/([a-zA-Z0-9_-]+)/) ?? url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  const id = match?.[1];
+  if (id) {
+    return {
+      preview: `https://drive.google.com/file/d/${id}/view`,
+      download: `https://drive.google.com/uc?export=download&id=${id}`,
+    };
+  }
+  return { preview: url, download: url };
+}
+
+/** Open the PDF in a new tab AND trigger its download (per the funnel request). */
+function openAndDownloadBonus(url: string) {
+  const { preview, download } = bonusLinks(url);
+  window.open(preview, "_blank", "noopener,noreferrer");
+  const a = document.createElement("a");
+  a.href = download;
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 /** The end-of-funnel screen, varying by funnel type (bonus download, booked meeting). */
 function FunnelCompletion({
   funnel,
@@ -325,6 +356,7 @@ function FunnelCompletion({
   const t = useTranslations("funnel");
   const locale = useLocale();
 
+  const bonusUrl = funnel.type === "BONUS" ? funnel.bonusUrl : null;
   const meetingBooked = funnel.type === "MEETING" && bookedISO;
   const bookedLabel = bookedISO
     ? new Date(bookedISO).toLocaleString(locale, {
@@ -342,15 +374,14 @@ function FunnelCompletion({
         {meetingBooked ? bookedLabel : t("completionText")}
       </p>
 
-      {funnel.type === "BONUS" && funnel.bonusUrl ? (
-        <a
-          href={funnel.bonusUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+      {bonusUrl ? (
+        <button
+          type="button"
+          onClick={() => openAndDownloadBonus(bonusUrl)}
           className="mt-5 inline-flex items-center justify-center rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-brand-foreground"
         >
           {funnel.bonusButtonLabel || t("download")}
-        </a>
+        </button>
       ) : null}
     </div>
   );
