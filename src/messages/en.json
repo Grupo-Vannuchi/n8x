@@ -672,6 +672,7 @@
       "bonusButtonLabel": "Download button label",
       "messageBody": "WhatsApp message",
       "messageBodyHint": "Message sent to the visitor at the end (supports '{NOME}' and '{CARGO}').",
+      "messageUsesCompletion": "This funnel sends the completion message (below) via WhatsApp at the end — no extra message needed.",
       "sectionCompletion": "Completion message (WhatsApp)",
       "completionMessage": "Message sent on completion",
       "completionHint": "Sent via WhatsApp at the end of any funnel (supports '{NOME}' and '{CARGO}').",

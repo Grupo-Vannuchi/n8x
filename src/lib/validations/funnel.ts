@@ -72,13 +72,6 @@ export const funnelSchema = z
         message: "Required for a bonus funnel",
       });
     }
-    if (val.type === "MESSAGE" && !val.messageBody) {
-      ctx.addIssue({
-        path: ["messageBody"],
-        code: z.ZodIssueCode.custom,
-        message: "Required for a message funnel",
-      });
-    }
     if (val.type === "MEETING" && val.meetingSlotEndHour <= val.meetingSlotStartHour) {
       ctx.addIssue({
         path: ["meetingSlotEndHour"],

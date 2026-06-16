@@ -444,15 +444,9 @@ export function FunnelForm({
 
           {type === "MESSAGE" ? (
             <div className="rounded-lg border border-border bg-background p-4">
-              <Label htmlFor="messageBody">{t("messageBody")}</Label>
-              <Textarea
-                id="messageBody"
-                className="min-h-28"
-                aria-invalid={Boolean(errors.messageBody)}
-                {...register("messageBody")}
-              />
-              <FieldError>{errors.messageBody?.message}</FieldError>
-              <p className="mt-1 text-xs text-muted-foreground">{t("messageBodyHint")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("messageUsesCompletion")}
+              </p>
             </div>
           ) : null}
         </div>

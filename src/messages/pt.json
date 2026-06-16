@@ -672,6 +672,7 @@
       "bonusButtonLabel": "Texto do botão de download",
       "messageBody": "Mensagem enviada no WhatsApp",
       "messageBodyHint": "Mensagem enviada ao visitante ao final (suporta '{NOME}' e '{CARGO}').",
+      "messageUsesCompletion": "Este funil envia a mensagem de conclusão (abaixo) no WhatsApp ao final — não precisa de outra mensagem.",
       "sectionCompletion": "Mensagem de conclusão (WhatsApp)",
       "completionMessage": "Mensagem enviada ao concluir",
       "completionHint": "Enviada por WhatsApp ao final de qualquer funil (suporta '{NOME}' e '{CARGO}').",

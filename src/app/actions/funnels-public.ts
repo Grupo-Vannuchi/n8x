@@ -95,15 +95,14 @@ export async function submitFunnel(
       },
     });
 
-    // WhatsApp is best-effort and must never fail the submission.
+    // WhatsApp is best-effort and must never fail the submission. The single
+    // completion message is the funnel's message (incl. MESSAGE-type funnels).
     await deliverWhatsapp({
       submissionId: submission.id,
       phoneE164,
       name: data.name,
       role: data.role,
       completionMessage: funnel.completionMessage,
-      // The MESSAGE-type funnel's specific deliverable, defined per funnel.
-      messageBody: funnel.type === "MESSAGE" ? funnel.messageBody : null,
     });
 
     return { ok: true };
@@ -135,14 +134,14 @@ export async function getFunnelSlots(
   return { configured: true, slots };
 }
 
-/** Best-effort WhatsApp delivery + status write. Never throws. */
+/** Best-effort WhatsApp delivery + status write. Never throws. Sends exactly one
+ * message per funnel: the completion message (which IS a MESSAGE funnel's body). */
 async function deliverWhatsapp(args: {
   submissionId: string;
   phoneE164: string | null;
   name: string;
   role?: string;
   completionMessage: string;
-  messageBody: string | null;
 }): Promise<void> {
   const tokens = { name: args.name, role: args.role };
 
@@ -150,21 +149,15 @@ async function deliverWhatsapp(args: {
   if (!isEvolutionConfigured())
     return markWhatsapp(args.submissionId, "FAILED", "not_configured");
 
-  // Primary: the per-funnel completion message (every funnel type).
-  const primary = await sendText(
+  const result = await sendText(
     args.phoneE164,
     interpolateTokens(args.completionMessage, tokens),
   );
 
-  // MESSAGE funnels also deliver their specific message body (best-effort).
-  if (args.messageBody && args.messageBody.trim()) {
-    await sendText(args.phoneE164, interpolateTokens(args.messageBody, tokens));
-  }
-
   return markWhatsapp(
     args.submissionId,
-    primary.ok ? "SENT" : "FAILED",
-    primary.ok ? null : primary.error,
+    result.ok ? "SENT" : "FAILED",
+    result.ok ? null : result.error,
   );
 }
 
