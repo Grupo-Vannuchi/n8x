@@ -3,6 +3,12 @@
 #   docker compose up -d      # start
 #   npm run db:migrate        # apply schema
 #   npm run db:seed           # load demo content + admin user
+#
+# Fixed project name so the data volume is always `n8x-marketing_agency-pgdata`,
+# regardless of the folder name. Without this, `docker compose up` would derive
+# the project from the directory and attach an empty volume.
+name: n8x-marketing
+
 services:
   postgres:
     image: postgres:17-alpine
