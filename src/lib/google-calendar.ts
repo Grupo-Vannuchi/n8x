@@ -218,7 +218,7 @@ export async function getAvailableSlots(
 }
 
 export type BookResult =
-  | { ok: true; eventId: string }
+  | { ok: true; eventId: string; meetLink: string | null }
   | { ok: false; error: "not_configured" | "slot_taken" | "unknown" };
 
 /** Re-check availability then create the calendar event. */
@@ -244,6 +244,8 @@ export async function bookMeeting(
     const calendar = google.calendar({ version: "v3", auth: ctx.client });
     const res = await calendar.events.insert({
       calendarId: ctx.calendarId,
+      // Required for Google to provision a Meet link via createRequest.
+      conferenceDataVersion: 1,
       requestBody: {
         summary: `Reunião — ${attendee.name}`,
         description: [
@@ -254,9 +256,24 @@ export async function bookMeeting(
         ].join("\n"),
         start: { dateTime: start.toISOString() },
         end: { dateTime: end.toISOString() },
+        conferenceData: {
+          createRequest: {
+            requestId: crypto.randomUUID(),
+            conferenceSolutionKey: { type: "hangoutsMeet" },
+          },
+        },
       },
     });
-    return { ok: true, eventId: res.data.id ?? "" };
+
+    // The generated Google Meet URL (hangoutLink, or the video entry point).
+    const meetLink =
+      res.data.hangoutLink ??
+      res.data.conferenceData?.entryPoints?.find(
+        (e) => e.entryPointType === "video",
+      )?.uri ??
+      null;
+
+    return { ok: true, eventId: res.data.id ?? "", meetLink };
   } catch (error) {
     console.error("Failed to create calendar event", error);
     return { ok: false, error: "unknown" };

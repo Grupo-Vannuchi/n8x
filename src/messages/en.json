@@ -673,6 +673,7 @@
       "endingsCount": "{count, plural, one {# ending} other {# endings}}",
       "type": "Funnel type",
       "meetingHint": "Scheduling integrated with Google Calendar.",
+      "meetingLinkHint": "Tip: use '{LINK}', '{DATE}' and '{TIME}' in the completion message to send the meeting's link, date and time.",
       "manageGoogle": "Manage Google connection",
       "meetingDuration": "Duration (minutes)",
       "meetingDaysAhead": "Days ahead available",

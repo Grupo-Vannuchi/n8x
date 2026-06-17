@@ -673,6 +673,7 @@
       "endingsCount": "{count, plural, one {# final} other {# finais}}",
       "type": "Tipo de funil",
       "meetingHint": "Agendamento integrado ao Google Agenda.",
+      "meetingLinkHint": "Dica: use '{LINK}', '{DATA}' e '{HORA}' na mensagem de conclusão para enviar o link do Meet, a data e o horário da reunião.",
       "manageGoogle": "Gerenciar conexão Google",
       "meetingDuration": "Duração (minutos)",
       "meetingDaysAhead": "Dias à frente disponíveis",

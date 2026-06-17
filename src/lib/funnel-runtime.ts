@@ -28,12 +28,18 @@ export type FunnelLeadValues = {
   role?: string;
   phone?: string;
   email?: string;
+  /** Google Meet link of a booked meeting, for the `{LINK}` token. */
+  link?: string;
+  /** Booked meeting date / time (pre-formatted in the funnel locale + timezone). */
+  date?: string;
+  time?: string;
 };
 
 /**
- * Replace `{NOME}`/`{NAME}` and `{CARGO}`/`{ROLE}` tokens (case-insensitive) in a
- * bot/message string with the visitor's captured values. Unknown/empty tokens
- * collapse to an empty string so a half-filled funnel never shows raw braces.
+ * Replace tokens (case-insensitive) in a bot/message string with the visitor's
+ * captured values: `{NOME}`/`{NAME}`, `{CARGO}`/`{ROLE}`, `{LINK}`,
+ * `{DATA}`/`{DATE}`, `{HORA}`/`{TIME}`. Unknown/empty tokens collapse to an empty
+ * string so a half-filled funnel never shows raw braces.
  */
 export function interpolateTokens(
   text: string,
@@ -41,7 +47,10 @@ export function interpolateTokens(
 ): string {
   return text
     .replace(/\{\s*(nome|name)\s*\}/gi, values.name?.trim() ?? "")
-    .replace(/\{\s*(cargo|role)\s*\}/gi, values.role?.trim() ?? "");
+    .replace(/\{\s*(cargo|role)\s*\}/gi, values.role?.trim() ?? "")
+    .replace(/\{\s*link\s*\}/gi, values.link?.trim() ?? "")
+    .replace(/\{\s*(data|date)\s*\}/gi, values.date?.trim() ?? "")
+    .replace(/\{\s*(hora|time)\s*\}/gi, values.time?.trim() ?? "");
 }
 
 /**

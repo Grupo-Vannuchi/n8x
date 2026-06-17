@@ -535,6 +535,7 @@ export function FunnelForm({
                       <p className="text-xs text-muted-foreground">
                         {t("meetingTimezone")}: America/Sao_Paulo
                       </p>
+                      <p className="text-xs text-brand">{t("meetingLinkHint")}</p>
                     </div>
                   ) : null}
 

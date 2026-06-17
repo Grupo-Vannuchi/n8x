@@ -69,6 +69,7 @@ export async function submitFunnel(
     // records the lead (no event).
     let meetingStartAt: Date | null = null;
     let googleEventId: string | null = null;
+    let meetLink: string | null = null;
     if (ending.type === "MEETING" && data.meetingStartAt) {
       const booking = await bookMeeting(ending, data.meetingStartAt, {
         name: data.name,
@@ -78,6 +79,7 @@ export async function submitFunnel(
       if (booking.ok) {
         meetingStartAt = new Date(data.meetingStartAt);
         googleEventId = booking.eventId;
+        meetLink = booking.meetLink;
       } else if (booking.error === "slot_taken") {
         return { ok: false, error: "slot_taken" };
       }
@@ -102,11 +104,31 @@ export async function submitFunnel(
     });
 
     // WhatsApp is best-effort and must never fail the submission.
+    // Pre-format the booked date/time in the ending's timezone + funnel locale
+    // for the {DATA} / {HORA} tokens.
+    const tz = ending.meetingTimezone ?? "America/Sao_Paulo";
+    const meetingDate = meetingStartAt
+      ? new Intl.DateTimeFormat(funnel.locale, {
+          dateStyle: "long",
+          timeZone: tz,
+        }).format(meetingStartAt)
+      : "";
+    const meetingTime = meetingStartAt
+      ? new Intl.DateTimeFormat(funnel.locale, {
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: tz,
+        }).format(meetingStartAt)
+      : "";
+
     await deliverWhatsapp({
       submissionId: submission.id,
       phoneE164,
       name: data.name,
       role: data.role,
+      link: meetLink,
+      date: meetingDate,
+      time: meetingTime,
       completionMessage: ending.completionMessage,
     });
 
@@ -152,9 +174,18 @@ async function deliverWhatsapp(args: {
   phoneE164: string | null;
   name: string;
   role?: string;
+  link?: string | null;
+  date?: string;
+  time?: string;
   completionMessage: string;
 }): Promise<void> {
-  const tokens = { name: args.name, role: args.role };
+  const tokens = {
+    name: args.name,
+    role: args.role,
+    link: args.link ?? "",
+    date: args.date ?? "",
+    time: args.time ?? "",
+  };
 
   if (!args.phoneE164) return markWhatsapp(args.submissionId, "FAILED", "no_phone");
   if (!isEvolutionConfigured())
