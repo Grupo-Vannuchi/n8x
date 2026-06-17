@@ -384,16 +384,26 @@ export const getClients = unstable_cache(
 
 /** A funnel reduced to what the public runner needs (no server-only secrets like
  * the completion/message bodies, which are sent server-side, never exposed). */
+export type FunnelEndingView = {
+  key: string;
+  type: "MEETING" | "BONUS" | "MESSAGE";
+  bonusUrl: string | null;
+  bonusButtonLabel: string | null;
+};
+
 export type FunnelRunView = {
   id: string;
   slug: string;
   locale: string;
-  type: "MEETING" | "BONUS" | "MESSAGE";
   defaultBlock: FunnelDefaultStep[];
-  questions: { id: string; prompt: string; options: string[] }[];
-  bonusUrl: string | null;
-  bonusButtonLabel: string | null;
-  meetingDurationMinutes: number;
+  questions: {
+    key: string;
+    prompt: string;
+    options: { label: string; next: string }[];
+  }[];
+  /** Endings in order; the first is the default/fallback. Completion messages
+   * and meeting config stay server-side and are NOT exposed here. */
+  endings: FunnelEndingView[];
 };
 
 /** A published funnel by slug, matched to its own (single) locale. */
@@ -401,23 +411,31 @@ export const getPublishedFunnelBySlug = unstable_cache(
   async (locale: Locale, slug: string): Promise<FunnelRunView | null> => {
     const f = await prisma.funnel.findFirst({
       where: { slug, status: "PUBLISHED", locale },
-      include: { questions: { orderBy: { order: "asc" } } },
+      include: {
+        questions: { orderBy: { order: "asc" } },
+        endings: { orderBy: { order: "asc" } },
+      },
     });
-    if (!f) return null;
+    if (!f || f.endings.length === 0) return null;
     return {
       id: f.id,
       slug: f.slug,
       locale: f.locale,
-      type: f.type,
       defaultBlock: (f.defaultBlock as FunnelDefaultStep[] | null) ?? [],
       questions: f.questions.map((q) => ({
-        id: q.id,
+        key: q.key,
         prompt: q.prompt,
-        options: q.options,
+        options: q.options.map((label, i) => ({
+          label,
+          next: q.optionNext?.[i] ?? "",
+        })),
       })),
-      bonusUrl: f.bonusUrl,
-      bonusButtonLabel: f.bonusButtonLabel,
-      meetingDurationMinutes: f.meetingDurationMinutes ?? 30,
+      endings: f.endings.map((e) => ({
+        key: e.key,
+        type: e.type,
+        bonusUrl: e.bonusUrl,
+        bonusButtonLabel: e.bonusButtonLabel,
+      })),
     };
   },
   ["funnels", "detail"],

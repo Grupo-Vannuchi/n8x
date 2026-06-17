@@ -22,24 +22,14 @@ function revalidateFunnels(): void {
   updateTag(tags.funnels);
 }
 
-/** Scalar/JSON funnel columns shared by create and update (questions are separate). */
+/** Scalar/JSON funnel columns shared by create and update (relations are separate). */
 function toScalarData(input: FunnelInput) {
   return {
     slug: input.slug,
     locale: input.locale,
     name: input.name,
-    type: input.type,
     status: input.status,
     defaultBlock: input.defaultBlock as unknown as Prisma.InputJsonValue,
-    completionMessage: input.completionMessage,
-    meetingDurationMinutes: input.meetingDurationMinutes,
-    meetingSlotStartHour: input.meetingSlotStartHour,
-    meetingSlotEndHour: input.meetingSlotEndHour,
-    meetingDaysAhead: input.meetingDaysAhead,
-    meetingTimezone: input.meetingTimezone,
-    bonusUrl: input.bonusUrl || null,
-    bonusButtonLabel: input.bonusButtonLabel || null,
-    messageBody: input.messageBody || null,
   };
 }
 
@@ -47,8 +37,28 @@ function toScalarData(input: FunnelInput) {
 function questionsCreate(input: FunnelInput) {
   return input.questions.map((q, i) => ({
     order: i,
+    key: q.key,
     prompt: q.prompt,
     options: q.options,
+    optionNext: q.optionNext,
+  }));
+}
+
+/** Named endings as nested-create rows, order taken from array position. */
+function endingsCreate(input: FunnelInput) {
+  return input.endings.map((e, i) => ({
+    order: i,
+    key: e.key,
+    name: e.name,
+    type: e.type,
+    completionMessage: e.completionMessage,
+    meetingDurationMinutes: e.meetingDurationMinutes,
+    meetingSlotStartHour: e.meetingSlotStartHour,
+    meetingSlotEndHour: e.meetingSlotEndHour,
+    meetingDaysAhead: e.meetingDaysAhead,
+    meetingTimezone: e.meetingTimezone,
+    bonusUrl: e.bonusUrl || null,
+    bonusButtonLabel: e.bonusButtonLabel || null,
   }));
 }
 
@@ -67,6 +77,7 @@ export async function createFunnel(
       data: {
         ...toScalarData(parsed.data),
         questions: { create: questionsCreate(parsed.data) },
+        endings: { create: endingsCreate(parsed.data) },
       },
     });
     revalidateFunnels();
@@ -97,11 +108,13 @@ export async function updateFunnel(
   try {
     await prisma.$transaction([
       prisma.funnelQuestion.deleteMany({ where: { funnelId: id } }),
+      prisma.funnelEnding.deleteMany({ where: { funnelId: id } }),
       prisma.funnel.update({
         where: { id },
         data: {
           ...toScalarData(parsed.data),
           questions: { create: questionsCreate(parsed.data) },
+          endings: { create: endingsCreate(parsed.data) },
         },
       }),
     ]);

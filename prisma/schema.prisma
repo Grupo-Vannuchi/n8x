@@ -229,24 +229,49 @@ enum WhatsappStatus {
 }
 
 /// A conversational lead-capture quiz, shared via direct link. Single-language.
+/// The ending (type + WhatsApp message + config) lives in `endings`: a funnel
+/// can have several, and branching options route to a specific one. The first
+/// ending (lowest `order`) is the default/fallback for the straight-through path.
 model Funnel {
   id     String       @id @default(cuid())
   slug   String       @unique
   locale String       @default("pt") // "pt" | "en", chosen at creation
   name   String // internal admin label
-  type   FunnelType
   status FunnelStatus @default(DRAFT)
 
   /// Editable snapshot of the standard lead-capture opening (FunnelDefaultStep[]),
   /// copied from the global FunnelDefaultTemplate at creation and overridable.
   defaultBlock Json @default("[]")
 
-  /// Personalized WhatsApp sent on completion. Supports {NOME} / {CARGO} tokens.
+  questions   FunnelQuestion[]
+  endings     FunnelEnding[]
+  submissions FunnelSubmission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@map("funnels")
+}
+
+/// A named ending of a funnel. Branch options route to one of these by `key`;
+/// each carries its own type, WhatsApp message and type-specific config.
+model FunnelEnding {
+  id       String     @id @default(cuid())
+  funnelId String
+  funnel   Funnel     @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  order    Int        @default(0)
+  /// Stable identifier within the funnel, used as a branch target.
+  key      String     @default("")
+  name     String // admin label
+  type     FunnelType
+
+  /// Personalized WhatsApp sent when this ending is reached. Supports {NOME}/{CARGO}.
   completionMessage String
 
   // --- MEETING config ---
   meetingDurationMinutes Int?    @default(30)
-  meetingSlotStartHour   Int?    @default(9) // local time, meetingTimezone
+  meetingSlotStartHour   Int?    @default(9)
   meetingSlotEndHour     Int?    @default(18)
   meetingDaysAhead       Int?    @default(14)
   meetingTimezone        String? @default("America/Sao_Paulo")
@@ -255,17 +280,11 @@ model Funnel {
   bonusUrl         String? // Google Drive PDF link
   bonusButtonLabel String?
 
-  // --- MESSAGE config ---
-  messageBody String? // WhatsApp body sent at the end (MESSAGE type)
-
-  questions   FunnelQuestion[]
-  submissions FunnelSubmission[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([status, type])
-  @@map("funnels")
+  @@index([funnelId, order])
+  @@map("funnel_endings")
 }
 
 /// A custom single-choice (buttons) question that runs after the default block.
@@ -274,8 +293,14 @@ model FunnelQuestion {
   funnelId String
   funnel   Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
   order    Int      @default(0)
+  /// Stable identifier within the funnel, used as a branch target. Survives edits
+  /// (the DB `id` is regenerated on save, so branching can't rely on it).
+  key      String   @default("")
   prompt   String
   options  String[] @default([]) // ordered single-choice labels
+  /// Per-option branch target, aligned with `options`: a question `key`, an
+  /// ending `key`, "END" (the default ending), or "" (the next question in order).
+  optionNext String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -301,6 +326,8 @@ model FunnelSubmission {
   answers Json @default("[]")
 
   outcome FunnelOutcome @default(COMPLETED)
+  /// Name of the ending the lead reached (for the admin inbox).
+  endingName String?
 
   // MEETING
   meetingStartAt DateTime?

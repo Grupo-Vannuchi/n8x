@@ -4,11 +4,10 @@ import type { FunnelInput } from "@/lib/validations/funnel";
 
 /**
  * Bridges the admin funnel form and the stored funnel shape. The form works with
- * flat, text-friendly values (numbers as strings; option lists as `{value}`
- * objects so react-hook-form `useFieldArray` can track them). `formToInput` maps
- * those to the structured `FunnelInput` the server validates; `funnelToForm` does
- * the reverse to pre-fill the edit form. No "use client"/"server-only" so both
- * sides can import it.
+ * flat, text-friendly values (numbers as strings; option lists as objects so
+ * react-hook-form `useFieldArray` can track them). `formToInput` maps those to the
+ * structured `FunnelInput` the server validates; `funnelToForm` does the reverse.
+ * No "use client"/"server-only" so both sides can import it.
  */
 
 /** A default-block step in form-friendly shape (all fields present). */
@@ -19,21 +18,20 @@ export type FunnelFormStep = {
   prompt: string;
 };
 
-/** A custom question in form-friendly shape (options as objects for field array). */
+/** A custom question in form-friendly shape. `key` is the stable branch id; each
+ * option's `next` is its branch target (a question/ending key, "END", or ""). */
 export type FunnelFormQuestion = {
+  key: string;
   prompt: string;
-  options: { value: string }[];
+  options: { value: string; next: string }[];
 };
 
-export type FunnelFormValues = {
-  slug: string;
-  locale: Locale;
+/** A named ending in form-friendly shape (numbers as strings). */
+export type FunnelFormEnding = {
+  key: string;
   name: string;
   type: "MEETING" | "BONUS" | "MESSAGE";
-  status: "DRAFT" | "PUBLISHED";
-  defaultBlock: FunnelFormStep[];
   completionMessage: string;
-  questions: FunnelFormQuestion[];
   meetingDurationMinutes: string;
   meetingSlotStartHour: string;
   meetingSlotEndHour: string;
@@ -41,10 +39,19 @@ export type FunnelFormValues = {
   meetingTimezone: string;
   bonusUrl: string;
   bonusButtonLabel: string;
-  messageBody: string;
 };
 
-/** Blank steps/questions for the form's "add" buttons. */
+export type FunnelFormValues = {
+  slug: string;
+  locale: Locale;
+  name: string;
+  status: "DRAFT" | "PUBLISHED";
+  defaultBlock: FunnelFormStep[];
+  questions: FunnelFormQuestion[];
+  endings: FunnelFormEnding[];
+};
+
+/** Blank steps/questions/endings for the form's "add" buttons. */
 export function blankBotStep(): FunnelFormStep {
   return { kind: "bot", text: "", field: "name", prompt: "" };
 }
@@ -52,7 +59,29 @@ export function blankInputStep(): FunnelFormStep {
   return { kind: "input", text: "", field: "name", prompt: "" };
 }
 export function blankQuestion(): FunnelFormQuestion {
-  return { prompt: "", options: [{ value: "" }, { value: "" }] };
+  return {
+    key: crypto.randomUUID(),
+    prompt: "",
+    options: [
+      { value: "", next: "" },
+      { value: "", next: "" },
+    ],
+  };
+}
+export function blankEnding(): FunnelFormEnding {
+  return {
+    key: crypto.randomUUID(),
+    name: "",
+    type: "MESSAGE",
+    completionMessage: "",
+    meetingDurationMinutes: "30",
+    meetingSlotStartHour: "9",
+    meetingSlotEndHour: "18",
+    meetingDaysAhead: "14",
+    meetingTimezone: "America/Sao_Paulo",
+    bonusUrl: "",
+    bonusButtonLabel: "",
+  };
 }
 
 /** Read a stored default-block JSON value into form steps. */
@@ -63,7 +92,7 @@ export function readSteps(value: unknown): FunnelFormStep[] {
     if (step.kind === "input") {
       const field = step.field;
       return {
-        kind: "input",
+        kind: "input" as const,
         text: "",
         field:
           field === "role" || field === "phone" || field === "email"
@@ -73,9 +102,9 @@ export function readSteps(value: unknown): FunnelFormStep[] {
       };
     }
     return {
-      kind: "bot",
+      kind: "bot" as const,
       text: typeof step.text === "string" ? step.text : "",
-      field: "name",
+      field: "name" as const,
       prompt: "",
     };
   });
@@ -94,7 +123,7 @@ export function stepsToStored(steps: FunnelFormStep[]): FunnelDefaultStep[] {
   return steps.map(stepToStored);
 }
 
-/** Blank form for the "new funnel" page; default block pre-filled from template. */
+/** Blank form for the "new funnel" page; default block pre-filled, one ending. */
 export function emptyFunnelForm(
   templateSteps: FunnelDefaultStep[],
   locale: Locale,
@@ -103,30 +132,33 @@ export function emptyFunnelForm(
     slug: "",
     locale,
     name: "",
-    type: "MESSAGE",
     status: "DRAFT",
     defaultBlock: readSteps(templateSteps),
-    completionMessage: "",
     questions: [],
-    meetingDurationMinutes: "30",
-    meetingSlotStartHour: "9",
-    meetingSlotEndHour: "18",
-    meetingDaysAhead: "14",
-    meetingTimezone: "America/Sao_Paulo",
-    bonusUrl: "",
-    bonusButtonLabel: "",
-    messageBody: "",
+    endings: [blankEnding()],
   };
 }
 
-/** Stored funnel row (the JSON/nullable fields arrive loosely typed). */
+/** Stored funnel row (defaultBlock arrives as opaque JSON). */
 type FunnelRow = {
   slug: string;
   locale: string;
   name: string;
-  type: "MEETING" | "BONUS" | "MESSAGE";
   status: "DRAFT" | "PUBLISHED";
   defaultBlock: unknown;
+};
+
+type QuestionRow = {
+  key: string;
+  prompt: string;
+  options: string[];
+  optionNext: string[];
+};
+
+type EndingRow = {
+  key: string;
+  name: string;
+  type: "MEETING" | "BONUS" | "MESSAGE";
   completionMessage: string;
   meetingDurationMinutes: number | null;
   meetingSlotStartHour: number | null;
@@ -135,36 +167,45 @@ type FunnelRow = {
   meetingTimezone: string | null;
   bonusUrl: string | null;
   bonusButtonLabel: string | null;
-  messageBody: string | null;
 };
 
-type QuestionRow = { prompt: string; options: string[] };
+function endingToForm(e: EndingRow): FunnelFormEnding {
+  return {
+    key: e.key || crypto.randomUUID(),
+    name: e.name,
+    type: e.type,
+    completionMessage: e.completionMessage,
+    meetingDurationMinutes: String(e.meetingDurationMinutes ?? 30),
+    meetingSlotStartHour: String(e.meetingSlotStartHour ?? 9),
+    meetingSlotEndHour: String(e.meetingSlotEndHour ?? 18),
+    meetingDaysAhead: String(e.meetingDaysAhead ?? 14),
+    meetingTimezone: e.meetingTimezone ?? "America/Sao_Paulo",
+    bonusUrl: e.bonusUrl ?? "",
+    bonusButtonLabel: e.bonusButtonLabel ?? "",
+  };
+}
 
-/** Pre-fill the form from a stored funnel + its questions (edit page). */
+/** Pre-fill the form from a stored funnel + its questions + endings (edit page). */
 export function funnelToForm(
   funnel: FunnelRow,
   questions: QuestionRow[],
+  endings: EndingRow[],
 ): FunnelFormValues {
   return {
     slug: funnel.slug,
     locale: resolveLocale(funnel.locale),
     name: funnel.name,
-    type: funnel.type,
     status: funnel.status,
     defaultBlock: readSteps(funnel.defaultBlock),
-    completionMessage: funnel.completionMessage,
     questions: questions.map((q) => ({
+      key: q.key || crypto.randomUUID(),
       prompt: q.prompt,
-      options: q.options.map((value) => ({ value })),
+      options: q.options.map((value, i) => ({
+        value,
+        next: q.optionNext?.[i] ?? "",
+      })),
     })),
-    meetingDurationMinutes: String(funnel.meetingDurationMinutes ?? 30),
-    meetingSlotStartHour: String(funnel.meetingSlotStartHour ?? 9),
-    meetingSlotEndHour: String(funnel.meetingSlotEndHour ?? 18),
-    meetingDaysAhead: String(funnel.meetingDaysAhead ?? 14),
-    meetingTimezone: funnel.meetingTimezone ?? "America/Sao_Paulo",
-    bonusUrl: funnel.bonusUrl ?? "",
-    bonusButtonLabel: funnel.bonusButtonLabel ?? "",
-    messageBody: funnel.messageBody ?? "",
+    endings: endings.length ? endings.map(endingToForm) : [blankEnding()],
   };
 }
 
@@ -174,23 +215,34 @@ export function formToInput(values: FunnelFormValues): FunnelInput {
     slug: values.slug.trim(),
     locale: values.locale,
     name: values.name.trim(),
-    type: values.type,
     status: values.status,
     defaultBlock: stepsToStored(values.defaultBlock),
-    completionMessage: values.completionMessage.trim(),
     questions: values.questions
-      .map((q) => ({
-        prompt: q.prompt.trim(),
-        options: q.options.map((o) => o.value.trim()).filter(Boolean),
-      }))
+      .map((q) => {
+        // Drop blank options, keeping options[] and optionNext[] aligned.
+        const opts = q.options
+          .map((o) => ({ label: o.value.trim(), next: o.next }))
+          .filter((o) => o.label.length > 0);
+        return {
+          key: q.key,
+          prompt: q.prompt.trim(),
+          options: opts.map((o) => o.label),
+          optionNext: opts.map((o) => o.next),
+        };
+      })
       .filter((q) => q.prompt.length > 0),
-    meetingDurationMinutes: Number(values.meetingDurationMinutes),
-    meetingSlotStartHour: Number(values.meetingSlotStartHour),
-    meetingSlotEndHour: Number(values.meetingSlotEndHour),
-    meetingDaysAhead: Number(values.meetingDaysAhead),
-    meetingTimezone: values.meetingTimezone.trim(),
-    bonusUrl: values.bonusUrl.trim(),
-    bonusButtonLabel: values.bonusButtonLabel.trim(),
-    messageBody: values.messageBody.trim(),
+    endings: values.endings.map((e) => ({
+      key: e.key,
+      name: e.name.trim(),
+      type: e.type,
+      completionMessage: e.completionMessage.trim(),
+      meetingDurationMinutes: Number(e.meetingDurationMinutes),
+      meetingSlotStartHour: Number(e.meetingSlotStartHour),
+      meetingSlotEndHour: Number(e.meetingSlotEndHour),
+      meetingDaysAhead: Number(e.meetingDaysAhead),
+      meetingTimezone: e.meetingTimezone.trim(),
+      bonusUrl: e.bonusUrl.trim(),
+      bonusButtonLabel: e.bonusButtonLabel.trim(),
+    })),
   };
 }

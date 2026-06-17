@@ -29,9 +29,9 @@ function outcomeFor(type: "MEETING" | "BONUS" | "MESSAGE", booked: boolean) {
 
 /**
  * Persist a completed funnel run. Public (no auth) — like `submitContactLead`.
- * The submission is the durable record and is written first; type-specific
- * outcomes (bonus/message/meeting) and the WhatsApp completion message are
- * layered on in later phases and must never block this persistence.
+ * The reached ending (resolved by `endingKey`, falling back to the default/first)
+ * drives the outcome, the meeting booking and the WhatsApp completion message.
+ * The submission is the durable record; WhatsApp never blocks persistence.
  */
 export async function submitFunnel(
   input: FunnelSubmissionInput,
@@ -46,8 +46,11 @@ export async function submitFunnel(
   try {
     const funnel = await prisma.funnel.findFirst({
       where: { id: data.funnelId, status: "PUBLISHED" },
+      include: { endings: { orderBy: { order: "asc" } } },
     });
-    if (!funnel) return { ok: false, error: "not_found" };
+    if (!funnel || funnel.endings.length === 0) {
+      return { ok: false, error: "not_found" };
+    }
 
     // Idempotency: a repeated token (double-submit/retry) is a no-op success.
     const existing = await prisma.funnelSubmission.findUnique({
@@ -55,15 +58,19 @@ export async function submitFunnel(
     });
     if (existing) return { ok: true };
 
+    // Resolve the reached ending; fall back to the default (first) ending.
+    const ending =
+      funnel.endings.find((e) => e.key === data.endingKey) ?? funnel.endings[0];
+
     const phoneE164 = normalizePhoneBR(data.phone);
 
-    // MEETING funnels book the calendar event BEFORE persisting: a taken slot
-    // must let the visitor re-pick (no submission), but a missing Google
-    // connection still records the lead (COMPLETED, no event).
+    // A MEETING ending books the event BEFORE persisting: a taken slot must let
+    // the visitor re-pick (no submission); a missing Google connection still
+    // records the lead (no event).
     let meetingStartAt: Date | null = null;
     let googleEventId: string | null = null;
-    if (funnel.type === "MEETING" && data.meetingStartAt) {
-      const booking = await bookMeeting(funnel, data.meetingStartAt, {
+    if (ending.type === "MEETING" && data.meetingStartAt) {
+      const booking = await bookMeeting(ending, data.meetingStartAt, {
         name: data.name,
         phone: phoneE164,
         email: data.email || null,
@@ -74,10 +81,8 @@ export async function submitFunnel(
       } else if (booking.error === "slot_taken") {
         return { ok: false, error: "slot_taken" };
       }
-      // not_configured / unknown → fall through, record the lead without an event.
     }
 
-    // The submission is the durable record — write it first, before any send.
     const submission = await prisma.funnelSubmission.create({
       data: {
         funnelId: funnel.id,
@@ -87,7 +92,8 @@ export async function submitFunnel(
         phoneE164,
         email: data.email || null,
         answers: data.answers as unknown as Prisma.InputJsonValue,
-        outcome: outcomeFor(funnel.type, Boolean(googleEventId)),
+        outcome: outcomeFor(ending.type, Boolean(googleEventId)),
+        endingName: ending.name,
         meetingStartAt,
         googleEventId,
         submissionToken: data.submissionToken,
@@ -95,14 +101,13 @@ export async function submitFunnel(
       },
     });
 
-    // WhatsApp is best-effort and must never fail the submission. The single
-    // completion message is the funnel's message (incl. MESSAGE-type funnels).
+    // WhatsApp is best-effort and must never fail the submission.
     await deliverWhatsapp({
       submissionId: submission.id,
       phoneE164,
       name: data.name,
       role: data.role,
-      completionMessage: funnel.completionMessage,
+      completionMessage: ending.completionMessage,
     });
 
     return { ok: true };
@@ -121,16 +126,22 @@ export async function submitFunnel(
 
 export type FunnelSlotsResult = { configured: boolean; slots: MeetingSlot[] };
 
-/** Available meeting slots for a MEETING funnel (live — not cached). */
+/** Available meeting slots for a funnel's MEETING ending (live — not cached). */
 export async function getFunnelSlots(
   funnelId: string,
   locale: string,
+  endingKey?: string,
 ): Promise<FunnelSlotsResult> {
   const funnel = await prisma.funnel.findFirst({
-    where: { id: funnelId, status: "PUBLISHED", type: "MEETING" },
+    where: { id: funnelId, status: "PUBLISHED" },
+    include: { endings: { orderBy: { order: "asc" } } },
   });
-  if (!funnel || !isGoogleConfigured()) return { configured: false, slots: [] };
-  const slots = await getAvailableSlots(funnel, locale);
+  if (!funnel || funnel.endings.length === 0 || !isGoogleConfigured()) {
+    return { configured: false, slots: [] };
+  }
+  const ending = funnel.endings.find((e) => e.key === endingKey) ?? funnel.endings[0];
+  if (ending.type !== "MEETING") return { configured: false, slots: [] };
+  const slots = await getAvailableSlots(ending, locale);
   return { configured: true, slots };
 }
 

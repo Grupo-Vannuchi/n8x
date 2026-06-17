@@ -33,26 +33,26 @@ export const funnelDefaultStepSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
-/** A custom single-choice question (buttons). */
+/** A custom single-choice question (buttons), with per-option branch targets. */
 const funnelQuestionSchema = z.object({
+  key: z.string().trim().min(1).max(60),
   prompt: z.string().trim().min(1).max(2000),
   options: z
     .array(z.string().trim().min(1).max(200))
     .min(2, "Add at least two options")
     .max(12),
+  /** Aligned with `options`: a question key, an ending key, "END", or "" (next). */
+  optionNext: z.array(z.string().trim().max(60)).max(12),
 });
 
-export const funnelSchema = z
+/** A named funnel ending (type + WhatsApp message + type-specific config). */
+const funnelEndingSchema = z
   .object({
-    slug,
-    locale: localeValue,
-    name: z.string().trim().min(1).max(200),
+    key: z.string().trim().min(1).max(60),
+    name: z.string().trim().min(1).max(120),
     type: z.enum(["MEETING", "BONUS", "MESSAGE"]),
-    status: z.enum(["DRAFT", "PUBLISHED"]),
-    defaultBlock: z.array(funnelDefaultStepSchema).min(1, "Add at least one step"),
     completionMessage: z.string().trim().min(1).max(2000),
-    questions: z.array(funnelQuestionSchema).max(30),
-    // MEETING config (always present with sane defaults; only used when MEETING)
+    // MEETING config
     meetingDurationMinutes: z.coerce.number().int().min(5).max(480),
     meetingSlotStartHour: z.coerce.number().int().min(0).max(23),
     meetingSlotEndHour: z.coerce.number().int().min(1).max(24),
@@ -61,15 +61,13 @@ export const funnelSchema = z
     // BONUS config
     bonusUrl: z.union([z.string().trim().url().max(2000), z.literal("")]),
     bonusButtonLabel: z.string().trim().max(120),
-    // MESSAGE config
-    messageBody: z.string().trim().max(2000),
   })
   .superRefine((val, ctx) => {
     if (val.type === "BONUS" && !val.bonusUrl) {
       ctx.addIssue({
         path: ["bonusUrl"],
         code: z.ZodIssueCode.custom,
-        message: "Required for a bonus funnel",
+        message: "Required for a bonus ending",
       });
     }
     if (val.type === "MEETING" && val.meetingSlotEndHour <= val.meetingSlotStartHour) {
@@ -80,6 +78,17 @@ export const funnelSchema = z
       });
     }
   });
+
+export const funnelSchema = z.object({
+  slug,
+  locale: localeValue,
+  name: z.string().trim().min(1).max(200),
+  status: z.enum(["DRAFT", "PUBLISHED"]),
+  defaultBlock: z.array(funnelDefaultStepSchema).min(1, "Add at least one step"),
+  questions: z.array(funnelQuestionSchema).max(30),
+  // The first ending is the default/fallback for the straight-through path.
+  endings: z.array(funnelEndingSchema).min(1, "Add at least one ending").max(20),
+});
 
 export type FunnelInput = z.infer<typeof funnelSchema>;
 

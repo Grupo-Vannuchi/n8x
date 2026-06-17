@@ -3,6 +3,7 @@ import type {
   Client,
   Funnel,
   FunnelDefaultTemplate,
+  FunnelEnding,
   FunnelQuestion,
   FunnelSubmission,
   GoogleAccount,
@@ -150,23 +151,32 @@ export async function getStatById(id: string): Promise<Stat | null> {
 // Funnels
 // ---------------------------------------------------------------------------
 
-/** All funnels for the admin list, newest first. */
+/** All funnels for the admin list, newest first, with their endings. */
 export async function getAdminFunnels(): Promise<
-  (Funnel & { _count: { submissions: number } })[]
+  (Funnel & { endings: FunnelEnding[]; _count: { submissions: number } })[]
 > {
   return prisma.funnel.findMany({
     orderBy: [{ createdAt: "desc" }],
-    include: { _count: { select: { submissions: true } } },
+    include: {
+      endings: { orderBy: { order: "asc" } },
+      _count: { select: { submissions: true } },
+    },
   });
 }
 
-/** A funnel with its ordered questions, for the edit page. */
+/** A funnel with its ordered questions + endings, for the edit page. */
 export async function getFunnelById(
   id: string,
-): Promise<(Funnel & { questions: FunnelQuestion[] }) | null> {
+): Promise<
+  | (Funnel & { questions: FunnelQuestion[]; endings: FunnelEnding[] })
+  | null
+> {
   return prisma.funnel.findUnique({
     where: { id },
-    include: { questions: { orderBy: { order: "asc" } } },
+    include: {
+      questions: { orderBy: { order: "asc" } },
+      endings: { orderBy: { order: "asc" } },
+    },
   });
 }
 

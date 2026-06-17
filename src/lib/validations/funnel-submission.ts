@@ -7,6 +7,8 @@ import { z } from "zod";
  */
 export const funnelSubmissionSchema = z.object({
   funnelId: z.string().min(1).max(40),
+  /** Key of the ending the lead reached (resolved server-side; falls back to the default). */
+  endingKey: z.string().max(60).optional(),
   submissionToken: z.string().min(8).max(100),
   name: z.string().trim().min(1).max(200),
   role: z.string().trim().max(200).optional(),
