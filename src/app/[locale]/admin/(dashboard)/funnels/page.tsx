@@ -78,7 +78,7 @@ export default async function AdminFunnelsPage({
                       "rounded-full px-2 py-0.5 text-xs font-medium",
                       funnel.status === "PUBLISHED"
                         ? "bg-emerald-500/10 text-emerald-600"
-                        : "bg-muted text-muted-foreground",
+                        : "bg-amber-500/10 text-amber-600",
                     )}
                   >
                     {funnel.status === "PUBLISHED" ? t("statusPublished") : t("statusDraft")}
@@ -90,15 +90,17 @@ export default async function AdminFunnelsPage({
               </div>
 
               <div className="flex shrink-0 items-center gap-1">
-                <a
-                  href={funnelPath(funnel.locale, funnel.slug)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <ExternalLink className="size-4" />
-                  {t("openFunnel")}
-                </a>
+                {funnel.status === "PUBLISHED" ? (
+                  <a
+                    href={funnelPath(funnel.locale, funnel.slug)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <ExternalLink className="size-4" />
+                    {t("openFunnel")}
+                  </a>
+                ) : null}
                 <Link
                   href={`/admin/funnels/${funnel.id}/submissions`}
                   className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"

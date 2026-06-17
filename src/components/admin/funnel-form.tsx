@@ -470,8 +470,10 @@ export function FunnelForm({
                       <Label>{t("endingName")}</Label>
                       <Input
                         placeholder={t("endingNamePlaceholder")}
-                        {...register(`endings.${i}.name` as const)}
+                        aria-invalid={Boolean(errors.endings?.[i]?.name)}
+                        {...register(`endings.${i}.name` as const, required)}
                       />
+                      <FieldError>{errors.endings?.[i]?.name?.message}</FieldError>
                     </div>
                     <div>
                       <Label>{t("type")}</Label>
