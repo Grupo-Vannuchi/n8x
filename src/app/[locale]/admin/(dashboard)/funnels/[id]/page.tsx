@@ -47,7 +47,7 @@ export default async function EditFunnelPage({
       <FunnelForm
         mode="edit"
         funnelId={funnel.id}
-        defaultValues={funnelToForm(funnel, funnel.questions)}
+        defaultValues={funnelToForm(funnel, funnel.questions, funnel.endings)}
         templateSteps={steps}
       />
     </div>

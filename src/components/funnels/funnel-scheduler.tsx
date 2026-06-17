@@ -12,11 +12,13 @@ import type { MeetingSlot } from "@/lib/google-calendar";
 
 export function FunnelScheduler({
   funnelId,
+  endingKey,
   retryNotice,
   onConfirm,
   onUnavailable,
 }: {
   funnelId: string;
+  endingKey: string;
   retryNotice: boolean;
   onConfirm: (startISO: string) => void;
   onUnavailable: () => void;
@@ -31,7 +33,7 @@ export function FunnelScheduler({
 
   useEffect(() => {
     let active = true;
-    getFunnelSlots(funnelId, locale).then((res: FunnelSlotsResult) => {
+    getFunnelSlots(funnelId, locale, endingKey).then((res: FunnelSlotsResult) => {
       if (!active) return;
       setLoading(false);
       if (!res.configured || res.slots.length === 0) {

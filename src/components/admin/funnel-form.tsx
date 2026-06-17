@@ -21,6 +21,7 @@ import {
   blankBotStep,
   blankInputStep,
   blankQuestion,
+  blankEnding,
   type FunnelFormValues,
 } from "@/lib/funnel-form";
 import {
@@ -39,10 +40,15 @@ function OptionsEditor({
   control,
   register,
   qIndex,
+  questions,
+  endings,
 }: {
   control: Control<FunnelFormValues>;
   register: UseFormRegister<FunnelFormValues>;
   qIndex: number;
+  /** Live questions + endings lists, to populate each option's branch target. */
+  questions: FunnelFormValues["questions"];
+  endings: FunnelFormValues["endings"];
 }) {
   const t = useTranslations("admin.funnels");
   const { fields, append, remove } = useFieldArray({
@@ -50,28 +56,69 @@ function OptionsEditor({
     name: `questions.${qIndex}.options`,
   });
 
+  // Other questions this option can branch to (exclude self; need a key).
+  const targets = questions
+    .map((q, j) => ({ key: q.key, prompt: q.prompt, j }))
+    .filter((q) => q.j !== qIndex && q.key);
+  const endingTargets = endings
+    .map((e, j) => ({ key: e.key, name: e.name, j }))
+    .filter((e) => e.key);
+
   return (
     <div className="flex flex-col gap-2">
       <Label>{t("options")}</Label>
       {fields.map((field, i) => (
-        <div key={field.id} className="flex items-center gap-2">
-          <Input
-            placeholder={`${t("option")} ${i + 1}`}
-            {...register(`questions.${qIndex}.options.${i}.value` as const)}
-          />
-          <button
-            type="button"
-            onClick={() => remove(i)}
-            aria-label={t("removeOption")}
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-600"
-          >
-            <Trash2 className="size-4" />
-          </button>
+        <div
+          key={field.id}
+          className="flex flex-col gap-2 rounded-lg border border-border bg-card p-2.5"
+        >
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder={`${t("option")} ${i + 1}`}
+              {...register(`questions.${qIndex}.options.${i}.value` as const)}
+            />
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              aria-label={t("removeOption")}
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-600"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+          <label className="flex items-center gap-2 pl-1 text-xs text-muted-foreground">
+            <span className="shrink-0">{t("optionNext")}</span>
+            <select
+              className={cn(selectStyles, "py-1.5 text-xs")}
+              {...register(`questions.${qIndex}.options.${i}.next` as const)}
+            >
+              <option value="">{t("nextDefault")}</option>
+              <option value="END">{t("nextEnd")}</option>
+              {targets.length > 0 ? (
+                <optgroup label={t("sectionQuestions")}>
+                  {targets.map((tg) => (
+                    <option key={tg.key} value={tg.key}>
+                      {tg.prompt || `${t("question")} ${tg.j + 1}`}
+                    </option>
+                  ))}
+                </optgroup>
+              ) : null}
+              {endingTargets.length > 0 ? (
+                <optgroup label={t("sectionEndings")}>
+                  {endingTargets.map((e) => (
+                    <option key={e.key} value={e.key}>
+                      {e.name || `${t("ending")} ${e.j + 1}`}
+                    </option>
+                  ))}
+                </optgroup>
+              ) : null}
+            </select>
+          </label>
         </div>
       ))}
       <button
         type="button"
-        onClick={() => append({ value: "" })}
+        onClick={() => append({ value: "", next: "" })}
         className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-brand transition-colors hover:underline"
       >
         <Plus className="size-4" />
@@ -108,7 +155,10 @@ export function FunnelForm({
 
   const steps = useFieldArray({ control, name: "defaultBlock" });
   const questions = useFieldArray({ control, name: "questions" });
-  const type = watch("type");
+  const endings = useFieldArray({ control, name: "endings" });
+  // Live lists so the branch-target dropdowns and conditional ending config stay in sync.
+  const watchedQuestions = watch("questions") ?? [];
+  const watchedEndings = watch("endings") ?? [];
 
   async function onSubmit(values: FunnelFormValues) {
     setServerError(null);
@@ -339,7 +389,13 @@ export function FunnelForm({
                   <Label>{t("questionPrompt")}</Label>
                   <Input {...register(`questions.${qIndex}.prompt` as const)} />
                 </div>
-                <OptionsEditor control={control} register={register} qIndex={qIndex} />
+                <OptionsEditor
+                  control={control}
+                  register={register}
+                  qIndex={qIndex}
+                  questions={watchedQuestions}
+                  endings={watchedEndings}
+                />
               </div>
             </div>
           ))}
@@ -355,115 +411,182 @@ export function FunnelForm({
         </button>
       </fieldset>
 
-      {/* Type + ending config */}
+      {/* Endings (one or more; the first is the default/fallback) */}
       <fieldset className="rounded-xl border border-border bg-card p-5">
-        <legend className="px-1 text-sm font-semibold">{t("sectionEnding")}</legend>
+        <legend className="px-1 text-sm font-semibold">{t("sectionEndings")}</legend>
+        <p className="mb-4 text-xs text-muted-foreground">{t("endingsHint")}</p>
+
         <div className="flex flex-col gap-4">
-          <div>
-            <Label htmlFor="type">{t("type")}</Label>
-            <select id="type" className={cn(selectStyles)} {...register("type")}>
-              <option value="MEETING">{t("typeMeeting")}</option>
-              <option value="BONUS">{t("typeBonus")}</option>
-              <option value="MESSAGE">{t("typeMessage")}</option>
-            </select>
-          </div>
+          {endings.fields.map((field, i) => {
+            const endingType = watchedEndings[i]?.type ?? "MESSAGE";
+            return (
+              <div
+                key={field.id}
+                className="rounded-lg border border-border bg-background p-4"
+              >
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 text-sm font-medium">
+                    {t("ending")} {i + 1}
+                    {i === 0 ? (
+                      <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
+                        {t("endingDefault")}
+                      </span>
+                    ) : null}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => i > 0 && endings.move(i, i - 1)}
+                      aria-label={t("moveUp")}
+                      className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      <ArrowUp className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        i < endings.fields.length - 1 && endings.move(i, i + 1)
+                      }
+                      aria-label={t("moveDown")}
+                      className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      <ArrowDown className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={endings.fields.length <= 1}
+                      onClick={() => endings.remove(i)}
+                      aria-label={t("removeEnding")}
+                      className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-600 disabled:opacity-40"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                </div>
 
-          {type === "MEETING" ? (
-            <div className="flex flex-col gap-4 rounded-lg border border-border bg-background p-4">
-              <p className="text-xs text-muted-foreground">
-                {t("meetingHint")}{" "}
-                <Link href="/admin/funnels/google" className="text-brand hover:underline">
-                  {t("manageGoogle")}
-                </Link>
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="dur">{t("meetingDuration")}</Label>
-                  <Input
-                    id="dur"
-                    type="number"
-                    inputMode="numeric"
-                    {...register("meetingDurationMinutes")}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="days">{t("meetingDaysAhead")}</Label>
-                  <Input
-                    id="days"
-                    type="number"
-                    inputMode="numeric"
-                    {...register("meetingDaysAhead")}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="sh">{t("meetingStartHour")}</Label>
-                  <Input
-                    id="sh"
-                    type="number"
-                    inputMode="numeric"
-                    {...register("meetingSlotStartHour")}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="eh">{t("meetingEndHour")}</Label>
-                  <Input
-                    id="eh"
-                    type="number"
-                    inputMode="numeric"
-                    aria-invalid={Boolean(errors.meetingSlotEndHour)}
-                    {...register("meetingSlotEndHour")}
-                  />
-                  <FieldError>{errors.meetingSlotEndHour?.message}</FieldError>
+                <div className="flex flex-col gap-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <Label>{t("endingName")}</Label>
+                      <Input
+                        placeholder={t("endingNamePlaceholder")}
+                        {...register(`endings.${i}.name` as const)}
+                      />
+                    </div>
+                    <div>
+                      <Label>{t("type")}</Label>
+                      <select
+                        className={cn(selectStyles)}
+                        {...register(`endings.${i}.type` as const)}
+                      >
+                        <option value="MEETING">{t("typeMeeting")}</option>
+                        <option value="BONUS">{t("typeBonus")}</option>
+                        <option value="MESSAGE">{t("typeMessage")}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {endingType === "MEETING" ? (
+                    <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4">
+                      <p className="text-xs text-muted-foreground">
+                        {t("meetingHint")}{" "}
+                        <Link href="/admin/funnels/google" className="text-brand hover:underline">
+                          {t("manageGoogle")}
+                        </Link>
+                      </p>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <Label>{t("meetingDuration")}</Label>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            {...register(`endings.${i}.meetingDurationMinutes` as const)}
+                          />
+                        </div>
+                        <div>
+                          <Label>{t("meetingDaysAhead")}</Label>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            {...register(`endings.${i}.meetingDaysAhead` as const)}
+                          />
+                        </div>
+                        <div>
+                          <Label>{t("meetingStartHour")}</Label>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            {...register(`endings.${i}.meetingSlotStartHour` as const)}
+                          />
+                        </div>
+                        <div>
+                          <Label>{t("meetingEndHour")}</Label>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            aria-invalid={Boolean(errors.endings?.[i]?.meetingSlotEndHour)}
+                            {...register(`endings.${i}.meetingSlotEndHour` as const)}
+                          />
+                          <FieldError>
+                            {errors.endings?.[i]?.meetingSlotEndHour?.message}
+                          </FieldError>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("meetingTimezone")}: America/Sao_Paulo
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {endingType === "BONUS" ? (
+                    <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4">
+                      <div>
+                        <Label>{t("bonusUrl")}</Label>
+                        <Input
+                          placeholder="https://drive.google.com/..."
+                          aria-invalid={Boolean(errors.endings?.[i]?.bonusUrl)}
+                          {...register(`endings.${i}.bonusUrl` as const)}
+                        />
+                        <FieldError>{errors.endings?.[i]?.bonusUrl?.message}</FieldError>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {t("bonusUrlHint")}
+                        </p>
+                      </div>
+                      <div>
+                        <Label>{t("bonusButtonLabel")}</Label>
+                        <Input {...register(`endings.${i}.bonusButtonLabel` as const)} />
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div>
+                    <Label>{t("completionMessage")}</Label>
+                    <Textarea
+                      className="min-h-24"
+                      aria-invalid={Boolean(errors.endings?.[i]?.completionMessage)}
+                      {...register(`endings.${i}.completionMessage` as const, required)}
+                    />
+                    <FieldError>
+                      {errors.endings?.[i]?.completionMessage?.message}
+                    </FieldError>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t("completionHint")}
+                    </p>
+                  </div>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {t("meetingTimezone")}: America/Sao_Paulo
-              </p>
-            </div>
-          ) : null}
-
-          {type === "BONUS" ? (
-            <div className="flex flex-col gap-4 rounded-lg border border-border bg-background p-4">
-              <div>
-                <Label htmlFor="bonusUrl">{t("bonusUrl")}</Label>
-                <Input
-                  id="bonusUrl"
-                  placeholder="https://drive.google.com/..."
-                  aria-invalid={Boolean(errors.bonusUrl)}
-                  {...register("bonusUrl")}
-                />
-                <FieldError>{errors.bonusUrl?.message}</FieldError>
-                <p className="mt-1 text-xs text-muted-foreground">{t("bonusUrlHint")}</p>
-              </div>
-              <div>
-                <Label htmlFor="bonusButtonLabel">{t("bonusButtonLabel")}</Label>
-                <Input id="bonusButtonLabel" {...register("bonusButtonLabel")} />
-              </div>
-            </div>
-          ) : null}
-
-          {type === "MESSAGE" ? (
-            <div className="rounded-lg border border-border bg-background p-4">
-              <p className="text-sm text-muted-foreground">
-                {t("messageUsesCompletion")}
-              </p>
-            </div>
-          ) : null}
+            );
+          })}
         </div>
-      </fieldset>
 
-      {/* Completion WhatsApp message */}
-      <fieldset className="rounded-xl border border-border bg-card p-5">
-        <legend className="px-1 text-sm font-semibold">{t("sectionCompletion")}</legend>
-        <Label htmlFor="completionMessage">{t("completionMessage")}</Label>
-        <Textarea
-          id="completionMessage"
-          className="min-h-28"
-          aria-invalid={Boolean(errors.completionMessage)}
-          {...register("completionMessage", required)}
-        />
-        <FieldError>{errors.completionMessage?.message}</FieldError>
-        <p className="mt-1 text-xs text-muted-foreground">{t("completionHint")}</p>
+        <button
+          type="button"
+          onClick={() => endings.append(blankEnding())}
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand transition-colors hover:underline"
+        >
+          <Plus className="size-4" />
+          {t("addEnding")}
+        </button>
       </fieldset>
 
       {serverError ? (

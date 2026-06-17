@@ -29,9 +29,6 @@ export default async function AdminFunnelsPage({
   const t = await getTranslations("admin.funnels");
   const funnels = await getAdminFunnels();
 
-  const typeLabel = (type: string) =>
-    type === "MEETING" ? t("typeMeeting") : type === "BONUS" ? t("typeBonus") : t("typeMessage");
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -71,7 +68,7 @@ export default async function AdminFunnelsPage({
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold">{funnel.name}</span>
                   <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
-                    {typeLabel(funnel.type)}
+                    {t("endingsCount", { count: funnel.endings.length })}
                   </span>
                   <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                     {funnel.locale.toUpperCase()}

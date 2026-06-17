@@ -10,15 +10,22 @@ import {
   type FunnelAnswer,
 } from "@/lib/funnel-runtime";
 import { normalizePhoneBR, maskPhoneBR } from "@/lib/phone";
-import type { FunnelRunView } from "@/lib/queries";
+import type { FunnelRunView, FunnelEndingView } from "@/lib/queries";
 import { submitFunnel } from "@/app/actions/funnels-public";
 import { FunnelScheduler } from "@/components/funnels/funnel-scheduler";
 
 /** A single conversational node the runner walks through, in order. */
+type ChoiceOption = { label: string; next: string };
+
 type Node =
   | { type: "bot"; text: string }
   | { type: "input"; field: "name" | "role" | "phone" | "email"; prompt: string }
-  | { type: "choice"; questionId: string; prompt: string; options: string[] };
+  | {
+      type: "choice";
+      questionKey: string;
+      prompt: string;
+      options: ChoiceOption[];
+    };
 
 type ChatMessage = { role: "bot" | "user"; text: string };
 
@@ -34,7 +41,7 @@ function buildNodes(funnel: FunnelRunView): Node[] {
   for (const q of funnel.questions) {
     nodes.push({
       type: "choice",
-      questionId: q.id,
+      questionKey: q.key,
       prompt: q.prompt,
       options: q.options,
     });
@@ -63,6 +70,21 @@ function validateField(field: string, value: string): FieldError | null {
 export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   const t = useTranslations("funnel");
   const nodes = useMemo(() => buildNodes(funnel), [funnel]);
+  // Branch target lookup: question key → its node index.
+  const keyToIndex = useMemo(() => {
+    const map = new Map<string, number>();
+    nodes.forEach((n, i) => {
+      if (n.type === "choice") map.set(n.questionKey, i);
+    });
+    return map;
+  }, [nodes]);
+  // Branch target lookup: ending key → the ending.
+  const endingByKey = useMemo(() => {
+    const map = new Map<string, FunnelEndingView>();
+    for (const e of funnel.endings) map.set(e.key, e);
+    return map;
+  }, [funnel.endings]);
+  const defaultEnding = funnel.endings[0];
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [index, setIndex] = useState(0);
@@ -75,6 +97,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   >("running");
   const [bookedISO, setBookedISO] = useState<string | null>(null);
   const [retryNotice, setRetryNotice] = useState(false);
+  const [reachedEnding, setReachedEnding] = useState<FunnelEndingView | null>(null);
 
   const [values, setValues] = useState<FunnelLeadValues>({});
   const [answers, setAnswers] = useState<FunnelAnswer[]>([]);
@@ -92,9 +115,8 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     const node = nodes[index];
 
     if (!node) {
-      // MEETING funnels schedule before persisting; others submit immediately.
-      if (funnel.type === "MEETING") setStatus("scheduling");
-      else void runSubmit();
+      // End of the path with no explicit branch target → the default ending.
+      reachEnding(defaultEnding);
       return;
     }
 
@@ -123,13 +145,21 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing, status]);
 
-  async function runSubmit(meetingStartAt?: string) {
+  /** Reach a funnel ending: a MEETING opens the scheduler; others submit now. */
+  function reachEnding(ending: FunnelEndingView) {
+    setReachedEnding(ending);
+    if (ending.type === "MEETING") setStatus("scheduling");
+    else void runSubmit(ending);
+  }
+
+  async function runSubmit(ending: FunnelEndingView, meetingStartAt?: string) {
     if (submittedRef.current) return;
     submittedRef.current = true;
     setStatus("submitting");
     if (!tokenRef.current) tokenRef.current = crypto.randomUUID();
     const res = await submitFunnel({
       funnelId: funnel.id,
+      endingKey: ending.key,
       submissionToken: tokenRef.current,
       name: values.name ?? "",
       role: values.role,
@@ -167,17 +197,39 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     setIndex((i) => i + 1);
   }
 
-  function answerChoice(questionId: string, prompt: string, option: string) {
-    setAnswers((a) => [...a, { questionId, prompt, answer: option }]);
-    setMessages((m) => [...m, { role: "user", text: option }]);
+  function answerChoice(questionKey: string, prompt: string, option: ChoiceOption) {
+    setAnswers((a) => [
+      ...a,
+      { questionId: questionKey, prompt, answer: option.label },
+    ]);
+    setMessages((m) => [...m, { role: "user", text: option.label }]);
     setAwaiting(false);
-    setIndex((i) => i + 1);
+    // Branch to the option's target: a question, an ending, the default ending
+    // ("END"), or the next node in order.
+    const next = option.next;
+    if (next === "END") {
+      reachEnding(defaultEnding);
+    } else if (next && keyToIndex.has(next)) {
+      setIndex(keyToIndex.get(next)!);
+    } else if (next && endingByKey.has(next)) {
+      reachEnding(endingByKey.get(next)!);
+    } else if (index + 1 >= nodes.length) {
+      reachEnding(defaultEnding);
+    } else {
+      setIndex((i) => i + 1);
+    }
   }
 
   function retry() {
+    if (!reachedEnding) {
+      setStatus("error");
+      return;
+    }
     submittedRef.current = false;
-    setStatus("running");
-    setIndex(nodes.length); // re-trigger the submit effect
+    setRetryNotice(false);
+    // A MEETING re-opens the picker (the slot wasn't booked); others re-submit.
+    if (reachedEnding.type === "MEETING") setStatus("scheduling");
+    else void runSubmit(reachedEnding);
   }
 
   const current = nodes[index];
@@ -214,23 +266,24 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
           </div>
         ) : null}
 
-        {status === "scheduling" ? (
+        {status === "scheduling" && reachedEnding ? (
           <FunnelScheduler
             funnelId={funnel.id}
+            endingKey={reachedEnding.key}
             retryNotice={retryNotice}
-            onConfirm={(iso) => runSubmit(iso)}
-            onUnavailable={() => runSubmit()}
+            onConfirm={(iso) => runSubmit(reachedEnding, iso)}
+            onUnavailable={() => runSubmit(reachedEnding)}
           />
         ) : null}
 
         {status === "submitting" ? (
           <div className="mt-4 self-stretch rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-            {funnel.type === "MEETING" ? t("booking") : t("submitting")}
+            {reachedEnding?.type === "MEETING" ? t("booking") : t("submitting")}
           </div>
         ) : null}
 
         {status === "done" ? (
-          <FunnelCompletion funnel={funnel} bookedISO={bookedISO} />
+          <FunnelCompletion ending={reachedEnding} bookedISO={bookedISO} />
         ) : null}
 
         {status === "error" ? (
@@ -254,14 +307,14 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
         <div className="mt-4 flex flex-col gap-2">
           {choiceNode.options.map((option) => (
             <button
-              key={option}
+              key={option.label}
               type="button"
               onClick={() =>
-                answerChoice(choiceNode.questionId, choiceNode.prompt, option)
+                answerChoice(choiceNode.questionKey, choiceNode.prompt, option)
               }
               className="rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium transition-colors hover:border-brand hover:bg-brand/5"
             >
-              {option}
+              {option.label}
             </button>
           ))}
         </div>
@@ -345,19 +398,19 @@ function openAndDownloadBonus(url: string) {
   a.remove();
 }
 
-/** The end-of-funnel screen, varying by funnel type (bonus download, booked meeting). */
+/** The end-of-funnel screen, varying by the reached ending (bonus / booked meeting). */
 function FunnelCompletion({
-  funnel,
+  ending,
   bookedISO,
 }: {
-  funnel: FunnelRunView;
+  ending: FunnelEndingView | null;
   bookedISO: string | null;
 }) {
   const t = useTranslations("funnel");
   const locale = useLocale();
 
-  const bonusUrl = funnel.type === "BONUS" ? funnel.bonusUrl : null;
-  const meetingBooked = funnel.type === "MEETING" && bookedISO;
+  const bonusUrl = ending?.type === "BONUS" ? ending.bonusUrl : null;
+  const meetingBooked = ending?.type === "MEETING" && bookedISO;
   const bookedLabel = bookedISO
     ? new Date(bookedISO).toLocaleString(locale, {
         dateStyle: "full",
@@ -380,7 +433,7 @@ function FunnelCompletion({
           onClick={() => openAndDownloadBonus(bonusUrl)}
           className="mt-5 inline-flex items-center justify-center rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-brand-foreground"
         >
-          {funnel.bonusButtonLabel || t("download")}
+          {ending?.bonusButtonLabel || t("download")}
         </button>
       ) : null}
     </div>

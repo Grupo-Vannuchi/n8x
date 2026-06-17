@@ -120,9 +120,16 @@ export default async function FunnelSubmissionsPage({
                       <span className="text-sm text-muted-foreground">· {s.role}</span>
                     ) : null}
                   </div>
-                  <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
-                    {t(`outcome_${s.outcome}`)}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {s.endingName ? (
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {s.endingName}
+                      </span>
+                    ) : null}
+                    <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
+                      {t(`outcome_${s.outcome}`)}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-1 text-sm text-muted-foreground">
