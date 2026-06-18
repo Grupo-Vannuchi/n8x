@@ -32,7 +32,8 @@ function JsonLd({ data }: { data: Record<string, unknown> }) {
  * entity — name, contact, address and social profiles. JSON-LD only.
  */
 export function OrganizationJsonLd() {
-  const { name, legalName, foundedYear, contact, social } = siteConfig;
+  const { name, legalName, foundedYear, contact, social, parentOrganization } =
+    siteConfig;
   const url = localizedUrl(defaultLocale);
 
   const data = {
@@ -54,6 +55,17 @@ export function OrganizationJsonLd() {
     },
     // Filter out unset social links so `sameAs` never contains undefined.
     sameAs: Object.values(social).filter(Boolean),
+    // Declare the corporate parent so engines resolve the group relationship.
+    ...(parentOrganization && {
+      parentOrganization: {
+        "@type": "Organization",
+        name: parentOrganization.name,
+        ...(parentOrganization.url && { url: parentOrganization.url }),
+        ...(parentOrganization.sameAs?.length && {
+          sameAs: parentOrganization.sameAs,
+        }),
+      },
+    }),
   };
 
   return <JsonLd data={data} />;

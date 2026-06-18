@@ -41,6 +41,18 @@ export type SiteConfig = {
   foundedYear: number;
   /** Company registration number (Brazil: CNPJ). Optional. */
   registration?: string;
+  /**
+   * Parent company, when the agency is a brand/division of a larger group.
+   * Emitted as `parentOrganization` in structured data so search/AI engines
+   * resolve the corporate relationship and disambiguate the brand. Optional.
+   */
+  parentOrganization?: {
+    name: string;
+    /** Parent's official website, if any. */
+    url?: string;
+    /** Authoritative profiles for the parent (Google profile, LinkedIn, …). */
+    sameAs?: string[];
+  };
 
   contact: {
     email: string;
@@ -81,6 +93,12 @@ export const siteConfig: SiteConfig = {
   legalName: "n8x marketing & vendas.",
   foundedYear: 2017,
   registration: "43.158.706/0001-99",
+
+  parentOrganization: {
+    name: "Grupo Vannuchi Engenharia",
+    // url: "https://...",            // preencher com o site oficial do Grupo
+    // sameAs: ["https://..."],       // perfil do Google / LinkedIn do Grupo
+  },
 
   contact: {
     email: "marketing@n8company.com.br",
