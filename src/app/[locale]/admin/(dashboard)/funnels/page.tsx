@@ -5,6 +5,7 @@ import {
   ExternalLink,
   SlidersHorizontal,
   CalendarClock,
+  MessageCircle,
   Inbox,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -40,6 +41,13 @@ export default async function AdminFunnelsPage({
           >
             <SlidersHorizontal className="size-4" />
             {t("editDefault")}
+          </Link>
+          <Link
+            href="/admin/funnels/whatsapp"
+            className={cn(buttonVariants({ variant: "outline", size: "md" }))}
+          >
+            <MessageCircle className="size-4" />
+            {t("whatsappPanel")}
           </Link>
           <Link
             href="/admin/funnels/google"

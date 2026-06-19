@@ -133,12 +133,15 @@ export function FunnelForm({
   funnelId,
   defaultValues,
   templateSteps,
+  instanceOptions = [],
 }: {
   mode: "create" | "edit";
   funnelId?: string;
   defaultValues: FunnelFormValues;
   /** Global default steps for the funnel's locale — used by "reset to default". */
   templateSteps: FunnelDefaultStep[];
+  /** WhatsApp instances available on the Evolution server (live, may be empty). */
+  instanceOptions?: string[];
 }) {
   const t = useTranslations("admin.funnels");
   const tv = useTranslations("validation");
@@ -159,6 +162,12 @@ export function FunnelForm({
   // Live lists so the branch-target dropdowns and conditional ending config stay in sync.
   const watchedQuestions = watch("questions") ?? [];
   const watchedEndings = watch("endings") ?? [];
+  // Keep the funnel's current instance selectable even if it's not in the live list.
+  const watchedInstance = watch("whatsappInstance");
+  const instanceSelectOptions =
+    watchedInstance && !instanceOptions.includes(watchedInstance)
+      ? [watchedInstance, ...instanceOptions]
+      : instanceOptions;
 
   async function onSubmit(values: FunnelFormValues) {
     setServerError(null);
@@ -227,6 +236,27 @@ export function FunnelForm({
               <option value="DRAFT">{t("statusDraft")}</option>
               <option value="PUBLISHED">{t("statusPublished")}</option>
             </select>
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="whatsappInstance">{t("whatsappInstance")}</Label>
+            <select
+              id="whatsappInstance"
+              className={cn(selectStyles)}
+              {...register("whatsappInstance")}
+            >
+              <option value="">{t("whatsappInstanceDefault")}</option>
+              {instanceSelectOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("whatsappInstanceHint")}{" "}
+              <Link href="/admin/funnels/whatsapp" className="text-brand hover:underline">
+                {t("manageWhatsapp")}
+              </Link>
+            </p>
           </div>
         </div>
       </fieldset>

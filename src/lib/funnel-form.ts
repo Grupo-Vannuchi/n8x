@@ -49,6 +49,8 @@ export type FunnelFormValues = {
   locale: Locale;
   name: string;
   status: "DRAFT" | "PUBLISHED";
+  /** Evolution instance for WhatsApp sends; "" = use the default instance. */
+  whatsappInstance: string;
   defaultBlock: FunnelFormStep[];
   questions: FunnelFormQuestion[];
   endings: FunnelFormEnding[];
@@ -139,6 +141,7 @@ export function emptyFunnelForm(
     locale,
     name: "",
     status: "DRAFT",
+    whatsappInstance: "",
     defaultBlock: readSteps(templateSteps),
     questions: [],
     endings: [blankEnding()],
@@ -151,6 +154,7 @@ type FunnelRow = {
   locale: string;
   name: string;
   status: "DRAFT" | "PUBLISHED";
+  whatsappInstance: string | null;
   defaultBlock: unknown;
 };
 
@@ -208,6 +212,7 @@ export function funnelToForm(
     locale: resolveLocale(funnel.locale),
     name: funnel.name,
     status: funnel.status,
+    whatsappInstance: funnel.whatsappInstance ?? "",
     defaultBlock: readSteps(funnel.defaultBlock),
     questions: questions.map((q) => ({
       key: q.key || crypto.randomUUID(),
@@ -228,6 +233,7 @@ export function formToInput(values: FunnelFormValues): FunnelInput {
     locale: values.locale,
     name: values.name.trim(),
     status: values.status,
+    whatsappInstance: values.whatsappInstance.trim(),
     defaultBlock: stepsToStored(values.defaultBlock),
     questions: values.questions
       .map((q) => {

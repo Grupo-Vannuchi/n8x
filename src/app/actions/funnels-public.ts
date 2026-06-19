@@ -134,6 +134,7 @@ export async function submitFunnel(
       date: meetingDate,
       time: meetingTime,
       completionMessage: ending.completionMessage,
+      instance: funnel.whatsappInstance,
     });
 
     return { ok: true };
@@ -182,6 +183,7 @@ async function deliverWhatsapp(args: {
   date?: string;
   time?: string;
   completionMessage: string;
+  instance?: string | null;
 }): Promise<void> {
   const tokens = {
     name: args.name,
@@ -198,6 +200,7 @@ async function deliverWhatsapp(args: {
   const result = await sendText(
     args.phoneE164,
     interpolateTokens(args.completionMessage, tokens),
+    args.instance,
   );
 
   return markWhatsapp(

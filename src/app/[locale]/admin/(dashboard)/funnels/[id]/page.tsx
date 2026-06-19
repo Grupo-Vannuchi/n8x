@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { FunnelForm } from "@/components/admin/funnel-form";
 import { getFunnelById, getFunnelDefaultTemplate } from "@/lib/admin-queries";
 import { funnelToForm } from "@/lib/funnel-form";
+import { fetchInstances, isEvolutionConfigured } from "@/lib/evolution";
 import {
   DEFAULT_TEMPLATE_STEPS,
   type FunnelDefaultStep,
@@ -29,6 +30,9 @@ export default async function EditFunnelPage({
     (template?.steps as FunnelDefaultStep[] | undefined) ??
     DEFAULT_TEMPLATE_STEPS[resolveLocale(funnel.locale)];
 
+  const evo = isEvolutionConfigured() ? await fetchInstances() : null;
+  const instanceOptions = evo?.ok ? evo.data.map((i) => i.name) : [];
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <div>
@@ -49,6 +53,7 @@ export default async function EditFunnelPage({
         funnelId={funnel.id}
         defaultValues={funnelToForm(funnel, funnel.questions, funnel.endings)}
         templateSteps={steps}
+        instanceOptions={instanceOptions}
       />
     </div>
   );

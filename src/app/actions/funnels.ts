@@ -29,6 +29,7 @@ function toScalarData(input: FunnelInput) {
     locale: input.locale,
     name: input.name,
     status: input.status,
+    whatsappInstance: input.whatsappInstance || null,
     defaultBlock: input.defaultBlock as unknown as Prisma.InputJsonValue,
   };
 }

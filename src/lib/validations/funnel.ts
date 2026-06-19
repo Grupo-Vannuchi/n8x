@@ -95,6 +95,8 @@ export const funnelSchema = z.object({
   locale: localeValue,
   name: z.string().trim().min(1).max(200),
   status: z.enum(["DRAFT", "PUBLISHED"]),
+  /** Evolution instance for WhatsApp sends; "" = default instance. */
+  whatsappInstance: z.string().trim().max(60),
   defaultBlock: z.array(funnelDefaultStepSchema).min(1, "Add at least one step"),
   questions: z.array(funnelQuestionSchema).max(30),
   // The first ending is the default/fallback for the straight-through path.

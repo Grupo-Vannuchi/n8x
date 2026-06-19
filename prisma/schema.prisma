@@ -245,6 +245,10 @@ model Funnel {
   /// copied from the global FunnelDefaultTemplate at creation and overridable.
   defaultBlock Json @default("[]")
 
+  /// Evolution instance used for this funnel's WhatsApp sends. Null = use the
+  /// default instance (env EVOLUTION_INSTANCE). Managed from the admin panel.
+  whatsappInstance String?
+
   questions   FunnelQuestion[]
   endings     FunnelEnding[]
   submissions FunnelSubmission[]
