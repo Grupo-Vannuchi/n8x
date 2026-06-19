@@ -484,6 +484,7 @@ export function FunnelForm({
                         <option value="MEETING">{t("typeMeeting")}</option>
                         <option value="BONUS">{t("typeBonus")}</option>
                         <option value="MESSAGE">{t("typeMessage")}</option>
+                        <option value="REDIRECT">{t("typeRedirect")}</option>
                       </select>
                     </div>
                   </div>
@@ -558,6 +559,40 @@ export function FunnelForm({
                       <div>
                         <Label>{t("bonusButtonLabel")}</Label>
                         <Input {...register(`endings.${i}.bonusButtonLabel` as const)} />
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {endingType === "REDIRECT" ? (
+                    <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4">
+                      <div>
+                        <Label>{t("redirectUrl")}</Label>
+                        <Input
+                          placeholder="https://..."
+                          aria-invalid={Boolean(errors.endings?.[i]?.redirectUrl)}
+                          {...register(`endings.${i}.redirectUrl` as const)}
+                        />
+                        <FieldError>{errors.endings?.[i]?.redirectUrl?.message}</FieldError>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {t("redirectUrlHint")}
+                        </p>
+                      </div>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <Label>{t("redirectButtonLabel")}</Label>
+                          <Input {...register(`endings.${i}.redirectButtonLabel` as const)} />
+                        </div>
+                        <div>
+                          <Label>{t("redirectDelay")}</Label>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            {...register(`endings.${i}.redirectDelaySeconds` as const)}
+                          />
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {t("redirectDelayHint")}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ) : null}

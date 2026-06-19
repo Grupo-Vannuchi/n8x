@@ -59,6 +59,9 @@ function endingsCreate(input: FunnelInput) {
     meetingTimezone: e.meetingTimezone,
     bonusUrl: e.bonusUrl || null,
     bonusButtonLabel: e.bonusButtonLabel || null,
+    redirectUrl: e.redirectUrl || null,
+    redirectButtonLabel: e.redirectButtonLabel || null,
+    redirectDelaySeconds: e.redirectDelaySeconds,
   }));
 }
 

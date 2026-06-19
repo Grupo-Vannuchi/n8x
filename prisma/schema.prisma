@@ -208,6 +208,7 @@ enum FunnelType {
   MEETING // ends with a Google Calendar scheduler
   BONUS // ends with a button to download a PDF
   MESSAGE // ends by sending a WhatsApp message
+  REDIRECT // ends by sending the lead to an external URL
 }
 
 enum FunnelStatus {
@@ -220,6 +221,7 @@ enum FunnelOutcome {
   MEETING_BOOKED
   BONUS_DOWNLOADED
   MESSAGE_SENT
+  REDIRECTED
 }
 
 enum WhatsappStatus {
@@ -279,6 +281,11 @@ model FunnelEnding {
   // --- BONUS config ---
   bonusUrl         String? // Google Drive PDF link
   bonusButtonLabel String?
+
+  // --- REDIRECT config ---
+  redirectUrl          String? // external destination (e.g. course site)
+  redirectButtonLabel  String?
+  redirectDelaySeconds Int?    @default(3) // auto-redirect countdown; 0 = immediate
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

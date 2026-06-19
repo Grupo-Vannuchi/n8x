@@ -50,7 +50,7 @@ const funnelEndingSchema = z
   .object({
     key: z.string().trim().min(1).max(60),
     name: z.string().trim().min(1).max(120),
-    type: z.enum(["MEETING", "BONUS", "MESSAGE"]),
+    type: z.enum(["MEETING", "BONUS", "MESSAGE", "REDIRECT"]),
     completionMessage: z.string().trim().min(1).max(2000),
     // MEETING config
     meetingDurationMinutes: z.coerce.number().int().min(5).max(480),
@@ -61,6 +61,10 @@ const funnelEndingSchema = z
     // BONUS config
     bonusUrl: z.union([z.string().trim().url().max(2000), z.literal("")]),
     bonusButtonLabel: z.string().trim().max(120),
+    // REDIRECT config
+    redirectUrl: z.union([z.string().trim().url().max(2000), z.literal("")]),
+    redirectButtonLabel: z.string().trim().max(120),
+    redirectDelaySeconds: z.coerce.number().int().min(0).max(60),
   })
   .superRefine((val, ctx) => {
     if (val.type === "BONUS" && !val.bonusUrl) {
@@ -68,6 +72,13 @@ const funnelEndingSchema = z
         path: ["bonusUrl"],
         code: z.ZodIssueCode.custom,
         message: "Required for a bonus ending",
+      });
+    }
+    if (val.type === "REDIRECT" && !val.redirectUrl) {
+      ctx.addIssue({
+        path: ["redirectUrl"],
+        code: z.ZodIssueCode.custom,
+        message: "Required for a redirect ending",
       });
     }
     if (val.type === "MEETING" && val.meetingSlotEndHour <= val.meetingSlotStartHour) {

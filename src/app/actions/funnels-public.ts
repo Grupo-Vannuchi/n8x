@@ -21,9 +21,13 @@ export type SubmitFunnelResult =
   | { ok: false; error: "invalid" | "not_found" | "slot_taken" | "unknown" };
 
 /** Outcome for a completed run, derived from the funnel type. */
-function outcomeFor(type: "MEETING" | "BONUS" | "MESSAGE", booked: boolean) {
+function outcomeFor(
+  type: "MEETING" | "BONUS" | "MESSAGE" | "REDIRECT",
+  booked: boolean,
+) {
   if (type === "MEETING") return booked ? "MEETING_BOOKED" : "COMPLETED";
   if (type === "BONUS") return "BONUS_DOWNLOADED";
+  if (type === "REDIRECT") return "REDIRECTED";
   return "MESSAGE_SENT";
 }
 

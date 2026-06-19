@@ -30,7 +30,7 @@ export type FunnelFormQuestion = {
 export type FunnelFormEnding = {
   key: string;
   name: string;
-  type: "MEETING" | "BONUS" | "MESSAGE";
+  type: "MEETING" | "BONUS" | "MESSAGE" | "REDIRECT";
   completionMessage: string;
   meetingDurationMinutes: string;
   meetingSlotStartHour: string;
@@ -39,6 +39,9 @@ export type FunnelFormEnding = {
   meetingTimezone: string;
   bonusUrl: string;
   bonusButtonLabel: string;
+  redirectUrl: string;
+  redirectButtonLabel: string;
+  redirectDelaySeconds: string;
 };
 
 export type FunnelFormValues = {
@@ -81,6 +84,9 @@ export function blankEnding(): FunnelFormEnding {
     meetingTimezone: "America/Sao_Paulo",
     bonusUrl: "",
     bonusButtonLabel: "",
+    redirectUrl: "",
+    redirectButtonLabel: "",
+    redirectDelaySeconds: "3",
   };
 }
 
@@ -158,7 +164,7 @@ type QuestionRow = {
 type EndingRow = {
   key: string;
   name: string;
-  type: "MEETING" | "BONUS" | "MESSAGE";
+  type: "MEETING" | "BONUS" | "MESSAGE" | "REDIRECT";
   completionMessage: string;
   meetingDurationMinutes: number | null;
   meetingSlotStartHour: number | null;
@@ -167,6 +173,9 @@ type EndingRow = {
   meetingTimezone: string | null;
   bonusUrl: string | null;
   bonusButtonLabel: string | null;
+  redirectUrl: string | null;
+  redirectButtonLabel: string | null;
+  redirectDelaySeconds: number | null;
 };
 
 function endingToForm(e: EndingRow): FunnelFormEnding {
@@ -182,6 +191,9 @@ function endingToForm(e: EndingRow): FunnelFormEnding {
     meetingTimezone: e.meetingTimezone ?? "America/Sao_Paulo",
     bonusUrl: e.bonusUrl ?? "",
     bonusButtonLabel: e.bonusButtonLabel ?? "",
+    redirectUrl: e.redirectUrl ?? "",
+    redirectButtonLabel: e.redirectButtonLabel ?? "",
+    redirectDelaySeconds: String(e.redirectDelaySeconds ?? 3),
   };
 }
 
@@ -243,6 +255,9 @@ export function formToInput(values: FunnelFormValues): FunnelInput {
       meetingTimezone: e.meetingTimezone.trim(),
       bonusUrl: e.bonusUrl.trim(),
       bonusButtonLabel: e.bonusButtonLabel.trim(),
+      redirectUrl: e.redirectUrl.trim(),
+      redirectButtonLabel: e.redirectButtonLabel.trim(),
+      redirectDelaySeconds: Number(e.redirectDelaySeconds),
     })),
   };
 }

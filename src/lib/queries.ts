@@ -386,9 +386,12 @@ export const getClients = unstable_cache(
  * the completion/message bodies, which are sent server-side, never exposed). */
 export type FunnelEndingView = {
   key: string;
-  type: "MEETING" | "BONUS" | "MESSAGE";
+  type: "MEETING" | "BONUS" | "MESSAGE" | "REDIRECT";
   bonusUrl: string | null;
   bonusButtonLabel: string | null;
+  redirectUrl: string | null;
+  redirectButtonLabel: string | null;
+  redirectDelaySeconds: number;
 };
 
 export type FunnelRunView = {
@@ -435,6 +438,9 @@ export const getPublishedFunnelBySlug = unstable_cache(
         type: e.type,
         bonusUrl: e.bonusUrl,
         bonusButtonLabel: e.bonusButtonLabel,
+        redirectUrl: e.redirectUrl,
+        redirectButtonLabel: e.redirectButtonLabel,
+        redirectDelaySeconds: e.redirectDelaySeconds ?? 3,
       })),
     };
   },

@@ -398,7 +398,8 @@ function openAndDownloadBonus(url: string) {
   a.remove();
 }
 
-/** The end-of-funnel screen, varying by the reached ending (bonus / booked meeting). */
+/** The end-of-funnel screen, varying by the reached ending
+ * (bonus / booked meeting / external redirect). */
 function FunnelCompletion({
   ending,
   bookedISO,
@@ -411,12 +412,29 @@ function FunnelCompletion({
 
   const bonusUrl = ending?.type === "BONUS" ? ending.bonusUrl : null;
   const meetingBooked = ending?.type === "MEETING" && bookedISO;
+  const redirectUrl = ending?.type === "REDIRECT" ? ending.redirectUrl : null;
   const bookedLabel = bookedISO
     ? new Date(bookedISO).toLocaleString(locale, {
         dateStyle: "full",
         timeStyle: "short",
       })
     : "";
+
+  // REDIRECT: send the lead to the destination (same tab) after a short
+  // countdown; the button is an immediate fallback if the auto-redirect is
+  // blocked or the visitor would rather go now.
+  const redirectDelay =
+    ending?.type === "REDIRECT" ? ending.redirectDelaySeconds : 0;
+  const [secondsLeft, setSecondsLeft] = useState(redirectDelay);
+  useEffect(() => {
+    if (!redirectUrl) return;
+    if (secondsLeft <= 0) {
+      window.location.assign(redirectUrl);
+      return;
+    }
+    const id = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [redirectUrl, secondsLeft]);
 
   return (
     <div className="mt-4 self-stretch rounded-2xl border border-border bg-card p-6 text-center">
@@ -435,6 +453,23 @@ function FunnelCompletion({
         >
           {ending?.bonusButtonLabel || t("download")}
         </button>
+      ) : null}
+
+      {redirectUrl ? (
+        <div className="mt-5 flex flex-col items-center gap-2">
+          {secondsLeft > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {t("redirectingIn", { seconds: secondsLeft })}
+            </p>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => window.location.assign(redirectUrl)}
+            className="inline-flex items-center justify-center rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-brand-foreground"
+          >
+            {ending?.redirectButtonLabel || t("redirectButton")}
+          </button>
+        </div>
       ) : null}
     </div>
   );
