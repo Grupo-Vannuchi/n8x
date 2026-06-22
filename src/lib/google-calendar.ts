@@ -97,6 +97,8 @@ export async function exchangeCodeAndStore(code: string): Promise<void> {
 
 /** Remove the stored Google connection. */
 export async function disconnectGoogleAccount(): Promise<void> {
+  // GoogleAccount is a singleton table — `deleteMany()` without a `where` clears
+  // the single connection row on purpose (disconnect), not an accidental wipe.
   await prisma.googleAccount.deleteMany();
 }
 

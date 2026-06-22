@@ -21,12 +21,14 @@ export default async function NewFunnelPage({
   const t = await getTranslations("admin.funnels");
 
   // The new funnel defaults to the current admin locale; pull its default block.
-  const template = await getFunnelDefaultTemplate(locale);
+  // Independent reads — run in parallel (avoid a request waterfall).
+  const [template, evo] = await Promise.all([
+    getFunnelDefaultTemplate(locale),
+    isEvolutionConfigured() ? fetchInstances() : Promise.resolve(null),
+  ]);
   const steps =
     (template?.steps as FunnelDefaultStep[] | undefined) ??
     DEFAULT_TEMPLATE_STEPS[locale];
-
-  const evo = isEvolutionConfigured() ? await fetchInstances() : null;
   const instanceOptions = evo?.ok ? evo.data.map((i) => i.name) : [];
 
   return (

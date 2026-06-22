@@ -25,12 +25,15 @@ export default async function EditFunnelPage({
   const funnel = await getFunnelById(id);
   if (!funnel) notFound();
 
-  const template = await getFunnelDefaultTemplate(funnel.locale);
+  // The template depends on the funnel's locale, but the instance list is
+  // independent — fetch both in parallel (avoid a request waterfall).
+  const [template, evo] = await Promise.all([
+    getFunnelDefaultTemplate(funnel.locale),
+    isEvolutionConfigured() ? fetchInstances() : Promise.resolve(null),
+  ]);
   const steps =
     (template?.steps as FunnelDefaultStep[] | undefined) ??
     DEFAULT_TEMPLATE_STEPS[resolveLocale(funnel.locale)];
-
-  const evo = isEvolutionConfigured() ? await fetchInstances() : null;
   const instanceOptions = evo?.ok ? evo.data.map((i) => i.name) : [];
 
   return (
