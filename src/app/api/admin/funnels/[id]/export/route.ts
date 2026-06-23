@@ -28,9 +28,20 @@ export async function GET(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  const outcome = request.nextUrl.searchParams.get("outcome");
+  const sp = request.nextUrl.searchParams;
+  const outcome = sp.get("outcome");
+  const q = sp.get("q");
+  const a = sp.get("a");
   let rows = await getFunnelSubmissions(id);
   if (outcome) rows = rows.filter((r) => r.outcome === outcome);
+  if (q) {
+    rows = rows.filter((r) => {
+      const answers = (Array.isArray(r.answers) ? r.answers : []) as Answer[];
+      return answers.some(
+        (x) => x.questionId === q && (!a || x.answer === a),
+      );
+    });
+  }
 
   const header = [
     "Nome",
