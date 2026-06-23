@@ -73,5 +73,6 @@ Also set the **Área** field on the board. New issues should use the
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the system fits together.
 - [`docs/RUNBOOK.md`](docs/RUNBOOK.md) — operations & integrations.
 - [`docs/adr/`](docs/adr/) — architecture decision records.
+- [`docs/TESTING.md`](docs/TESTING.md) — testing strategy & rollout plan.
 - [`SECURITY.md`](SECURITY.md) — security policy & checklist.
 - [`SNAPSHOT.md`](SNAPSHOT.md) — restore/snapshot & first production deploy.
