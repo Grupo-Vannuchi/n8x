@@ -1,5 +1,7 @@
 # n8x marketing
 
+[![CI](https://github.com/Grupo-Vannuchi/n8x/actions/workflows/ci.yml/badge.svg)](https://github.com/Grupo-Vannuchi/n8x/actions/workflows/ci.yml)
+
 A production-grade, **marketing-agency website** built with Next.js 16
 (App Router), TypeScript, Tailwind CSS v4, Prisma and PostgreSQL. Inspired by the
 structure of a full-service advertising agency: hero, services, portfolio/case

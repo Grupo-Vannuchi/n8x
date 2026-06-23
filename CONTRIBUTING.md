@@ -24,6 +24,8 @@ npm run dev             # http://localhost:3000  (admin at /admin)
    ```bash
    npm run typecheck && npm run lint && npm run build
    ```
+   **CI** (GitHub Actions, `.github/workflows/ci.yml`) runs these same gates on
+   every PR and push to `Development`/`main` — only merge a PR with a green check.
 4. **Migrations:** `npm run db:migrate` (`prisma migrate dev`) **locally only**;
    production runs `prisma migrate deploy` in the Vercel build.
 
