@@ -151,14 +151,20 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing, status]);
 
-  /** Reach a funnel ending: a MEETING opens the scheduler; others submit now. */
-  function reachEnding(ending: FunnelEndingView) {
+  /** Reach a funnel ending: a MEETING opens the scheduler; others submit now.
+   * `answersOverride` carries the just-picked answer that `setAnswers` hasn't
+   * committed yet, so a choice that branches straight to an ending isn't lost. */
+  function reachEnding(ending: FunnelEndingView, answersOverride?: FunnelAnswer[]) {
     setReachedEnding(ending);
     if (ending.type === "MEETING") setStatus("scheduling");
-    else void runSubmit(ending);
+    else void runSubmit(ending, undefined, answersOverride);
   }
 
-  async function runSubmit(ending: FunnelEndingView, meetingStartAt?: string) {
+  async function runSubmit(
+    ending: FunnelEndingView,
+    meetingStartAt?: string,
+    answersOverride?: FunnelAnswer[],
+  ) {
     if (submittedRef.current) return;
     submittedRef.current = true;
     setStatus("submitting");
@@ -171,7 +177,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
       role: values.role,
       phone: values.phone,
       email: values.email,
-      answers,
+      answers: answersOverride ?? answers,
       meetingStartAt,
     });
     if (res.ok) {
@@ -205,23 +211,26 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   }
 
   function answerChoice(questionKey: string, prompt: string, option: ChoiceOption) {
-    setAnswers((a) => [
-      ...a,
+    // Compute the new answers locally so a branch that submits in this same
+    // handler includes the just-picked answer (state updates are async).
+    const nextAnswers = [
+      ...answers,
       { questionId: questionKey, prompt, answer: option.label },
-    ]);
+    ];
+    setAnswers(nextAnswers);
     setMessages((m) => [...m, { role: "user", text: option.label }]);
     setAwaiting(false);
     // Branch to the option's target: a question, an ending, the default ending
     // ("END"), or the next node in order.
     const next = option.next;
     if (next === "END") {
-      reachEnding(defaultEnding);
+      reachEnding(defaultEnding, nextAnswers);
     } else if (next && keyToIndex.has(next)) {
       setIndex(keyToIndex.get(next)!);
     } else if (next && endingByKey.has(next)) {
-      reachEnding(endingByKey.get(next)!);
+      reachEnding(endingByKey.get(next)!, nextAnswers);
     } else if (index + 1 >= nodes.length) {
-      reachEnding(defaultEnding);
+      reachEnding(defaultEnding, nextAnswers);
     } else {
       setIndex((i) => i + 1);
     }
