@@ -4,7 +4,6 @@ import { Link } from "@/i18n/navigation";
 import { FunnelForm } from "@/components/admin/funnel-form";
 import { emptyFunnelForm } from "@/lib/funnel-form";
 import { getFunnelDefaultTemplate } from "@/lib/admin-queries";
-import { fetchInstances, isEvolutionConfigured } from "@/lib/evolution";
 import {
   DEFAULT_TEMPLATE_STEPS,
   type FunnelDefaultStep,
@@ -21,15 +20,10 @@ export default async function NewFunnelPage({
   const t = await getTranslations("admin.funnels");
 
   // The new funnel defaults to the current admin locale; pull its default block.
-  // Independent reads — run in parallel (avoid a request waterfall).
-  const [template, evo] = await Promise.all([
-    getFunnelDefaultTemplate(locale),
-    isEvolutionConfigured() ? fetchInstances() : Promise.resolve(null),
-  ]);
+  const template = await getFunnelDefaultTemplate(locale);
   const steps =
     (template?.steps as FunnelDefaultStep[] | undefined) ??
     DEFAULT_TEMPLATE_STEPS[locale];
-  const instanceOptions = evo?.ok ? evo.data.map((i) => i.name) : [];
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
@@ -48,7 +42,6 @@ export default async function NewFunnelPage({
         mode="create"
         defaultValues={emptyFunnelForm(steps, locale)}
         templateSteps={steps}
-        instanceOptions={instanceOptions}
       />
     </div>
   );
