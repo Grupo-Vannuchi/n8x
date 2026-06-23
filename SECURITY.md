@@ -12,8 +12,10 @@ within a few business days.
 
 ## Where the boundaries are
 
-- **Public, unauthenticated:** the marketing site, and the funnel runtime
-  (`/f/<slug>` + `submitFunnel` / `getFunnelSlots`). Treat all input as hostile.
+- **Public, unauthenticated:** the marketing site, the contact & careers lead
+  forms (`submitContactLead` / `submitCareerLead`), and the funnel runtime
+  (`/f/<slug>` + `submitFunnel` / `getFunnelSlots`). All of these carry a honeypot
+  + per-IP rate limit. Treat all input as hostile.
 - **Authenticated (admin):** everything under `/admin` and `/api/admin/*`, gated
   by `getCurrentUser()` (jose JWT session, bcrypt password).
 - **Secrets:** DB, Evolution, Google, Upstash — server-side only, in env vars.

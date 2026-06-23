@@ -55,6 +55,15 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+      {/* Honeypot — hidden from humans; bots fill it and get dropped server-side. */}
+      <input
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute left-[-9999px] size-0 opacity-0"
+        {...register("hp")}
+      />
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="name">{t("name")}</Label>

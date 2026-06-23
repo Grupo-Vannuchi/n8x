@@ -83,9 +83,9 @@ docs/                         ARCHITECTURE, RUNBOOK, ADRs, SEO audit
 
 ## Security — skill: `security-review`
 
-- **Public endpoints** (`submitFunnel`, `getFunnelSlots`): honeypot + **per-IP
-  rate limit** (`lib/rate-limit`, Upstash with in-memory fallback) + `zod`
-  validation as the server boundary.
+- **Public endpoints** (`submitFunnel`, `getFunnelSlots`, `submitContactLead`,
+  `submitCareerLead`): honeypot + **per-IP rate limit** (`lib/rate-limit`,
+  Upstash with in-memory fallback) + `zod` validation as the server boundary.
 - **Admin** server actions and `/api/admin/*` routes gate on `getCurrentUser()`.
 - **Secrets** only in env, read server-side. Never log them; redact in errors.
 - **Integration tokens expire** — detect and surface it (Google `invalid_grant`
