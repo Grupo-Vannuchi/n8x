@@ -91,6 +91,9 @@ export async function submitFunnel(
         name: data.name,
         phone: phoneE164,
         email: data.email || null,
+        role: data.role || null,
+        funnelName: funnel.name,
+        answers: data.answers.map((a) => ({ prompt: a.prompt, answer: a.answer })),
       });
       if (booking.ok) {
         meetingStartAt = new Date(data.meetingStartAt);

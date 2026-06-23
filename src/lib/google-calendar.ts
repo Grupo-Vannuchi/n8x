@@ -227,7 +227,14 @@ export type BookResult =
 export async function bookMeeting(
   funnel: MeetingConfig,
   startISO: string,
-  attendee: { name: string; phone: string | null; email: string | null },
+  attendee: {
+    name: string;
+    phone: string | null;
+    email: string | null;
+    role?: string | null;
+    funnelName?: string;
+    answers?: { prompt: string; answer: string }[];
+  },
 ): Promise<BookResult> {
   const ctx = await authedContext();
   if (!ctx) return { ok: false, error: "not_configured" };
@@ -235,6 +242,25 @@ export async function bookMeeting(
   const duration = funnel.meetingDurationMinutes ?? 30;
   const start = new Date(startISO);
   const end = new Date(start.getTime() + duration * 60000);
+
+  // Rich, professional event details: lead context + the funnel answers laid
+  // out like the admin "submissions" view (question, then its answer below).
+  const summary = attendee.funnelName
+    ? `Reunião — ${attendee.name} (${attendee.funnelName})`
+    : `Reunião — ${attendee.name}`;
+  const detail: string[] = [
+    `Lead recebido pelo funil: ${attendee.funnelName ?? "—"}`,
+    "",
+    `Nome: ${attendee.name}`,
+    `Cargo: ${attendee.role || "—"}`,
+    `E-mail: ${attendee.email ?? "—"}`,
+    `WhatsApp: ${attendee.phone ?? "—"}`,
+  ];
+  if (attendee.answers?.length) {
+    detail.push("", "Respostas do funil:");
+    for (const a of attendee.answers) detail.push("", a.prompt, `→ ${a.answer}`);
+  }
+  const description = detail.join("\n");
 
   try {
     // Read-then-write race guard: re-check right before inserting.
@@ -249,13 +275,8 @@ export async function bookMeeting(
       // Required for Google to provision a Meet link via createRequest.
       conferenceDataVersion: 1,
       requestBody: {
-        summary: `Reunião — ${attendee.name}`,
-        description: [
-          "Agendado por um funil do site.",
-          `Nome: ${attendee.name}`,
-          `WhatsApp: ${attendee.phone ?? "-"}`,
-          `E-mail: ${attendee.email ?? "-"}`,
-        ].join("\n"),
+        summary,
+        description,
         start: { dateTime: start.toISOString() },
         end: { dateTime: end.toISOString() },
         conferenceData: {
