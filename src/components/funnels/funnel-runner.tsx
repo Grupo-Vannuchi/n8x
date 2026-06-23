@@ -100,6 +100,9 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   const [errorKey, setErrorKey] = useState<"errorRetry" | "rateLimited">(
     "errorRetry",
   );
+  // A MEETING ending whose scheduler couldn't load slots (e.g. Google expired):
+  // we still capture the lead, but say so honestly instead of faking completion.
+  const [meetingUnavailable, setMeetingUnavailable] = useState(false);
   const [reachedEnding, setReachedEnding] = useState<FunnelEndingView | null>(null);
 
   const [values, setValues] = useState<FunnelLeadValues>({});
@@ -276,7 +279,10 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
             endingKey={reachedEnding.key}
             retryNotice={retryNotice}
             onConfirm={(iso) => runSubmit(reachedEnding, iso)}
-            onUnavailable={() => runSubmit(reachedEnding)}
+            onUnavailable={() => {
+              setMeetingUnavailable(true);
+              void runSubmit(reachedEnding);
+            }}
           />
         ) : null}
 
@@ -287,7 +293,11 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
         ) : null}
 
         {status === "done" ? (
-          <FunnelCompletion ending={reachedEnding} bookedISO={bookedISO} />
+          <FunnelCompletion
+            ending={reachedEnding}
+            bookedISO={bookedISO}
+            meetingUnavailable={meetingUnavailable}
+          />
         ) : null}
 
         {status === "error" ? (
@@ -407,15 +417,19 @@ function openAndDownloadBonus(url: string) {
 function FunnelCompletion({
   ending,
   bookedISO,
+  meetingUnavailable,
 }: {
   ending: FunnelEndingView | null;
   bookedISO: string | null;
+  meetingUnavailable: boolean;
 }) {
   const t = useTranslations("funnel");
   const locale = useLocale();
 
   const bonusUrl = ending?.type === "BONUS" ? ending.bonusUrl : null;
   const meetingBooked = ending?.type === "MEETING" && bookedISO;
+  const meetingFailed =
+    ending?.type === "MEETING" && !bookedISO && meetingUnavailable;
   const redirectUrl = ending?.type === "REDIRECT" ? ending.redirectUrl : null;
   const bookedLabel = bookedISO
     ? new Date(bookedISO).toLocaleString(locale, {
@@ -443,10 +457,18 @@ function FunnelCompletion({
   return (
     <div className="mt-4 self-stretch rounded-2xl border border-border bg-card p-6 text-center">
       <h2 className="text-lg font-bold">
-        {meetingBooked ? t("bookedTitle") : t("completionTitle")}
+        {meetingBooked
+          ? t("bookedTitle")
+          : meetingFailed
+            ? t("meetingUnavailableTitle")
+            : t("completionTitle")}
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        {meetingBooked ? bookedLabel : t("completionText")}
+        {meetingBooked
+          ? bookedLabel
+          : meetingFailed
+            ? t("meetingUnavailableText")
+            : t("completionText")}
       </p>
 
       {bonusUrl ? (

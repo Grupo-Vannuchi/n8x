@@ -86,6 +86,8 @@ export async function exchangeCodeAndStore(code: string): Promise<void> {
     refreshToken: tokens.refresh_token ?? existing?.refreshToken ?? null,
     expiryDate: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
     scope: tokens.scope ?? null,
+    // A fresh reconnect clears any prior "needs reconnect" flag.
+    invalidatedAt: null,
   };
 
   if (existing) {
@@ -137,6 +139,25 @@ async function authedContext(): Promise<AuthedContext | null> {
   return { client, calendarId: account.calendarId };
 }
 
+/** Detect Google's "token expired/revoked" error (invalid_grant). */
+function isInvalidGrant(error: unknown): boolean {
+  const e = error as {
+    message?: string;
+    response?: { data?: { error?: string } };
+  };
+  return (
+    e?.response?.data?.error === "invalid_grant" ||
+    (typeof e?.message === "string" && e.message.includes("invalid_grant"))
+  );
+}
+
+/** Flag the stored account so the admin panel prompts a reconnect. */
+async function markGoogleInvalid(): Promise<void> {
+  await prisma.googleAccount
+    .updateMany({ data: { invalidatedAt: new Date() } })
+    .catch((e) => console.error("Failed to flag Google account invalid", e));
+}
+
 type BusyInterval = { start: Date; end: Date };
 
 async function getFreeBusy(
@@ -179,6 +200,7 @@ export async function getAvailableSlots(
   } catch (error) {
     // Missing scope, revoked access, API hiccup — never crash the public funnel.
     console.error("Failed to read Google free/busy", error);
+    if (isInvalidGrant(error)) await markGoogleInvalid();
     return [];
   }
 
@@ -299,6 +321,7 @@ export async function bookMeeting(
     return { ok: true, eventId: res.data.id ?? "", meetLink };
   } catch (error) {
     console.error("Failed to create calendar event", error);
+    if (isInvalidGrant(error)) await markGoogleInvalid();
     return { ok: false, error: "unknown" };
   }
 }

@@ -369,6 +369,9 @@ model GoogleAccount {
   expiryDate   DateTime?
   calendarId   String    @default("primary")
   scope        String?
+  /// Set when Google rejects the token (invalid_grant) so the admin panel can
+  /// prompt a reconnect. Cleared on a successful reconnect.
+  invalidatedAt DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 

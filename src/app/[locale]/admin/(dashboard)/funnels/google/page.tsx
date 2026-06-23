@@ -21,7 +21,9 @@ export default async function FunnelGooglePage({
 
   const { connected: justConnected, error } = await searchParams;
   const account = await getGoogleAccount();
-  const connected = Boolean(account?.refreshToken);
+  // A token rejected by Google (invalid_grant) keeps its row but needs a reconnect.
+  const expired = Boolean(account?.refreshToken && account?.invalidatedAt);
+  const connected = Boolean(account?.refreshToken) && !expired;
   const configured = isGoogleConfigured();
 
   return (
@@ -58,6 +60,33 @@ export default async function FunnelGooglePage({
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("googleNotConfiguredHint")}
               </p>
+            </div>
+          </div>
+        ) : expired ? (
+          <div className="flex flex-col gap-5">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 size-5 shrink-0 text-amber-500" />
+              <div>
+                <p className="font-medium">{t("googleExpired")}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t("googleExpiredHint")}
+                </p>
+                {account?.email ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {account.email}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              <a
+                href="/api/admin/google/connect"
+                className={cn(buttonVariants({ size: "md" }))}
+              >
+                {t("googleReconnect")}
+              </a>
+              <GoogleDisconnectButton />
             </div>
           </div>
         ) : connected ? (
