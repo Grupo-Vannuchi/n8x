@@ -54,11 +54,15 @@ jobs:
       - name: Apply migrations
         run: npx prisma migrate deploy
 
+      # Build first: `next build` generates next-env.d.ts (which declares image
+      # imports like *.png) and runs its own TypeScript check. A standalone
+      # `tsc`/`eslint` before it fails on a fresh clone because that file is
+      # generated, not committed.
+      - name: Build
+        run: npm run build
+
       - name: Typecheck
         run: npm run typecheck
 
       - name: Lint
         run: npm run lint
-
-      - name: Build
-        run: npm run build
