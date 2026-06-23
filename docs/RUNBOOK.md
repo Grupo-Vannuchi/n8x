@@ -11,8 +11,8 @@ the production deploy basics see SNAPSHOT.md too.
 
 | Var | Where | Notes |
 |---|---|---|
-| `DATABASE_URL` | Vercel + local | Supabase **pooled** (6543) `?pgbouncer=true&connection_limit=1`. Mark **Sensitive** on Vercel. |
-| `DIRECT_URL` | Vercel + local | Supabase **session pooler** (5432), migrations only — **no** `connection_limit`. |
+| `DATABASE_URL` | Vercel + local | Supabase **pooled** (6543) `?pgbouncer=true`. Mark **Sensitive** on Vercel. ⚠️ Do **not** add `connection_limit=1` — PgBouncer already pools, and `=1` breaks the build's concurrent prerender (`P2024`). |
+| `DIRECT_URL` | Vercel + local | Supabase **session pooler** (5432), migrations only. |
 | `SESSION_SECRET` | Vercel + local | JWT session signing. |
 | `NEXT_PUBLIC_SITE_URL` | Vercel + local | Inlined at build — set before the first build. |
 | `EVOLUTION_BASE_URL` / `EVOLUTION_API_KEY` | server | Evolution server + global key. |

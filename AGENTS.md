@@ -45,9 +45,11 @@ docs/                         ARCHITECTURE, RUNBOOK, ADRs, SEO audit
 
 ## Prisma (database) — skill: `prisma-patterns`
 
-- **Serverless connection pool:** in production `DATABASE_URL` must carry
-  `?pgbouncer=true&connection_limit=1` (Supabase pooler, port 6543). `DIRECT_URL`
-  (port 5432) is migrations-only and stays unpooled.
+- **Serverless connection pool:** in production `DATABASE_URL` uses the Supabase
+  pooler (port 6543) with `?pgbouncer=true` — PgBouncer already caps real DB
+  connections. **Do not force `connection_limit=1`** on it: it starves the
+  build's concurrent prerendering (`P2024` pool timeout across the 400+ static
+  pages). `DIRECT_URL` (port 5432) is migrations-only and stays unpooled.
 - **Migrations:** `prisma migrate deploy` in CI/prod (the Vercel build runs it);
   `prisma migrate dev` **only** on the local Docker DB (it can reset data).
   Never edit a migration file after it has been applied (checksum break).
