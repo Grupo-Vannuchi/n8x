@@ -31,6 +31,10 @@ const serverSchema = z.object({
   // External conversation inbox (the dedicated chat UI — metodon8n now,
   // Chatwoot/Evo CRM once self-hosted). Linked from the admin WhatsApp panel.
   WHATSAPP_INBOX_URL: z.string().url().optional(),
+  // Upstash Redis (Vercel Marketplace, "KV" prefix) for durable rate limiting.
+  // When absent (e.g. local dev), the limiter falls back to in-memory.
+  KV_REST_API_URL: z.string().url().optional(),
+  KV_REST_API_TOKEN: z.string().min(1).optional(),
   // Google OAuth (Calendar) for MEETING funnels.
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),

@@ -255,6 +255,7 @@
     "completionTitle": "Tudo certo! 🎉",
     "completionText": "Recebemos suas respostas. Em breve entraremos em contato.",
     "errorRetry": "Algo deu errado ao enviar. Tente novamente.",
+    "rateLimited": "Muitas tentativas em pouco tempo. Aguarde um minuto e tente de novo.",
     "retry": "Tentar de novo",
     "download": "Baixar agora",
     "redirectButton": "Continuar",

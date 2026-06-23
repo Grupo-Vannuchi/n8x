@@ -97,6 +97,9 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   >("running");
   const [bookedISO, setBookedISO] = useState<string | null>(null);
   const [retryNotice, setRetryNotice] = useState(false);
+  const [errorKey, setErrorKey] = useState<"errorRetry" | "rateLimited">(
+    "errorRetry",
+  );
   const [reachedEnding, setReachedEnding] = useState<FunnelEndingView | null>(null);
 
   const [values, setValues] = useState<FunnelLeadValues>({});
@@ -177,6 +180,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
       setRetryNotice(true);
       setStatus("scheduling");
     } else {
+      setErrorKey(res.error === "rate_limited" ? "rateLimited" : "errorRetry");
       setStatus("error");
     }
   }
@@ -288,7 +292,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
 
         {status === "error" ? (
           <div className="self-start">
-            <p className="text-sm text-red-500">{t("errorRetry")}</p>
+            <p className="text-sm text-red-500">{t(errorKey)}</p>
             <button
               type="button"
               onClick={retry}
