@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "defaultTitle": "{brand} — Agência de Marketing Estratégico",
+    "defaultTitle": "{brand} — Sua marca na primeira página do Google",
     "titleTemplate": "%s · {brand}",
     "description": "A N8X Marketing é uma agência de marketing digital especializada em estratégia, conteúdo, posicionamento de marca e crescimento previsível para empresas.",
     "keywords": "agência, publicidade, marketing, social media, branding, tráfego pago"
@@ -30,7 +30,7 @@
   "home": {
     "hero": {
       "eyebrow": "Há {years} anos no mercado",
-      "titleLead": "Agência de marketing estratégico",
+      "titleLead": "Sua marca na primeira página do Google",
       "rotating": ["Focada em crescimento previsível!"],
       "subtitle": "A N8X Marketing usa a estratégia de Ideal Customer Profile (ICP) para encontrar, abordar e engajar clientes ideais todos os dias.",
       "primaryCta": "Começar um projeto",
