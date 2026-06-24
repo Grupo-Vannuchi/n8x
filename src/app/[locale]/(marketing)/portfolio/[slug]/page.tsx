@@ -9,7 +9,7 @@ import { Section } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
 import { RichText } from "@/components/rich-text";
 import { buttonVariants } from "@/components/ui/button";
-import { getProjectBySlug, getProjectSlugs } from "@/lib/queries";
+import { getProjectBySlug } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
 import { localeAlternates, localizedUrl } from "@/lib/seo";
 import { siteConfig } from "@/config/site";
@@ -17,15 +17,10 @@ import { BreadcrumbJsonLd, CreativeWorkJsonLd } from "@/components/json-ld";
 
 type Params = { locale: string; slug: string };
 
-// Prerender every published project (per locale). New/edited projects are
-// rendered on demand and cached, then refreshed via the `projects` tag.
-// Resilient to the DB being unavailable at build time — falls back to on-demand.
-export async function generateStaticParams() {
-  try {
-    return (await getProjectSlugs()).map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
+// Don't prerender slugs at build — detail pages render on the first request and
+// are then cached (ISR via the `projects` tag). Keeps the build small and fast.
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata({
