@@ -2,7 +2,8 @@
 
 The strategy and rollout for automated tests in n8x. Grounded in the
 `react-testing` and `e2e-testing` skills, adapted to this codebase. Status:
-**not started** — this doc is the plan; check items off as they land.
+**Phase 3a landed** (Vitest base + first unit/component tests + CI). Phase 3b
+(Playwright) and 3c (growth) still open.
 
 ## Philosophy
 
@@ -121,12 +122,12 @@ Scripts (package.json):
 
 ## Phased rollout
 
-### Phase 3a — Vitest base + first tests + CI  *(high ROI, ~0.5–1 day)*
-- [ ] Add deps + scripts + `vitest.config.ts` + `test/setup.ts` + `test/test-utils.tsx` + asset stub.
-- [ ] Unit tests: `interpolateTokens`, `phone`, `rate-limit`, one `funnel-form` round-trip.
-- [ ] Component tests: `funnel-runner` (branching + **answers regression**), `contact-form` (honeypot + validation + axe).
-- [ ] Add the `Test` step to `ci.yml`.
-- **Done when:** `npm run test` is green locally and in CI; the answers-regression test fails if the `answerChoice` fix is reverted.
+### Phase 3a — Vitest base + first tests + CI  *(DONE)*
+- [x] Deps + scripts (`test`, `test:watch`) + `vitest.config.ts` + `test/setup.ts` + `test/test-utils.tsx`. Asset stub deferred — the tested components don't import images; add it when one does.
+- [x] Unit tests: `interpolateTokens`, `phone`, `rate-limit` (exported `memLimit`), `funnel-form` round-trip.
+- [x] Component tests: `funnel-runner` (**answers regression**), `contact-form` (honeypot hidden + validation + success + axe).
+- [x] Added the `Test` step to `ci.yml` (runs first — no DB/browser needed).
+- **Done:** `npm run test` is green (26 tests); the answers-regression test fails if the `answerChoice` fix is reverted.
 
 ### Phase 3b — Playwright + E2E  *(~1 day)*
 - [ ] Add Playwright + `playwright.config.ts` + `prisma/seed-e2e.ts`.

@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   verify:
-    name: typecheck · lint · build
+    name: test · typecheck · lint · build
     runs-on: ubuntu-latest
 
     # Prisma queries run during the Next prerender, so the build needs a DB.
@@ -50,6 +50,12 @@ jobs:
       # cross-version transitive drift (e.g. @swc/helpers). install reconciles it.
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+
+      # Vitest unit + component tests. Fast and self-contained (jsdom; no DB or
+      # browser — static assets and server-only modules are stubbed), so it runs
+      # first for quick feedback before the slower build.
+      - name: Test
+        run: npm run test
 
       - name: Apply migrations
         run: npx prisma migrate deploy

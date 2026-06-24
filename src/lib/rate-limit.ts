@@ -43,7 +43,9 @@ function getLimiter(name: string, limit: number, windowSeconds: number): Ratelim
 // --- In-memory fallback (fixed window, per instance) ---
 const memStore = new Map<string, { count: number; reset: number }>();
 
-function memLimit(key: string, limit: number, windowMs: number, now: number): RateLimitResult {
+// Exported for unit testing — pure given `now`, so the fixed-window behaviour
+// (allow-up-to-limit, retryAfter, reset) can be asserted deterministically.
+export function memLimit(key: string, limit: number, windowMs: number, now: number): RateLimitResult {
   // Opportunistic cleanup so the map can't grow unbounded.
   if (memStore.size > 5000) {
     for (const [k, v] of memStore) if (v.reset <= now) memStore.delete(k);
