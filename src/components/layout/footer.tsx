@@ -36,7 +36,7 @@ export async function Footer() {
         </div>
 
         <nav aria-label={t("navTitle")} className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold">{t("navTitle")}</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">{t("navTitle")}</h3>
           {siteConfig.nav.map((item) => (
             <Link
               key={item.key}
@@ -49,7 +49,7 @@ export async function Footer() {
         </nav>
 
         <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold">{t("contactTitle")}</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">{t("contactTitle")}</h3>
           <a
             href={`mailto:${siteConfig.contact.email}`}
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -72,7 +72,7 @@ export async function Footer() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold">{t("socialTitle")}</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">{t("socialTitle")}</h3>
           <div className="flex gap-3">
             {socials.map(([key, url]) => {
               const Icon = socialIcons[key];
@@ -83,7 +83,7 @@ export async function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={key}
-                  className="inline-flex size-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-brand hover:text-brand"
+                  className="inline-flex size-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-accent hover:text-accent"
                 >
                   <Icon className="size-4" />
                 </a>

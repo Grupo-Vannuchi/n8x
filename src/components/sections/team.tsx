@@ -30,7 +30,7 @@ export async function Team({ locale }: { locale: Locale }) {
             delay={(i % 4) * 90}
             className="group flex flex-col items-center text-center"
           >
-            <div className="relative size-32 overflow-hidden rounded-full bg-muted">
+            <div className="relative size-32 overflow-hidden rounded-full bg-muted ring-1 ring-border transition duration-300 group-hover:ring-accent/50">
               {member.photoUrl ? (
                 <Image
                   src={member.photoUrl}
@@ -54,7 +54,7 @@ export async function Team({ locale }: { locale: Locale }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`${member.name} — ${key}`}
-                    className="text-muted-foreground transition-colors hover:text-brand"
+                    className="text-muted-foreground transition-colors hover:text-accent"
                   >
                     <Icon className="size-4" />
                   </a>

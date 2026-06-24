@@ -13,12 +13,9 @@ export async function CTA() {
   return (
     <section className="py-20 sm:py-section">
       <Container>
-        <Reveal className="relative overflow-hidden rounded-2xl bg-brand px-6 py-16 text-center text-brand-foreground sm:px-12">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-white/10 blur-2xl"
-          />
-          <h2 className="relative mx-auto max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+        <Reveal className="relative overflow-hidden rounded-2xl bg-brand px-6 py-16 text-center text-brand-foreground sm:px-12 sm:py-20">
+          <span className="mx-auto mb-6 block h-px w-10 bg-accent" aria-hidden />
+          <h2 className="relative mx-auto max-w-2xl text-balance font-display text-3xl font-normal tracking-tight sm:text-4xl">
             {t("title")}
           </h2>
           <p className="relative mx-auto mt-4 max-w-xl text-pretty opacity-90">

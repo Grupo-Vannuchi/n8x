@@ -47,11 +47,18 @@ export function SectionHeader({
       )}
     >
       {eyebrow ? (
-        <span className="text-sm font-semibold uppercase tracking-widest text-brand">
-          {eyebrow}
-        </span>
+        align === "left" ? (
+          <span className="inline-flex items-center gap-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="h-px w-8 bg-accent" aria-hidden />
+            {eyebrow}
+          </span>
+        ) : (
+          <span className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            {eyebrow}
+          </span>
+        )
       ) : null}
-      <h2 className="max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+      <h2 className="max-w-2xl text-balance font-display text-3xl font-normal tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem]">
         {title}
       </h2>
       {subtitle ? (

@@ -26,7 +26,7 @@ export async function Testimonials({ locale }: { locale: Locale }) {
             as="li"
             key={item.id}
             delay={(i % 3) * 90}
-            className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lg"
+            className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-md"
           >
             <div className="flex gap-0.5" aria-label={`${item.rating}/5`}>
               {Array.from({ length: item.rating }).map((_, i) => (

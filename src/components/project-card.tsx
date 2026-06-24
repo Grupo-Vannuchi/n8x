@@ -7,7 +7,7 @@ export function ProjectCard({ project }: { project: ProjectCardView }) {
   return (
     <Link
       href={`/portfolio/${project.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg focus-visible:shadow-lg"
+      className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-md focus-visible:shadow-md"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <Image
@@ -25,7 +25,7 @@ export function ProjectCard({ project }: { project: ProjectCardView }) {
         </div>
         <h3 className="flex items-start justify-between gap-2 text-lg font-semibold">
           <span className="text-balance">{project.title}</span>
-          <ArrowUpRight className="size-5 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand" />
+          <ArrowUpRight className="size-5 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent" />
         </h3>
         <p className="text-sm text-muted-foreground">{project.summary}</p>
         {project.tags.length > 0 ? (

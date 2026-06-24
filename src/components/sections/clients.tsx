@@ -69,7 +69,7 @@ export async function Clients() {
         <Reveal
           as="h2"
           variant="fade"
-          className="text-center text-sm font-semibold uppercase tracking-widest text-muted-foreground"
+          className="text-center text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
         >
           {t("title")}
         </Reveal>
