@@ -129,11 +129,11 @@ Scripts (package.json):
 - [x] Added the `Test` step to `ci.yml` (runs first — no DB/browser needed).
 - **Done:** `npm run test` is green (26 tests); the answers-regression test fails if the `answerChoice` fix is reverted.
 
-### Phase 3b — Playwright + E2E  *(~1 day)*
-- [ ] Add Playwright + `playwright.config.ts` + `prisma/seed-e2e.ts`.
-- [ ] E2E: fill a seeded MESSAGE funnel; submit the contact form.
-- [ ] Decide CI: add the separate `e2e` job (Postgres service + seed + browsers).
-- **Done when:** `npm run test:e2e` is green locally; (optional) the e2e CI job passes.
+### Phase 3b — Playwright + E2E  *(local DONE)*
+- [x] Playwright + `playwright.config.ts` (chromium; `webServer: npm run dev`; `locale: pt-BR` so next-intl serves the seeded pt content) + `prisma/seed-e2e.ts` (run in `globalSetup`).
+- [x] E2E: complete the seeded MESSAGE funnel end to end; submit the contact form. `npm run test:e2e` (2 passing).
+- [ ] CI: the separate `e2e` job (Postgres service + seed + browsers) is intentionally **deferred** — run E2E locally first, wire CI once the suite is stable.
+- **Done (local):** `npm run test:e2e` is green. CI job still open.
 
 ### Phase 3c — grow coverage  *(ongoing)*
 - [ ] Add tests with each new feature (TDD where it fits).
