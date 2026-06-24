@@ -8,7 +8,7 @@ import { Section } from "@/components/ui/section";
 import { Icon } from "@/components/ui/icon";
 import { RichText } from "@/components/rich-text";
 import { buttonVariants } from "@/components/ui/button";
-import { getServiceBySlug, getServiceSlugs } from "@/lib/queries";
+import { getServiceBySlug } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
 import { localeAlternates, localizedUrl } from "@/lib/seo";
 import { siteConfig } from "@/config/site";
@@ -16,15 +16,11 @@ import { BreadcrumbJsonLd, ServiceJsonLd } from "@/components/json-ld";
 
 type Params = { locale: string; slug: string };
 
-// Prerender every published service (per locale). New/edited services are
-// rendered on demand and cached, then refreshed via the `services` tag.
-// Resilient to the DB being unavailable at build time — falls back to on-demand.
-export async function generateStaticParams() {
-  try {
-    return (await getServiceSlugs()).map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
+// Don't prerender slugs at build — detail pages render on the first request and
+// are then cached (ISR via the `services` tag). Keeps the build small and fast;
+// only the static + list pages are prebuilt.
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata({
