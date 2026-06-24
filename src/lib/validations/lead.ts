@@ -22,6 +22,9 @@ const defaultMessages: LeadMessages = {
 /** Optional free-text field that may arrive as an empty string. */
 const optionalText = z.string().trim().max(200).optional().or(z.literal(""));
 
+/** Honeypot: hidden from humans; bots tend to fill it → dropped server-side. */
+const honeypot = z.string().max(200).optional();
+
 export function contactSchema(m: LeadMessages = defaultMessages) {
   return z.object({
     name: z.string().trim().min(2, m.nameMin).max(120),
@@ -29,6 +32,7 @@ export function contactSchema(m: LeadMessages = defaultMessages) {
     phone: optionalText,
     company: optionalText,
     message: z.string().trim().min(10, m.messageMin).max(2000),
+    hp: honeypot,
   });
 }
 
@@ -46,6 +50,7 @@ export function careerSchema(m: LeadMessages = defaultMessages) {
       .optional()
       .or(z.literal("")),
     message: z.string().trim().min(10, m.messageMin).max(2000),
+    hp: honeypot,
   });
 }
 

@@ -11,6 +11,7 @@ import {
   type MeetingSlot,
 } from "@/lib/google-calendar";
 import { interpolateTokens } from "@/lib/funnel-runtime";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import {
   funnelSubmissionSchema,
   type FunnelSubmissionInput,
@@ -18,7 +19,10 @@ import {
 
 export type SubmitFunnelResult =
   | { ok: true }
-  | { ok: false; error: "invalid" | "not_found" | "slot_taken" | "unknown" };
+  | {
+      ok: false;
+      error: "invalid" | "not_found" | "slot_taken" | "rate_limited" | "unknown";
+    };
 
 /** Outcome for a completed run, derived from the funnel type. */
 function outcomeFor(
@@ -40,6 +44,14 @@ function outcomeFor(
 export async function submitFunnel(
   input: FunnelSubmissionInput,
 ): Promise<SubmitFunnelResult> {
+  // Per-IP rate limit: public endpoint that writes a lead + books a meeting +
+  // sends WhatsApp, so abuse is costly. 5 submissions / minute / IP.
+  const rl = await rateLimit("funnel-submit", await clientIp(), {
+    limit: 5,
+    windowSeconds: 60,
+  });
+  if (!rl.ok) return { ok: false, error: "rate_limited" };
+
   const parsed = funnelSubmissionSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "invalid" };
   const data = parsed.data;
@@ -79,6 +91,9 @@ export async function submitFunnel(
         name: data.name,
         phone: phoneE164,
         email: data.email || null,
+        role: data.role || null,
+        funnelName: funnel.name,
+        answers: data.answers.map((a) => ({ prompt: a.prompt, answer: a.answer })),
       });
       if (booking.ok) {
         meetingStartAt = new Date(data.meetingStartAt);
@@ -159,6 +174,14 @@ export async function getFunnelSlots(
   locale: string,
   endingKey?: string,
 ): Promise<FunnelSlotsResult> {
+  // Lighter per-IP limit: this only reads Google free/busy, but it's still an
+  // external call worth protecting. 20 / minute / IP; degrade to no slots.
+  const rl = await rateLimit("funnel-slots", await clientIp(), {
+    limit: 20,
+    windowSeconds: 60,
+  });
+  if (!rl.ok) return { configured: false, slots: [] };
+
   const funnel = await prisma.funnel.findFirst({
     where: { id: funnelId, status: "PUBLISHED" },
     include: { endings: { orderBy: { order: "asc" } } },

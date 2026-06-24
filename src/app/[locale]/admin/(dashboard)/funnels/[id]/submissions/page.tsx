@@ -4,6 +4,7 @@ import { ArrowLeft, CalendarClock, Download } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { getFunnelById, getFunnelSubmissions } from "@/lib/admin-queries";
+import { SubmissionsFilter } from "@/components/admin/submissions-filter";
 import { resolveLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,7 @@ const OUTCOMES = [
   "MEETING_BOOKED",
   "BONUS_DOWNLOADED",
   "MESSAGE_SENT",
+  "REDIRECTED",
 ] as const;
 
 export default async function FunnelSubmissionsPage({
@@ -21,7 +23,7 @@ export default async function FunnelSubmissionsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ outcome?: string }>;
+  searchParams: Promise<{ outcome?: string; q?: string; a?: string }>;
 }) {
   const { locale: rawLocale, id } = await params;
   const locale = resolveLocale(rawLocale);
@@ -32,15 +34,49 @@ export default async function FunnelSubmissionsPage({
   if (!funnel) notFound();
 
   const all = await getFunnelSubmissions(id);
-  const { outcome } = await searchParams;
+  const { outcome, q, a } = await searchParams;
 
   // Count per outcome → only show chips for outcomes that actually occur.
   const counts = new Map<string, number>();
   for (const s of all) counts.set(s.outcome, (counts.get(s.outcome) ?? 0) + 1);
   const activeOutcome = outcome && counts.has(outcome) ? outcome : null;
-  const submissions = activeOutcome
+
+  // Questions + their distinct answers, aggregated from the submissions, so the
+  // filter only offers questions/answers that actually occurred.
+  const qMap = new Map<string, { prompt: string; answers: Set<string> }>();
+  for (const s of all) {
+    const ans = (Array.isArray(s.answers) ? s.answers : []) as Answer[];
+    for (const x of ans) {
+      const e = qMap.get(x.questionId) ?? {
+        prompt: x.prompt,
+        answers: new Set<string>(),
+      };
+      e.answers.add(x.answer);
+      qMap.set(x.questionId, e);
+    }
+  }
+  const questionFilters = [...qMap.entries()].map(([key, v]) => ({
+    key,
+    prompt: v.prompt,
+    answers: [...v.answers].sort((x, y) => x.localeCompare(y)),
+  }));
+  const activeQuestion = q && qMap.has(q) ? q : null;
+  const activeAnswer =
+    activeQuestion && a && qMap.get(activeQuestion)!.answers.has(a) ? a : null;
+
+  let submissions = activeOutcome
     ? all.filter((s) => s.outcome === activeOutcome)
     : all;
+  if (activeQuestion) {
+    submissions = submissions.filter((s) => {
+      const ans = (Array.isArray(s.answers) ? s.answers : []) as Answer[];
+      return ans.some(
+        (x) =>
+          x.questionId === activeQuestion &&
+          (!activeAnswer || x.answer === activeAnswer),
+      );
+    });
+  }
 
   const dateFmt = new Intl.DateTimeFormat(locale, {
     dateStyle: "short",
@@ -48,7 +84,26 @@ export default async function FunnelSubmissionsPage({
   });
 
   const base = `/admin/funnels/${id}/submissions`;
-  const exportHref = `/api/admin/funnels/${id}/export${activeOutcome ? `?outcome=${activeOutcome}` : ""}`;
+  // Build a URL preserving the active filters, applying overrides.
+  const buildHref = (overrides: Record<string, string | null>): string => {
+    const p = new URLSearchParams();
+    if (activeOutcome) p.set("outcome", activeOutcome);
+    if (activeQuestion) p.set("q", activeQuestion);
+    if (activeAnswer) p.set("a", activeAnswer);
+    for (const [k, v] of Object.entries(overrides)) {
+      if (v) p.set(k, v);
+      else p.delete(k);
+    }
+    const s = p.toString();
+    return s ? `${base}?${s}` : base;
+  };
+  const exportQuery = new URLSearchParams();
+  if (activeOutcome) exportQuery.set("outcome", activeOutcome);
+  if (activeQuestion) exportQuery.set("q", activeQuestion);
+  if (activeAnswer) exportQuery.set("a", activeAnswer);
+  const exportHref = `/api/admin/funnels/${id}/export${
+    exportQuery.toString() ? `?${exportQuery}` : ""
+  }`;
 
   const chip = (active: boolean) =>
     cn(
@@ -86,19 +141,31 @@ export default async function FunnelSubmissionsPage({
       </div>
 
       {all.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          <Link href={base} className={chip(!activeOutcome)}>
-            {t("filterAll")} ({all.length})
-          </Link>
-          {OUTCOMES.filter((o) => counts.has(o)).map((o) => (
-            <Link
-              key={o}
-              href={`${base}?outcome=${o}`}
-              className={chip(activeOutcome === o)}
-            >
-              {t(`outcome_${o}`)} ({counts.get(o)})
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
+            <Link href={buildHref({ outcome: null })} className={chip(!activeOutcome)}>
+              {t("filterAll")} ({all.length})
             </Link>
-          ))}
+            {OUTCOMES.filter((o) => counts.has(o)).map((o) => (
+              <Link
+                key={o}
+                href={buildHref({ outcome: o })}
+                className={chip(activeOutcome === o)}
+              >
+                {t(`outcome_${o}`)} ({counts.get(o)})
+              </Link>
+            ))}
+          </div>
+          <SubmissionsFilter
+            questions={questionFilters}
+            selectedQuestion={activeQuestion}
+            selectedAnswer={activeAnswer}
+          />
+          {submissions.length !== all.length ? (
+            <p className="text-xs text-muted-foreground">
+              {t("filterShowing", { shown: submissions.length, total: all.length })}
+            </p>
+          ) : null}
         </div>
       ) : null}
 

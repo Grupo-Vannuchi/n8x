@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import {
   careerSchema,
   contactSchema,
@@ -21,8 +22,17 @@ export async function submitContactLead(
   input: ContactInput,
   locale: string,
 ): Promise<LeadResult> {
+  // Public write endpoint → per-IP rate limit (5/min).
+  const rl = await rateLimit("contact-lead", await clientIp(), {
+    limit: 5,
+    windowSeconds: 60,
+  });
+  if (!rl.ok) return { ok: false };
+
   const parsed = contactSchema().safeParse(input);
   if (!parsed.success) return { ok: false };
+  // Honeypot tripped → pretend success, persist nothing.
+  if (parsed.data.hp) return { ok: true };
 
   try {
     const { name, email, phone, company, message } = parsed.data;
@@ -49,8 +59,17 @@ export async function submitCareerLead(
   input: CareerInput,
   locale: string,
 ): Promise<LeadResult> {
+  // Public write endpoint → per-IP rate limit (5/min).
+  const rl = await rateLimit("career-lead", await clientIp(), {
+    limit: 5,
+    windowSeconds: 60,
+  });
+  if (!rl.ok) return { ok: false };
+
   const parsed = careerSchema().safeParse(input);
   if (!parsed.success) return { ok: false };
+  // Honeypot tripped → pretend success, persist nothing.
+  if (parsed.data.hp) return { ok: true };
 
   try {
     const { name, email, phone, role, portfolio, message } = parsed.data;

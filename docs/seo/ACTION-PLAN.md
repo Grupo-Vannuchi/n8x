@@ -1,6 +1,6 @@
 # Plano de Ação SEO — n8x-marketing
 
-Ordem de execução priorizada (impacto × esforço). Baseado em [FULL-AUDIT-REPORT.md](FULL-AUDIT-REPORT.md).
+Ordem de execução priorizada (impacto × esforço). Baseado em [AUDIT-REPORT.md](AUDIT-REPORT.md).
 
 ---
 

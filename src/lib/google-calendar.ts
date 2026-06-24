@@ -86,6 +86,8 @@ export async function exchangeCodeAndStore(code: string): Promise<void> {
     refreshToken: tokens.refresh_token ?? existing?.refreshToken ?? null,
     expiryDate: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
     scope: tokens.scope ?? null,
+    // A fresh reconnect clears any prior "needs reconnect" flag.
+    invalidatedAt: null,
   };
 
   if (existing) {
@@ -97,6 +99,8 @@ export async function exchangeCodeAndStore(code: string): Promise<void> {
 
 /** Remove the stored Google connection. */
 export async function disconnectGoogleAccount(): Promise<void> {
+  // GoogleAccount is a singleton table — `deleteMany()` without a `where` clears
+  // the single connection row on purpose (disconnect), not an accidental wipe.
   await prisma.googleAccount.deleteMany();
 }
 
@@ -133,6 +137,25 @@ async function authedContext(): Promise<AuthedContext | null> {
   });
 
   return { client, calendarId: account.calendarId };
+}
+
+/** Detect Google's "token expired/revoked" error (invalid_grant). */
+function isInvalidGrant(error: unknown): boolean {
+  const e = error as {
+    message?: string;
+    response?: { data?: { error?: string } };
+  };
+  return (
+    e?.response?.data?.error === "invalid_grant" ||
+    (typeof e?.message === "string" && e.message.includes("invalid_grant"))
+  );
+}
+
+/** Flag the stored account so the admin panel prompts a reconnect. */
+async function markGoogleInvalid(): Promise<void> {
+  await prisma.googleAccount
+    .updateMany({ data: { invalidatedAt: new Date() } })
+    .catch((e) => console.error("Failed to flag Google account invalid", e));
 }
 
 type BusyInterval = { start: Date; end: Date };
@@ -177,6 +200,7 @@ export async function getAvailableSlots(
   } catch (error) {
     // Missing scope, revoked access, API hiccup — never crash the public funnel.
     console.error("Failed to read Google free/busy", error);
+    if (isInvalidGrant(error)) await markGoogleInvalid();
     return [];
   }
 
@@ -225,7 +249,14 @@ export type BookResult =
 export async function bookMeeting(
   funnel: MeetingConfig,
   startISO: string,
-  attendee: { name: string; phone: string | null; email: string | null },
+  attendee: {
+    name: string;
+    phone: string | null;
+    email: string | null;
+    role?: string | null;
+    funnelName?: string;
+    answers?: { prompt: string; answer: string }[];
+  },
 ): Promise<BookResult> {
   const ctx = await authedContext();
   if (!ctx) return { ok: false, error: "not_configured" };
@@ -233,6 +264,25 @@ export async function bookMeeting(
   const duration = funnel.meetingDurationMinutes ?? 30;
   const start = new Date(startISO);
   const end = new Date(start.getTime() + duration * 60000);
+
+  // Rich, professional event details: lead context + the funnel answers laid
+  // out like the admin "submissions" view (question, then its answer below).
+  const summary = attendee.funnelName
+    ? `Reunião — ${attendee.name} (${attendee.funnelName})`
+    : `Reunião — ${attendee.name}`;
+  const detail: string[] = [
+    `Lead recebido pelo funil: ${attendee.funnelName ?? "—"}`,
+    "",
+    `Nome: ${attendee.name}`,
+    `Cargo: ${attendee.role || "—"}`,
+    `E-mail: ${attendee.email ?? "—"}`,
+    `WhatsApp: ${attendee.phone ?? "—"}`,
+  ];
+  if (attendee.answers?.length) {
+    detail.push("", "Respostas do funil:");
+    for (const a of attendee.answers) detail.push("", a.prompt, `→ ${a.answer}`);
+  }
+  const description = detail.join("\n");
 
   try {
     // Read-then-write race guard: re-check right before inserting.
@@ -247,13 +297,8 @@ export async function bookMeeting(
       // Required for Google to provision a Meet link via createRequest.
       conferenceDataVersion: 1,
       requestBody: {
-        summary: `Reunião — ${attendee.name}`,
-        description: [
-          "Agendado por um funil do site.",
-          `Nome: ${attendee.name}`,
-          `WhatsApp: ${attendee.phone ?? "-"}`,
-          `E-mail: ${attendee.email ?? "-"}`,
-        ].join("\n"),
+        summary,
+        description,
         start: { dateTime: start.toISOString() },
         end: { dateTime: end.toISOString() },
         conferenceData: {
@@ -276,6 +321,7 @@ export async function bookMeeting(
     return { ok: true, eventId: res.data.id ?? "", meetLink };
   } catch (error) {
     console.error("Failed to create calendar event", error);
+    if (isInvalidGrant(error)) await markGoogleInvalid();
     return { ok: false, error: "unknown" };
   }
 }

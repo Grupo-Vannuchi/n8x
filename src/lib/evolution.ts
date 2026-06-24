@@ -44,7 +44,9 @@ async function evoRequest<T>(
         apikey: env.EVOLUTION_API_KEY!,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal: AbortSignal.timeout(15_000),
+      // Management calls populate UI — keep the wait short so a slow/unreachable
+      // server degrades quickly instead of hanging the request.
+      signal: AbortSignal.timeout(8_000),
     });
     const text = await res.text().catch(() => "");
     if (!res.ok) {

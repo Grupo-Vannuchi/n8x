@@ -1,5 +1,7 @@
 # n8x marketing
 
+[![CI](https://github.com/Grupo-Vannuchi/n8x/actions/workflows/ci.yml/badge.svg)](https://github.com/Grupo-Vannuchi/n8x/actions/workflows/ci.yml)
+
 A production-grade, **marketing-agency website** built with Next.js 16
 (App Router), TypeScript, Tailwind CSS v4, Prisma and PostgreSQL. Inspired by the
 structure of a full-service advertising agency: hero, services, portfolio/case
@@ -9,6 +11,25 @@ capture and a small authenticated admin.
 The whole brand is driven by a single config file, the UI is **bilingual
 (pt-BR / English)** via next-intl, and all dynamic content lives in Postgres and
 is editable through the admin.
+
+> Beyond the marketing site, the app ships a **conversational lead-capture
+> "funnels"** feature (admin builder + public `/f/<slug>` runtime) with Google
+> Calendar, WhatsApp (Evolution) and rate-limiting integrations. See
+> [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## Documentation
+
+| Doc | What |
+| --- | --- |
+| [`AGENTS.md`](AGENTS.md) | Conventions & rules — **read before coding** (DB, React, security, Next). |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setup, workflow, commit/board conventions. |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the system fits together + the funnels subsystem. |
+| [`docs/RUNBOOK.md`](docs/RUNBOOK.md) | Operations: Google, WhatsApp, Upstash, env vars, deploy. |
+| [`docs/adr/`](docs/adr/) | Architecture decision records (the *why*). |
+| [`docs/TESTING.md`](docs/TESTING.md) | Testing strategy & rollout plan. |
+| [`SECURITY.md`](SECURITY.md) | Security policy & pre-deploy checklist. |
+| [`SNAPSHOT.md`](SNAPSHOT.md) | Restore/snapshot & first production deploy. |
+| [`docs/seo/`](docs/seo/) | SEO audit & action plan. |
 
 ---
 
@@ -106,6 +127,21 @@ Request  →  proxy.ts                 detects the locale (pt = "/", en = "/en")
   dashboard + leads management.
 - **`src/lib/{session,auth}.ts` + `src/app/actions/`** — auth (signed cookie via
   jose) and server actions (login, saving a lead, changing a lead's status).
+
+## Funnels & integrations
+
+The admin builds conversational funnels served at `/f/<slug>` (noindex). Endings
+can book a **Google Calendar** meeting (with a Meet link), send a **WhatsApp**
+message (**Evolution API**), offer a **bonus** download, or **redirect** to an
+external URL. The public submit endpoint is **rate-limited** per IP
+(**Upstash**/Vercel KV, in-memory fallback). Full design in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); operational steps (connecting
+Google/WhatsApp, env vars) in [`docs/RUNBOOK.md`](docs/RUNBOOK.md).
+
+Integration env (all optional — features degrade gracefully when unset):
+`EVOLUTION_BASE_URL`, `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCE`,
+`WHATSAPP_INBOX_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
+`GOOGLE_REDIRECT_URI`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`.
 
 ## Customization guide
 

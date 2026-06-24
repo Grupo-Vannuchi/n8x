@@ -5,13 +5,14 @@ import {
   ExternalLink,
   SlidersHorizontal,
   CalendarClock,
+  AlertCircle,
   MessageCircle,
   Inbox,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { FunnelDeleteButton } from "@/components/admin/funnel-delete-button";
-import { getAdminFunnels } from "@/lib/admin-queries";
+import { getAdminFunnels, getGoogleAccount } from "@/lib/admin-queries";
 import { resolveLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +29,14 @@ export default async function AdminFunnelsPage({
   const locale = resolveLocale((await params).locale);
   setRequestLocale(locale);
   const t = await getTranslations("admin.funnels");
-  const funnels = await getAdminFunnels();
+  const [funnels, googleAccount] = await Promise.all([
+    getAdminFunnels(),
+    getGoogleAccount(),
+  ]);
+  // Google token rejected (invalid_grant) → flag the button before the tab is opened.
+  const googleExpired = Boolean(
+    googleAccount?.refreshToken && googleAccount?.invalidatedAt,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -51,10 +59,24 @@ export default async function AdminFunnelsPage({
           </Link>
           <Link
             href="/admin/funnels/google"
-            className={cn(buttonVariants({ variant: "outline", size: "md" }))}
+            aria-label={
+              googleExpired ? t("googleConnectionExpired") : t("googleConnection")
+            }
+            className={cn(
+              buttonVariants({ variant: "outline", size: "md" }),
+              googleExpired &&
+                "border-amber-500 bg-amber-500/10 text-amber-600 hover:border-amber-500 hover:bg-amber-500/20 hover:text-amber-700",
+            )}
           >
-            <CalendarClock className="size-4" />
+            {googleExpired ? (
+              <AlertCircle className="size-4" />
+            ) : (
+              <CalendarClock className="size-4" />
+            )}
             {t("googleConnection")}
+            {googleExpired ? (
+              <span className="ml-0.5 inline-flex size-2 rounded-full bg-amber-500" />
+            ) : null}
           </Link>
           <Link href="/admin/funnels/new" className={buttonVariants({ size: "md" })}>
             <Plus className="size-4" />

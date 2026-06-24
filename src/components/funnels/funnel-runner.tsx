@@ -97,6 +97,12 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   >("running");
   const [bookedISO, setBookedISO] = useState<string | null>(null);
   const [retryNotice, setRetryNotice] = useState(false);
+  const [errorKey, setErrorKey] = useState<"errorRetry" | "rateLimited">(
+    "errorRetry",
+  );
+  // A MEETING ending whose scheduler couldn't load slots (e.g. Google expired):
+  // we still capture the lead, but say so honestly instead of faking completion.
+  const [meetingUnavailable, setMeetingUnavailable] = useState(false);
   const [reachedEnding, setReachedEnding] = useState<FunnelEndingView | null>(null);
 
   const [values, setValues] = useState<FunnelLeadValues>({});
@@ -145,14 +151,20 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing, status]);
 
-  /** Reach a funnel ending: a MEETING opens the scheduler; others submit now. */
-  function reachEnding(ending: FunnelEndingView) {
+  /** Reach a funnel ending: a MEETING opens the scheduler; others submit now.
+   * `answersOverride` carries the just-picked answer that `setAnswers` hasn't
+   * committed yet, so a choice that branches straight to an ending isn't lost. */
+  function reachEnding(ending: FunnelEndingView, answersOverride?: FunnelAnswer[]) {
     setReachedEnding(ending);
     if (ending.type === "MEETING") setStatus("scheduling");
-    else void runSubmit(ending);
+    else void runSubmit(ending, undefined, answersOverride);
   }
 
-  async function runSubmit(ending: FunnelEndingView, meetingStartAt?: string) {
+  async function runSubmit(
+    ending: FunnelEndingView,
+    meetingStartAt?: string,
+    answersOverride?: FunnelAnswer[],
+  ) {
     if (submittedRef.current) return;
     submittedRef.current = true;
     setStatus("submitting");
@@ -165,7 +177,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
       role: values.role,
       phone: values.phone,
       email: values.email,
-      answers,
+      answers: answersOverride ?? answers,
       meetingStartAt,
     });
     if (res.ok) {
@@ -177,6 +189,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
       setRetryNotice(true);
       setStatus("scheduling");
     } else {
+      setErrorKey(res.error === "rate_limited" ? "rateLimited" : "errorRetry");
       setStatus("error");
     }
   }
@@ -198,23 +211,26 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   }
 
   function answerChoice(questionKey: string, prompt: string, option: ChoiceOption) {
-    setAnswers((a) => [
-      ...a,
+    // Compute the new answers locally so a branch that submits in this same
+    // handler includes the just-picked answer (state updates are async).
+    const nextAnswers = [
+      ...answers,
       { questionId: questionKey, prompt, answer: option.label },
-    ]);
+    ];
+    setAnswers(nextAnswers);
     setMessages((m) => [...m, { role: "user", text: option.label }]);
     setAwaiting(false);
     // Branch to the option's target: a question, an ending, the default ending
     // ("END"), or the next node in order.
     const next = option.next;
     if (next === "END") {
-      reachEnding(defaultEnding);
+      reachEnding(defaultEnding, nextAnswers);
     } else if (next && keyToIndex.has(next)) {
       setIndex(keyToIndex.get(next)!);
     } else if (next && endingByKey.has(next)) {
-      reachEnding(endingByKey.get(next)!);
+      reachEnding(endingByKey.get(next)!, nextAnswers);
     } else if (index + 1 >= nodes.length) {
-      reachEnding(defaultEnding);
+      reachEnding(defaultEnding, nextAnswers);
     } else {
       setIndex((i) => i + 1);
     }
@@ -272,7 +288,10 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
             endingKey={reachedEnding.key}
             retryNotice={retryNotice}
             onConfirm={(iso) => runSubmit(reachedEnding, iso)}
-            onUnavailable={() => runSubmit(reachedEnding)}
+            onUnavailable={() => {
+              setMeetingUnavailable(true);
+              void runSubmit(reachedEnding);
+            }}
           />
         ) : null}
 
@@ -283,12 +302,16 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
         ) : null}
 
         {status === "done" ? (
-          <FunnelCompletion ending={reachedEnding} bookedISO={bookedISO} />
+          <FunnelCompletion
+            ending={reachedEnding}
+            bookedISO={bookedISO}
+            meetingUnavailable={meetingUnavailable}
+          />
         ) : null}
 
         {status === "error" ? (
           <div className="self-start">
-            <p className="text-sm text-red-500">{t("errorRetry")}</p>
+            <p className="text-sm text-red-500">{t(errorKey)}</p>
             <button
               type="button"
               onClick={retry}
@@ -403,15 +426,19 @@ function openAndDownloadBonus(url: string) {
 function FunnelCompletion({
   ending,
   bookedISO,
+  meetingUnavailable,
 }: {
   ending: FunnelEndingView | null;
   bookedISO: string | null;
+  meetingUnavailable: boolean;
 }) {
   const t = useTranslations("funnel");
   const locale = useLocale();
 
   const bonusUrl = ending?.type === "BONUS" ? ending.bonusUrl : null;
   const meetingBooked = ending?.type === "MEETING" && bookedISO;
+  const meetingFailed =
+    ending?.type === "MEETING" && !bookedISO && meetingUnavailable;
   const redirectUrl = ending?.type === "REDIRECT" ? ending.redirectUrl : null;
   const bookedLabel = bookedISO
     ? new Date(bookedISO).toLocaleString(locale, {
@@ -439,10 +466,18 @@ function FunnelCompletion({
   return (
     <div className="mt-4 self-stretch rounded-2xl border border-border bg-card p-6 text-center">
       <h2 className="text-lg font-bold">
-        {meetingBooked ? t("bookedTitle") : t("completionTitle")}
+        {meetingBooked
+          ? t("bookedTitle")
+          : meetingFailed
+            ? t("meetingUnavailableTitle")
+            : t("completionTitle")}
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        {meetingBooked ? bookedLabel : t("completionText")}
+        {meetingBooked
+          ? bookedLabel
+          : meetingFailed
+            ? t("meetingUnavailableText")
+            : t("completionText")}
       </p>
 
       {bonusUrl ? (

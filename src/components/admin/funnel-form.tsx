@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useForm,
   useFieldArray,
@@ -29,6 +29,7 @@ import {
   updateFunnel,
   type FunnelActionResult,
 } from "@/app/actions/funnels";
+import { listInstancesAction } from "@/app/actions/whatsapp";
 
 const selectStyles =
   "w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm transition-colors focus-visible:border-brand focus-visible:outline-none aria-[invalid=true]:border-red-500";
@@ -133,15 +134,12 @@ export function FunnelForm({
   funnelId,
   defaultValues,
   templateSteps,
-  instanceOptions = [],
 }: {
   mode: "create" | "edit";
   funnelId?: string;
   defaultValues: FunnelFormValues;
   /** Global default steps for the funnel's locale — used by "reset to default". */
   templateSteps: FunnelDefaultStep[];
-  /** WhatsApp instances available on the Evolution server (live, may be empty). */
-  instanceOptions?: string[];
 }) {
   const t = useTranslations("admin.funnels");
   const tv = useTranslations("validation");
@@ -162,6 +160,18 @@ export function FunnelForm({
   // Live lists so the branch-target dropdowns and conditional ending config stay in sync.
   const watchedQuestions = watch("questions") ?? [];
   const watchedEndings = watch("endings") ?? [];
+  // Load WhatsApp instances client-side and non-blocking: the funnel editor must
+  // never hang or fail because the Evolution server is slow/unreachable.
+  const [instanceOptions, setInstanceOptions] = useState<string[]>([]);
+  useEffect(() => {
+    let active = true;
+    listInstancesAction().then((r) => {
+      if (active && r.ok) setInstanceOptions(r.data.map((i) => i.name));
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   // Keep the funnel's current instance selectable even if it's not in the live list.
   const watchedInstance = watch("whatsappInstance");
   const instanceSelectOptions =

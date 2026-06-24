@@ -3,7 +3,36 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+/**
+ * Baseline security headers applied to every response. These are the "safe"
+ * set that never breaks rendering. A Content-Security-Policy is deliberately
+ * NOT set here: the site emits inline JSON-LD (<script type="application/ld+json">)
+ * and loads external fonts/images, so a CSP needs a nonce middleware + testing
+ * and should land as its own change.
+ */
+const securityHeaders = [
+  // Force HTTPS for two years (ignored on http/localhost by browsers).
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
+  // Disallow being embedded in an <iframe> (clickjacking).
+  { key: "X-Frame-Options", value: "DENY" },
+  // Don't let browsers MIME-sniff responses away from their declared type.
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  // Send origin only on cross-origin navigations.
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  // Lock down powerful features the site doesn't use.
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+  },
+];
+
 const nextConfig: NextConfig = {
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
   images: {
     // Remote sources used for seeded/demo imagery. Add a client's CDN here.
     remotePatterns: [
