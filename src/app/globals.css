@@ -25,6 +25,7 @@
   --font-sans:
     var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-fraunces), Georgia, ui-serif, serif;
 
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
@@ -39,6 +40,9 @@
   --muted: #f4f4f5;
   --muted-foreground: #52525b;
   --border: #e4e4e7;
+  /* Editorial hero surface — a warm off-white in light, a comfortable near-black
+     in dark (never the harsh pure white that hurts in dark mode). */
+  --hero-surface: #f7f6f3;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -48,6 +52,7 @@
     --muted: #1c1c1f;
     --muted-foreground: #a1a1aa;
     --border: #27272a;
+    --hero-surface: #0d0d10;
   }
 }
 
@@ -95,6 +100,27 @@
   [data-reveal][data-visible="true"] {
     opacity: 1;
     transform: none;
+  }
+}
+
+/*
+ * Hero statement crossfade — when the carousel advances, the rotating
+ * title/subtitle block remounts (key=index) and eases in. Subtle on purpose
+ * (premium, not flashy); reduced-motion users just get the final state.
+ */
+@keyframes hero-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-fade-in {
+    animation: hero-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
 
