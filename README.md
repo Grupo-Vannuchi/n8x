@@ -1,5 +1,7 @@
 # n8x marketing
 
+[![CI](https://github.com/Grupo-Vannuchi/n8x/actions/workflows/ci.yml/badge.svg)](https://github.com/Grupo-Vannuchi/n8x/actions/workflows/ci.yml)
+
 A production-grade, **marketing-agency website** built with Next.js 16
 (App Router), TypeScript, Tailwind CSS v4, Prisma and PostgreSQL. Inspired by the
 structure of a full-service advertising agency: hero, services, portfolio/case
@@ -24,6 +26,7 @@ is editable through the admin.
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the system fits together + the funnels subsystem. |
 | [`docs/RUNBOOK.md`](docs/RUNBOOK.md) | Operations: Google, WhatsApp, Upstash, env vars, deploy. |
 | [`docs/adr/`](docs/adr/) | Architecture decision records (the *why*). |
+| [`docs/TESTING.md`](docs/TESTING.md) | Testing strategy & rollout plan. |
 | [`SECURITY.md`](SECURITY.md) | Security policy & pre-deploy checklist. |
 | [`SNAPSHOT.md`](SNAPSHOT.md) | Restore/snapshot & first production deploy. |
 | [`docs/seo/`](docs/seo/) | SEO audit & action plan. |

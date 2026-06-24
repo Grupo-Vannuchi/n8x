@@ -10,11 +10,7 @@ import { RichText } from "@/components/rich-text";
 import { InformationCard } from "@/components/information-card";
 import { InformationGallery } from "@/components/information-gallery";
 import { ServiceRegions } from "@/components/service-regions";
-import {
-  getInformationBySlug,
-  getInformationSlugs,
-  getInformations,
-} from "@/lib/queries";
+import { getInformationBySlug, getInformations } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
 import { localeAlternates, localizedUrl } from "@/lib/seo";
 import { siteConfig } from "@/config/site";
@@ -23,15 +19,10 @@ import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/json-ld";
 
 type Params = { locale: string; slug: string };
 
-// Prerender every published information (per locale). New/edited entries are
-// rendered on demand and cached, then refreshed via the `informations` tag.
-// Resilient to the DB being unavailable at build time — falls back to on-demand.
-export async function generateStaticParams() {
-  try {
-    return (await getInformationSlugs()).map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
+// Don't prerender slugs at build — detail pages render on the first request and
+// are then cached (ISR via the `informations` tag). Keeps the build small/fast.
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata({

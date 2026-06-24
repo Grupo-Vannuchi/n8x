@@ -1,0 +1,69 @@
+name: E2E
+
+on:
+  pull_request:
+  push:
+    branches: [Development, main]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: playwright
+    runs-on: ubuntu-latest
+
+    # Playwright builds + starts the app, which prerenders pages via Prisma, so
+    # the E2E job needs its own database.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: agency
+          POSTGRES_PASSWORD: agency
+          POSTGRES_DB: agency
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://agency:agency@localhost:5432/agency
+      DIRECT_URL: postgresql://agency:agency@localhost:5432/agency
+      SESSION_SECRET: ci-session-secret-not-real-change-me-please
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Apply migrations
+        run: npx prisma migrate deploy
+
+      # playwright.config seeds the E2E funnel in globalSetup and, under CI,
+      # builds + starts the app as the web server before running the specs.
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
