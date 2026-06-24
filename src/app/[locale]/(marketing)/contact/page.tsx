@@ -52,7 +52,7 @@ export default async function ContactPage({
           <ContactForm />
 
           <aside className="flex flex-col gap-6">
-            <h2 className="text-lg font-semibold">{t("infoTitle")}</h2>
+            <h2 className="font-display text-lg font-normal tracking-tight">{t("infoTitle")}</h2>
             <ul className="flex flex-col gap-5">
               {channels.map((channel) => (
                 <li key={channel.label} className="flex gap-3">

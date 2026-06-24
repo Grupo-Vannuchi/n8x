@@ -39,7 +39,7 @@ export function LegalDocument({ doc }: { doc: LegalDoc }) {
           <div className="mt-12 flex flex-col gap-10">
             {doc.sections.map((section) => (
               <Reveal as="section" key={section.heading}>
-                <h2 className="text-xl font-bold sm:text-2xl">
+                <h2 className="font-display text-xl font-normal tracking-tight sm:text-2xl">
                   {section.heading}
                 </h2>
                 <div className="mt-4 flex flex-col gap-3">

@@ -17,7 +17,7 @@ export function ServiceRegions({ heading }: { heading: string }) {
 
   return (
     <section className="mt-16">
-      <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{heading}</h2>
+      <h2 className="font-display text-2xl font-normal tracking-tight sm:text-3xl">{heading}</h2>
 
       <div
         role="tablist"

@@ -12,7 +12,7 @@ export function PageHeader({
   return (
     <div className="border-b border-border bg-muted/30">
       <Container className="py-16 sm:py-20">
-        <Reveal as="h1" className="max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">
+        <Reveal as="h1" className="max-w-3xl text-balance font-display text-4xl font-normal tracking-tight sm:text-5xl">
           {title}
         </Reveal>
         {subtitle ? (

@@ -100,7 +100,7 @@ export default async function ProjectPage({
             <ArrowLeft className="size-4" />
             {t("title")}
           </Link>
-          <h1 className="max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="max-w-3xl text-balance font-display text-4xl font-normal tracking-tight sm:text-5xl">
             {project.title}
           </h1>
           <p className="mt-4 max-w-2xl text-pretty text-lg text-muted-foreground">
@@ -181,7 +181,7 @@ export default async function ProjectPage({
 
       <Section className="bg-muted/30">
         <div className="flex flex-col items-center gap-5 text-center">
-          <h2 className="text-balance text-2xl font-bold sm:text-3xl">
+          <h2 className="text-balance font-display text-2xl font-normal tracking-tight sm:text-3xl">
             {t("ctaTitle")}
           </h2>
           <Link href="/contact" className={buttonVariants({ size: "lg" })}>

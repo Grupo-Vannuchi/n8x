@@ -75,14 +75,14 @@ export default async function AboutPage({
 
         <div className="mt-16 grid gap-12 lg:grid-cols-2">
           <div>
-            <h2 className="text-2xl font-bold">{t("practice.title")}</h2>
+            <h2 className="font-display text-2xl font-normal tracking-tight">{t("practice.title")}</h2>
             <p className="mt-4 max-w-xl text-pretty leading-relaxed text-muted-foreground">
               {t.rich("practice.intro", richTags)}
             </p>
             <CheckList items={practiceItems} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">{t("services.title")}</h2>
+            <h2 className="font-display text-2xl font-normal tracking-tight">{t("services.title")}</h2>
             <p className="mt-4 max-w-xl text-pretty leading-relaxed text-muted-foreground">
               {t.rich("services.intro", richTags)}
             </p>
@@ -94,7 +94,7 @@ export default async function AboutPage({
       <Section className="border-y border-border bg-muted/30">
         <div className="grid gap-12 lg:grid-cols-2">
           <div>
-            <h2 className="text-2xl font-bold">{t("audience.title")}</h2>
+            <h2 className="font-display text-2xl font-normal tracking-tight">{t("audience.title")}</h2>
             <p className="mt-4 max-w-xl text-pretty leading-relaxed text-muted-foreground">
               {t.rich("audience.intro", richTags)}
             </p>
@@ -104,7 +104,7 @@ export default async function AboutPage({
             </p>
           </div>
           <div>
-            <h2 className="text-2xl font-bold">{t("timing.title")}</h2>
+            <h2 className="font-display text-2xl font-normal tracking-tight">{t("timing.title")}</h2>
             <p className="mt-4 max-w-xl text-pretty leading-relaxed text-muted-foreground">
               {t.rich("timing.intro", richTags)}
             </p>
@@ -118,7 +118,7 @@ export default async function AboutPage({
 
       <Section>
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-2xl font-bold sm:text-3xl">
+          <h2 className="font-display text-2xl font-normal tracking-tight sm:text-3xl">
             {t("whyFullService.title")}
           </h2>
           <div className="mt-6 flex flex-col gap-4">
@@ -134,13 +134,10 @@ export default async function AboutPage({
 
       <section className="py-20 sm:py-section">
         <Container>
-          <Reveal className="relative overflow-hidden rounded-2xl bg-brand px-6 py-16 text-brand-foreground sm:px-12">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-white/10 blur-2xl"
-            />
+          <Reveal className="relative overflow-hidden rounded-2xl bg-brand px-6 py-16 text-brand-foreground sm:px-12 sm:py-20">
             <div className="relative mx-auto max-w-2xl text-center">
-              <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+              <span className="mx-auto mb-6 block h-px w-10 bg-accent" aria-hidden />
+              <h2 className="text-balance font-display text-3xl font-normal tracking-tight sm:text-4xl">
                 {t("contactCta.title")}
               </h2>
               <div className="mt-5 flex flex-col gap-3">

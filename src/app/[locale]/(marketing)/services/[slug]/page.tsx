@@ -89,7 +89,7 @@ export default async function ServicePage({
           <span className="inline-flex size-14 items-center justify-center rounded-xl bg-brand/10 text-brand">
             <Icon name={service.icon} className="size-7" />
           </span>
-          <h1 className="mt-6 max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="mt-6 max-w-3xl text-balance font-display text-4xl font-normal tracking-tight sm:text-5xl">
             {service.title}
           </h1>
           <p className="mt-4 max-w-2xl text-pretty text-lg text-muted-foreground">
@@ -109,7 +109,7 @@ export default async function ServicePage({
 
       <Section className="bg-muted/30">
         <div className="flex flex-col items-center gap-5 text-center">
-          <h2 className="text-balance text-2xl font-bold sm:text-3xl">
+          <h2 className="text-balance font-display text-2xl font-normal tracking-tight sm:text-3xl">
             {t("ctaTitle")}
           </h2>
           <Link href="/contact" className={buttonVariants({ size: "lg" })}>
