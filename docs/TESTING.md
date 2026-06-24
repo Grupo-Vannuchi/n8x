@@ -115,10 +115,11 @@ Scripts (package.json):
 - **Vitest → the existing job** (`.github/workflows/ci.yml`): add a `Test` step.
   It's fast and needs no browser/DB (static assets are stubbed), so it can run
   early. Goal: a red `npm run test` blocks the PR.
-- **Playwright → a separate job/workflow** (heavier: browsers + app + DB):
-  `playwright install --with-deps`, the Postgres service, seed, `playwright test`,
-  upload the HTML report artifact. Land this **after** the local E2E suite is
-  green; until then run E2E locally.
+- **Playwright → a separate workflow** (`.github/workflows/e2e.yml`, heavier:
+  browsers + app + DB): `playwright install --with-deps chromium`, the Postgres
+  service, migrations, `npm run test:e2e` (which seeds + builds/starts the app),
+  and an uploaded report artifact. Runs on PRs/pushes; not yet a required merge
+  check (see Phase 3b).
 
 ## Phased rollout
 
@@ -129,13 +130,14 @@ Scripts (package.json):
 - [x] Added the `Test` step to `ci.yml` (runs first — no DB/browser needed).
 - **Done:** `npm run test` is green (26 tests); the answers-regression test fails if the `answerChoice` fix is reverted.
 
-### Phase 3b — Playwright + E2E  *(local DONE)*
-- [x] Playwright + `playwright.config.ts` (chromium; `webServer: npm run dev`; `locale: pt-BR` so next-intl serves the seeded pt content) + `prisma/seed-e2e.ts` (run in `globalSetup`).
+### Phase 3b — Playwright + E2E  *(DONE)*
+- [x] Playwright + `playwright.config.ts` (chromium; `locale: pt-BR` so next-intl serves the seeded pt content; `webServer` = dev locally / `build && start` in CI) + `prisma/seed-e2e.ts` (run in `globalSetup`).
 - [x] E2E: complete the seeded MESSAGE funnel end to end; submit the contact form. `npm run test:e2e` (2 passing).
-- [ ] CI: the separate `e2e` job (Postgres service + seed + browsers) is intentionally **deferred** — run E2E locally first, wire CI once the suite is stable.
-- **Done (local):** `npm run test:e2e` is green. CI job still open.
+- [x] CI: separate `.github/workflows/e2e.yml` (Postgres service + `playwright install --with-deps chromium` + migrations + `test:e2e` + report artifact). **Not yet a required merge check** — let it prove stable, then add it to branch protection.
+- **Done:** `npm run test:e2e` green locally; the E2E workflow runs on PRs/pushes.
 
 ### Phase 3c — grow coverage  *(ongoing)*
+- [x] Coverage reporting wired (`npm run test:cov`, v8) — **non-blocking** (no thresholds yet; baseline ~7%).
 - [ ] Add tests with each new feature (TDD where it fits).
 - [ ] Tighten coverage thresholds once the base is stable.
 

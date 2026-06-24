@@ -12,6 +12,14 @@ export default defineConfig({
     setupFiles: ["./test/setup.ts"],
     include: ["test/**/*.test.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
     restoreMocks: true,
+    coverage: {
+      // `npm run test:cov`. Reporting only for now — no thresholds (kept
+      // non-blocking; tighten once the base stabilises, per docs/TESTING.md).
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.d.ts", "src/messages/**"],
+    },
   },
   resolve: {
     alias: [

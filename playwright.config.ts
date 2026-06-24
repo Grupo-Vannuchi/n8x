@@ -23,9 +23,11 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "npm run dev",
+    // Locally: the dev server (fast, reused if already running). In CI: a real
+    // production build + start, which is what E2E should exercise.
+    command: process.env.CI ? "npm run build && npm run start" : "npm run dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: process.env.CI ? 180_000 : 120_000,
   },
 });
