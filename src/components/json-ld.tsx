@@ -149,11 +149,17 @@ export function ArticleJsonLd({
   slug,
   name,
   description,
+  image,
+  datePublished,
+  dateModified,
 }: {
   locale: Locale;
   slug: string;
   name: string;
   description: string;
+  image?: string;
+  datePublished?: string;
+  dateModified?: string;
 }) {
   const data = {
     "@context": "https://schema.org",
@@ -162,7 +168,18 @@ export function ArticleJsonLd({
     description,
     url: localizedUrl(locale, `/informations/${slug}`),
     inLanguage: locale,
-    author: { "@id": ORG_ID },
+    ...(image && { image: absoluteUrl(image) }),
+    ...(datePublished && { datePublished }),
+    ...(dateModified && { dateModified }),
+    // A named Person author (with their profile) is a stronger E-E-A-T signal
+    // than attributing the article to the org; fall back to the org if unset.
+    author: siteConfig.author
+      ? {
+          "@type": "Person",
+          name: siteConfig.author.name,
+          ...(siteConfig.author.url && { url: siteConfig.author.url }),
+        }
+      : { "@id": ORG_ID },
     publisher: { "@id": ORG_ID },
   };
 

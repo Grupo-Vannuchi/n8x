@@ -46,6 +46,8 @@ export type InformationView = {
 
 export type InformationDetailView = InformationView & {
   content: string[];
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type ProjectCardView = {
@@ -216,6 +218,8 @@ export const getInformationBySlug = unstable_cache(
       description: localize(i.description, locale),
       content: localizeRich(i.content, locale),
       featured: i.featured,
+      createdAt: i.createdAt,
+      updatedAt: i.updatedAt,
     };
   },
   ["informations", "detail"],

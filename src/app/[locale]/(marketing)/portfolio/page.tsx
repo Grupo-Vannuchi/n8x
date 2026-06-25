@@ -6,7 +6,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { Section } from "@/components/ui/section";
 import { getProjects } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
-import { localeAlternates } from "@/lib/seo";
+import { localeMetadata } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -18,7 +18,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: localeAlternates(locale, "/portfolio"),
+    ...localeMetadata(locale, "/portfolio"),
   };
 }
 

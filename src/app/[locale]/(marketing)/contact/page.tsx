@@ -1,5 +1,5 @@
 import { resolveLocale } from "@/i18n/routing";
-import { localeAlternates } from "@/lib/seo";
+import { localeMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Mail, Phone, MessageCircle, MapPin } from "lucide-react";
@@ -18,7 +18,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: localeAlternates(locale, "/contact"),
+    ...localeMetadata(locale, "/contact"),
   };
 }
 
