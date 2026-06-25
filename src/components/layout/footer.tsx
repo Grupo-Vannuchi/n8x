@@ -3,6 +3,7 @@ import { Instagram, Linkedin, Music2, Facebook } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/layout/logo";
 import { Container } from "@/components/ui/container";
+import { MapEmbed } from "@/components/layout/map-embed";
 import { siteConfig, fullAddress, mapEmbedUrl } from "@/config/site";
 
 const socialIcons = {
@@ -95,14 +96,7 @@ export async function Footer() {
 
       <div className="border-t border-border">
         <Container className="py-10">
-          <iframe
-            title={t("mapTitle")}
-            src={mapSrc}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
-            className="h-64 w-full rounded-2xl border border-border"
-          />
+          <MapEmbed src={mapSrc} title={t("mapTitle")} />
         </Container>
       </div>
 
