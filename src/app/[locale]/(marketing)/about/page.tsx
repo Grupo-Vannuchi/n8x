@@ -1,5 +1,5 @@
 import { resolveLocale } from "@/i18n/routing";
-import { localeAlternates } from "@/lib/seo";
+import { localeMetadata } from "@/lib/seo";
 import { richTags } from "@/i18n/rich";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -23,7 +23,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("metaDescription"),
-    alternates: localeAlternates(locale, "/about"),
+    ...localeMetadata(locale, "/about"),
   };
 }
 

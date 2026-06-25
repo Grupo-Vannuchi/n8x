@@ -29,11 +29,29 @@ const aiCrawlers = [
   "Google-Extended",
 ];
 
+/**
+ * Pure-training AI scrapers — they ingest content to train models with no
+ * citation or referral traffic back. Blocked entirely: we keep the citation/
+ * search bots above open (they send traffic), but opt out of training-only
+ * scraping. Note `anthropic-ai` (old training UA) is blocked while `ClaudeBot`
+ * (citation) stays allowed; same for `Applebot-Extended` (training) vs the
+ * normal Applebot search crawler.
+ */
+const trainingScrapers = [
+  "Bytespider",
+  "CCBot",
+  "Amazonbot",
+  "anthropic-ai",
+  "Applebot-Extended",
+  "FacebookBot",
+];
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       { userAgent: "*", allow: "/", disallow: adminPaths },
       { userAgent: aiCrawlers, allow: "/", disallow: adminPaths },
+      { userAgent: trainingScrapers, disallow: "/" },
     ],
     sitemap: `${base}/sitemap.xml`,
     host: base,

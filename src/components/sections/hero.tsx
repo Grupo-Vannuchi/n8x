@@ -3,17 +3,15 @@ import { yearsInBusiness } from "@/config/site";
 import { HeroCarousel, type HeroSlide } from "@/components/sections/hero-carousel";
 
 /**
- * Background images for the hero carousel — generic marketing/office stock from
- * Unsplash (host allowlisted in next.config). One per slide, matched by index to
- * the localized copy in `home.hero.slides`.
+ * Hero carousel background images — self-hosted under `/public/hero` so
+ * `next/image` serves optimized AVIF/WebP from the SAME origin (faster LCP than
+ * fetching from a remote host). One per slide, matched by index to the localized
+ * copy in `home.hero.slides`. Swap for the agency's own photography when ready.
  */
 const slideImages = [
-  // Marketing team meeting
-  "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1920&q=70",
-  // Modern office interior
-  "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1920&q=70",
-  // Marketing analytics / data
-  "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1920&q=70",
+  "/hero/slide-1.jpg", // marketing team meeting
+  "/hero/slide-2.jpg", // modern office interior
+  "/hero/slide-3.jpg", // marketing analytics / data
 ];
 
 export async function Hero() {

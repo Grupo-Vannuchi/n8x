@@ -79,6 +79,12 @@ export type SiteConfig = {
     facebook?: string;
   };
 
+  /**
+   * Default content author (a real person) for Article schema — the E-E-A-T
+   * "byline" signal. `url` should be their profile (LinkedIn, etc.).
+   */
+  author?: { name: string; url?: string };
+
   /** Primary navigation shown in the header and footer. */
   nav: NavItem[];
 
@@ -96,8 +102,13 @@ export const siteConfig: SiteConfig = {
 
   parentOrganization: {
     name: "Grupo Vannuchi Engenharia",
-    // url: "https://...",            // preencher com o site oficial do Grupo
-    // sameAs: ["https://..."],       // perfil do Google / LinkedIn do Grupo
+    url: "https://www.grupovannuchi.com.br",
+    // Authoritative profiles for entity disambiguation: the group's LinkedIn
+    // company page + its Google Knowledge Graph entity (kgmid).
+    sameAs: [
+      "https://br.linkedin.com/company/grupovannucci",
+      "https://www.google.com/search?kgmid=/g/11khvqzvcc",
+    ],
   },
 
   contact: {
@@ -119,6 +130,12 @@ export const siteConfig: SiteConfig = {
     instagram: "https://instagram.com/n8xmarketing",
     tiktok: "https://tiktok.com/@thigo.vannuchi",
     linkedin: "https://www.linkedin.com/in/thiago-v-a060a7215/",
+  },
+
+  // Confirme/ajuste o nome do autor padrão dos artigos.
+  author: {
+    name: "Thiago Vannuchi",
+    url: "https://www.linkedin.com/in/thiago-v-a060a7215/",
   },
 
   nav: [

@@ -39,3 +39,16 @@ export function localeAlternates(locale: Locale, path = "") {
     languages: languageAlternates(path),
   };
 }
+
+/**
+ * The `alternates` + `openGraph.url` block for a page's `generateMetadata`, both
+ * pointing at the page's self-referencing canonical (per the `as-needed` locale
+ * rule) so social shares resolve the right URL. Spread into the returned
+ * metadata: `...localeMetadata(locale, "/about")`.
+ */
+export function localeMetadata(locale: Locale, path = "") {
+  return {
+    alternates: localeAlternates(locale, path),
+    openGraph: { url: localizedUrl(locale, path) },
+  };
+}

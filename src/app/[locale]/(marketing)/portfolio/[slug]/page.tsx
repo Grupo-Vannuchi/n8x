@@ -37,6 +37,7 @@ export async function generateMetadata({
     description: project.summary,
     alternates: localeAlternates(locale, `/portfolio/${slug}`),
     openGraph: {
+      url: localizedUrl(locale, `/portfolio/${slug}`),
       title: project.title,
       description: project.summary,
       images: [{ url: project.coverImage }],

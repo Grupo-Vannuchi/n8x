@@ -10,7 +10,7 @@ import { RichText } from "@/components/rich-text";
 import { buttonVariants } from "@/components/ui/button";
 import { getServiceBySlug } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
-import { localeAlternates, localizedUrl } from "@/lib/seo";
+import { localeMetadata, localizedUrl } from "@/lib/seo";
 import { siteConfig } from "@/config/site";
 import { BreadcrumbJsonLd, ServiceJsonLd } from "@/components/json-ld";
 
@@ -37,7 +37,7 @@ export async function generateMetadata({
   return {
     title: service.title,
     description: service.description,
-    alternates: localeAlternates(locale, `/services/${slug}`),
+    ...localeMetadata(locale, `/services/${slug}`),
   };
 }
 

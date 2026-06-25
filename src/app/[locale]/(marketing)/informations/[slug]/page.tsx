@@ -12,7 +12,7 @@ import { InformationGallery } from "@/components/information-gallery";
 import { ServiceRegions } from "@/components/service-regions";
 import { getInformationBySlug, getInformations } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
-import { localeAlternates, localizedUrl } from "@/lib/seo";
+import { localeMetadata, localizedUrl } from "@/lib/seo";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/json-ld";
@@ -37,7 +37,7 @@ export async function generateMetadata({
   return {
     title: information.title,
     description: information.description,
-    alternates: localeAlternates(locale, `/informations/${slug}`),
+    ...localeMetadata(locale, `/informations/${slug}`),
   };
 }
 
@@ -74,6 +74,9 @@ export default async function InformationPage({
         slug={slug}
         name={information.title}
         description={information.description}
+        image={information.image}
+        datePublished={information.createdAt.toISOString()}
+        dateModified={information.updatedAt.toISOString()}
       />
       <BreadcrumbJsonLd
         items={[

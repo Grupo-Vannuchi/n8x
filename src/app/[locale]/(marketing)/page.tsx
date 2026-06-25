@@ -9,7 +9,7 @@ import { Testimonials } from "@/components/sections/testimonials";
 import { Team } from "@/components/sections/team";
 import { CTA } from "@/components/sections/cta";
 import { resolveLocale } from "@/i18n/routing";
-import { localeAlternates } from "@/lib/seo";
+import { localeMetadata } from "@/lib/seo";
 
 // Statically rendered (ISR): the CMS-backed sections read tagged, cached
 // queries, and the admin actions call `revalidateTag` on every edit — so the
@@ -23,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const locale = resolveLocale((await params).locale);
-  return { alternates: localeAlternates(locale, "") };
+  return { ...localeMetadata(locale, "") };
 }
 
 export default async function HomePage({
