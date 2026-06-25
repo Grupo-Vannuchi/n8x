@@ -44,11 +44,21 @@ export function HeroCarousel({
   const count = slides.length;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  // Only the first slide's image (the LCP element) is rendered server-side; the
+  // rest mount after first paint so they don't compete for bandwidth with the
+  // LCP image during the critical initial load. Flipped on right after mount —
+  // long before autoplay (6s) or any user interaction needs them.
+  const [deferredReady, setDeferredReady] = useState(false);
 
   const go = useCallback(
     (n: number) => setIndex((n + count) % count),
     [count],
   );
+
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => setDeferredReady(true));
+    return () => window.cancelAnimationFrame(id);
+  }, []);
 
   // Autoplay (skipped when paused, single-slide, or reduced-motion is on).
   useEffect(() => {
@@ -85,14 +95,16 @@ export function HeroCarousel({
                 active ? "opacity-100" : "pointer-events-none opacity-0",
               )}
             >
-              <Image
-                src={slide.image}
-                alt=""
-                fill
-                priority={i === 0}
-                sizes="100vw"
-                className="object-cover"
-              />
+              {(i === 0 || deferredReady) && (
+                <Image
+                  src={slide.image}
+                  alt=""
+                  fill
+                  priority={i === 0}
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              )}
               {/* Readability overlay — strong on the left where the text sits. */}
               <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/30" />
 
