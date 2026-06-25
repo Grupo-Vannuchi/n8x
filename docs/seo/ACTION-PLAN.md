@@ -1,83 +1,65 @@
 # Plano de Ação SEO — N8X Marketing
 
-**Site:** https://n8xmarketing.com.br · **Nota geral:** 90/100 (Excelente)
-**Data:** 25/06/2026
+**Site:** https://n8xmarketing.com.br · **Nota geral:** 95/100 (Excelente)
+**Data:** 25/06/2026 · **Atualizado:** 25/06 — item #1 (Open Graph) concluído (PR #67)
 
-> O site já está em ótimo estado. Nenhuma ação aqui é crítica para indexação ou ranqueamento — são **refinamentos** ordenados por impacto/esforço.
-
----
-
-## 🥇 Prioridade Alta (rápido, faz hoje)
-
-### 1. Adicionar `og:url` em todas as páginas
-**Por quê:** `og:url` está ausente (confirmado no HTML ao vivo). Sem ele, plataformas sociais às vezes erram a URL canônica do compartilhamento. Impacto baixo, esforço mínimo.
-**Onde:** [`src/app/[locale]/layout.tsx`](../../src/app/[locale]/layout.tsx) → `generateMetadata`, bloco `openGraph`.
-**Como:** o `og:url` deve ser por-rota (igual ao canonical). A forma limpa é incluir `url` no `openGraph` de cada página usando o mesmo valor de `localeAlternates(...).canonical`, ou adicionar um helper. Exemplo mínimo na home/serviços:
-```ts
-openGraph: { url: localizedUrl(locale, "/services/" + slug) }
-```
-Como o layout já omite títulos OG para herança por rota, basta as páginas passarem `openGraph.url` (ou centralizar num helper em `lib/seo.ts`).
-
-### 2. Preencher `parentOrganization` (Grupo Vannuchi)
-**Por quê:** desambiguação de entidade — ajuda Google/IA a conectar a N8X ao grupo. Já está modelado, só falta dado.
-**Onde:** [`src/config/site.ts`](../../src/config/site.ts) → `parentOrganization`.
-**Como:** descomentar e preencher `url` (site do Grupo) e `sameAs` (Google Business / LinkedIn do Grupo):
-```ts
-parentOrganization: {
-  name: "Grupo Vannuchi Engenharia",
-  url: "https://...",
-  sameAs: ["https://www.linkedin.com/company/...", "https://g.page/..."],
-},
-```
+> A base técnica está excelente e quase todo o plano anterior (24/06) foi implementado. A correção de alto alcance (Open Graph) **já foi entregue** — o foco restante é refinamento e conteúdo.
 
 ---
 
-## 🥈 Prioridade Média (esta semana)
+## ✅ Concluído — 25/06 (PR #67)
 
-### 3. Enriquecer `ArticleJsonLd` com datas e imagem
-**Por quê:** `datePublished`/`dateModified` são sinais de frescor e elegibilidade a rich results; `image` melhora a aparência na busca/IA.
-**Onde:** [`src/components/json-ld.tsx`](../../src/components/json-ld.tsx) → `ArticleJsonLd`, e o call site em `informations/[slug]/page.tsx`.
-**Como:** passar `createdAt`/`updatedAt` do registro de `information` e a capa:
+### 1. Restaurar as tags Open Graph removidas (regressão site-wide) — FEITO
+**Problema (resolvido):** `og:image`, `og:type`, `og:site_name`, `og:locale` e `twitter:image` haviam sumido de **todas** as páginas. Cards de compartilhamento (WhatsApp/LinkedIn/IG/X) e previews de IA ficaram sem imagem.
+
+**Causa:** [`src/lib/seo.ts`](../../src/lib/seo.ts) → `localeMetadata()` devolvia `openGraph: { url }`, e como o Next **não mescla `openGraph` em profundidade**, esse objeto substituía inteiro o `openGraph` do layout (type/siteName/locale) e derrubava a imagem do `opengraph-image.tsx`.
+
+**Solução entregue:** helper único `baseOpenGraph(locale, overrides)` em `src/lib/seo.ts` (fonte de verdade), usado **tanto** no layout **quanto** no `localeMetadata`. Atributos por página entram via `overrides` — artigos `type: "article"` + imagem própria; portfólio com a capa do projeto. Sem duplicar literais entre layout e páginas.
 ```ts
-datePublished: String(createdAt), dateModified: String(updatedAt), image: absoluteUrl(cover)
+export function baseOpenGraph(locale: Locale, overrides: Partial<OpenGraph> = {}): OpenGraph {
+  return {
+    type: "website",
+    siteName: siteConfig.name,
+    locale,
+    images: [{ url: `${localizedUrl(locale)}/opengraph-image`, width: 1200, height: 630, alt: siteConfig.name }],
+    ...overrides,
+  } as OpenGraph;
+}
 ```
-
-### 4. Decidir política de scrapers de IA de treino
-**Por quê:** Bytespider, CCBot, Amazonbot, anthropic-ai, Applebot-Extended, FacebookBot hoje herdam `allow`. PerplexityBot/OAI/GPTBot/ClaudeBot trazem **citação com tráfego** (manter). Os de treino puro não retornam tráfego — decisão de negócio.
-**Onde:** [`src/app/robots.ts`](../../src/app/robots.ts) → array `aiCrawlers`.
-**Como:** se a decisão for bloquear treino, adicionar uma 3ª regra `disallow: "/"` para esses UAs. Se a decisão for manter tudo aberto (estratégia de máxima exposição), **documentar** isso no comentário para não parecer omissão.
-
-### 5. Medir Core Web Vitals reais
-**Por quê:** não foi possível medir nesta auditoria (rate limit da API). Confirmar LCP/INP/CLS.
-**Como:** rodar https://pagespeed.web.dev/?url=https://n8xmarketing.com.br (mobile e desktop). Metas: LCP < 2,5s · INP < 200ms · CLS < 0,1. A arquitetura (ISR + next/image + gru1) sugere bom desempenho, mas confirme em campo.
+**Validação (curl, dev):** home/serviços/artigo/portfólio voltaram com o OG completo, 1 `og:image` por página, artigos com `og:type=article`. Conferir em produção após o deploy:
+```bash
+curl -s https://n8xmarketing.com.br | grep -oiE 'property="og:(image|type|site_name|locale)"'
+```
 
 ---
 
-## 🥉 Prioridade Baixa (backlog / refinamento)
+## 🥈 Prioridade Média — esta/próxima semana
 
-### 6. Byline de autor-pessoa nos artigos
-Adicionar autor-pessoa (com página de perfil `ProfilePage`/`Person`) nos artigos de `/informations` reforça E-E-A-T para queries competitivas (padrão dez/2025). Requer campo "autor" no CMS.
+### 2. Medir Core Web Vitals reais
+Não foi possível medir nesta auditoria (rate limit da API). As melhorias recentes (defer das imagens do hero, lazy-load do Maps) devem ter melhorado o LCP — **confirmar em campo**.
+**Como:** https://pagespeed.web.dev/?url=https://n8xmarketing.com.br (mobile + desktop). Metas: LCP < 2,5s · INP < 200ms · CLS < 0,1.
 
-### 7. Implementar CSP (Content-Security-Policy)
-Único header de segurança faltando (85/100 → 100). Exige nonce-middleware por causa do JSON-LD inline e fontes externas — entregar como mudança própria, com teste. Já está documentado como dívida consciente em `next.config.ts`.
+### 3. (Opcional) `twitter:site` / `twitter:creator`
+Adicionar o handle do X/Twitter da agência (se houver) ao bloco `twitter` para atribuição nos cards. Baixo impacto.
 
-### 8. `llms-full.txt` (opcional, GEO)
-Versão expandida do `llms.txt` com conteúdo completo de serviços/cases — pode melhorar a qualidade da citação por LLMs.
+---
 
-### 9. `twitter:site` / `twitter:creator` (opcional)
-Adicionar o handle do Twitter/X da agência (se houver) ao `twitter` metadata para atribuição em cards.
+## 🥉 Prioridade Baixa — backlog / estratégico
 
-### 10. Conteúdo: cadência editorial
-O maior ganho de **tráfego orgânico** não é técnico — a base já é excelente. É publicar com regularidade em `/informations` (cauda longa local: "agência de marketing Santos", "social media Baixada Santista", etc.), aproveitando a estrutura de schema/hreflang/sitemap que já existe.
+### 4. CSP (Content-Security-Policy)
+Único header de segurança faltando (85 → 100). Já é **dívida consciente** documentada em [`docs/adr/0004-defer-csp.md`](../adr/0004-defer-csp.md) — exige nonce-middleware por causa do JSON-LD inline. Manter no radar; entregar como mudança própria com teste.
+
+### 5. Cadência editorial (maior alavanca orgânica)
+A estrutura está pronta (schema Article completo, hreflang, sitemap com 177 URLs, autor-pessoa). O ganho de tráfego orgânico agora vem de **publicar com regularidade** em `/informations`, mirando cauda longa local: "agência de marketing Santos", "social media Baixada Santista", "tráfego pago Santos", etc.
 
 ---
 
 ## Resumo
 
-| Prioridade | Itens | Esforço | Impacto SEO |
-|-----------|-------|---------|-------------|
-| 🥇 Alta | og:url, parentOrganization | Minutos | Baixo-médio |
-| 🥈 Média | Article dates, política IA, medir CWV | Horas | Médio |
-| 🥉 Baixa | autor, CSP, llms-full, twitter, conteúdo | Variado | Médio (conteúdo) a baixo |
+| Prioridade | Itens | Esforço | Impacto |
+|-----------|-------|---------|---------|
+| ✅ Feito | Restaurar OG/Twitter image (regressão) — PR #67 | — | Alto (social/GEO/CTR) |
+| 🥈 Média | Medir CWV · twitter:site | Minutos | Médio |
+| 🥉 Baixa | CSP · cadência de conteúdo | Variado | Médio (conteúdo) |
 
-**Veredito:** Tecnicamente, o site está pronto para competir. O foco de maior retorno passa a ser **conteúdo e autoridade** (item 10), não correções técnicas.
+**Veredito:** Excelente evolução desde 24/06 — quase todo o plano anterior entregue. Com a regressão de Open Graph corrigida (item #1, PR #67), o site está no nível ~95/100. O foco agora deixa de ser técnico e passa a ser **conteúdo e autoridade**.
