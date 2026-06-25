@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { ThemeStyle } from "@/components/theme-style";
 import { siteConfig } from "@/config/site";
 import { env } from "@/lib/env";
+import { baseOpenGraph } from "@/lib/seo";
 import { locales, routing, resolveLocale } from "@/i18n/routing";
 import "../globals.css";
 
@@ -42,13 +43,10 @@ export async function generateMetadata({
     applicationName: siteConfig.name,
     // og/twitter title + description are intentionally omitted: Next derives
     // them from each page's `title`/`description`, so every route gets its own
-    // social copy instead of the site default. The shared OG image comes from
-    // `[locale]/opengraph-image.tsx` (inherited unless a page sets its own).
-    openGraph: {
-      type: "website",
-      siteName: siteConfig.name,
-      locale,
-    },
+    // social copy instead of the site default. `baseOpenGraph` is the single
+    // source for type/siteName/locale + the shared OG image, reused by every
+    // page's `localeMetadata` so the shallow metadata merge never drops them.
+    openGraph: baseOpenGraph(locale),
     twitter: {
       card: "summary_large_image",
     },

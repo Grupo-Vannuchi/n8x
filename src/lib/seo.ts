@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import { defaultLocale, locales, type Locale } from "@/i18n/routing";
+import { siteConfig } from "@/config/site";
 import { env } from "@/lib/env";
+
+type OpenGraph = NonNullable<Metadata["openGraph"]>;
 
 const base = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
 
@@ -41,14 +45,50 @@ export function localeAlternates(locale: Locale, path = "") {
 }
 
 /**
- * The `alternates` + `openGraph.url` block for a page's `generateMetadata`, both
- * pointing at the page's self-referencing canonical (per the `as-needed` locale
- * rule) so social shares resolve the right URL. Spread into the returned
- * metadata: `...localeMetadata(locale, "/about")`.
+ * The shared Open Graph block (type/siteName/locale + the default social image).
+ * Single source of truth: the root layout and every page spread this so Next's
+ * shallow metadata merge — which makes a page's `openGraph` REPLACE the layout's
+ * rather than deep-merge it — never drops the image/type/siteName/locale.
+ * `overrides` carries the per-page bits (e.g. `url`, `type: "article"`, a
+ * page-specific `images`).
  */
-export function localeMetadata(locale: Locale, path = "") {
+export function baseOpenGraph(
+  locale: Locale,
+  overrides: Partial<OpenGraph> = {},
+): OpenGraph {
+  return {
+    type: "website",
+    siteName: siteConfig.name,
+    locale,
+    images: [
+      {
+        url: `${localizedUrl(locale)}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: siteConfig.name,
+      },
+    ],
+    ...overrides,
+  } as OpenGraph;
+}
+
+/**
+ * The `alternates` + `openGraph` block for a page's `generateMetadata`: a
+ * self-referencing canonical for the locale, plus a complete Open Graph object
+ * (via `baseOpenGraph`) with the page's own `url`. Spread into the returned
+ * metadata: `...localeMetadata(locale, "/about")`. Pass `ogOverrides` for
+ * per-page Open Graph (e.g. `{ type: "article" }`).
+ */
+export function localeMetadata(
+  locale: Locale,
+  path = "",
+  ogOverrides: Partial<OpenGraph> = {},
+) {
   return {
     alternates: localeAlternates(locale, path),
-    openGraph: { url: localizedUrl(locale, path) },
+    openGraph: baseOpenGraph(locale, {
+      url: localizedUrl(locale, path),
+      ...ogOverrides,
+    }),
   };
 }

@@ -12,7 +12,7 @@ import { InformationGallery } from "@/components/information-gallery";
 import { ServiceRegions } from "@/components/service-regions";
 import { getInformationBySlug, getInformations } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
-import { localeMetadata, localizedUrl } from "@/lib/seo";
+import { localeMetadata, localizedUrl, absoluteUrl } from "@/lib/seo";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/json-ld";
@@ -37,7 +37,12 @@ export async function generateMetadata({
   return {
     title: information.title,
     description: information.description,
-    ...localeMetadata(locale, `/informations/${slug}`),
+    ...localeMetadata(locale, `/informations/${slug}`, {
+      type: "article",
+      ...(information.image && {
+        images: [{ url: absoluteUrl(information.image), alt: information.title }],
+      }),
+    }),
   };
 }
 

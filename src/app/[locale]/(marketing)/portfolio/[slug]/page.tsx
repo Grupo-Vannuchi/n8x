@@ -11,7 +11,7 @@ import { RichText } from "@/components/rich-text";
 import { buttonVariants } from "@/components/ui/button";
 import { getProjectBySlug } from "@/lib/queries";
 import { resolveLocale } from "@/i18n/routing";
-import { localeAlternates, localizedUrl } from "@/lib/seo";
+import { localeMetadata, localizedUrl, absoluteUrl } from "@/lib/seo";
 import { siteConfig } from "@/config/site";
 import { BreadcrumbJsonLd, CreativeWorkJsonLd } from "@/components/json-ld";
 
@@ -35,13 +35,9 @@ export async function generateMetadata({
   return {
     title: project.title,
     description: project.summary,
-    alternates: localeAlternates(locale, `/portfolio/${slug}`),
-    openGraph: {
-      url: localizedUrl(locale, `/portfolio/${slug}`),
-      title: project.title,
-      description: project.summary,
-      images: [{ url: project.coverImage }],
-    },
+    ...localeMetadata(locale, `/portfolio/${slug}`, {
+      images: [{ url: absoluteUrl(project.coverImage), alt: project.title }],
+    }),
   };
 }
 
