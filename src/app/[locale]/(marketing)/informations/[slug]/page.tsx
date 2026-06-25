@@ -75,8 +75,8 @@ export default async function InformationPage({
         name={information.title}
         description={information.description}
         image={information.image}
-        datePublished={information.createdAt.toISOString()}
-        dateModified={information.updatedAt.toISOString()}
+        datePublished={information.createdAt}
+        dateModified={information.updatedAt}
       />
       <BreadcrumbJsonLd
         items={[
