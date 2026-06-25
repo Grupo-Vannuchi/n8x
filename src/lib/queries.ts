@@ -46,8 +46,12 @@ export type InformationView = {
 
 export type InformationDetailView = InformationView & {
   content: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  // ISO strings, not Date: this view round-trips through `unstable_cache`, which
+  // JSON-serializes its payload — a Date comes back as a string on cache hits
+  // and crashes any `.toISOString()` caller. Serialize here, where the value is
+  // still a real Prisma Date.
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type ProjectCardView = {
@@ -218,8 +222,8 @@ export const getInformationBySlug = unstable_cache(
       description: localize(i.description, locale),
       content: localizeRich(i.content, locale),
       featured: i.featured,
-      createdAt: i.createdAt,
-      updatedAt: i.updatedAt,
+      createdAt: i.createdAt.toISOString(),
+      updatedAt: i.updatedAt.toISOString(),
     };
   },
   ["informations", "detail"],
