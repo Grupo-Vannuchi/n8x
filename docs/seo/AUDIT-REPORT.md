@@ -1,94 +1,180 @@
-# Auditoria de SEO — n8x-marketing (análise de código-fonte) · pós-implementação
+# Auditoria de SEO Completa — N8X Marketing
 
-> **Escopo:** auditoria estática do código-fonte do app Next.js (App Router + next-intl), **sem subir servidor**. Cobre metadata, indexabilidade (sitemap/robots), dados estruturados (JSON-LD), headings, imagens/alt, canonical/hreflang, OG/Twitter, PWA e sinais de E-E-A-T.
-> **Data:** 2026-06-08 · **Método:** LLM-first sobre os arquivos do repositório + verificação contra a saída do `next build` (Next 16.2.7). Sem fetch de URL público, sem PageSpeed.
-> **Confiança do score:** Média-Alta (estrutura confirmada no build de produção; Core Web Vitals e robots/sitemap *servidos publicamente* ainda não medidos — ver Limitações de Ambiente).
-
----
-
-## A) Resumo da Auditoria
-
-- **Tipo de site:** Agência de marketing (negócio local — Santos/SP, com endereço, telefone e CNPJ no `siteConfig`).
-- **Rating geral:** **~84 / 100 — Good** (antes: ~63 — *Needs Improvement*). Score confidence: Média-Alta.
-- **O que mudou desde a auditoria de 2026-06-05:** os três principais problemas (ausência de JSON-LD, falta de canonical/hreflang em página, e cards sociais em branco) foram resolvidos e **verificados no HTML pré-renderizado** do `next build`. Foram também tratados todos os itens de manutenção (robots locale-aware + AI crawlers, `lastModified` real no sitemap, ícones PWA) e adicionado `llms.txt`.
-
-**Top 3 problemas (anteriores) — todos resolvidos ✅**
-1. ✅ **Dados estruturados JSON-LD** — agora presentes em todas as páginas públicas: `ProfessionalService`, `WebSite`, `Service` + `BreadcrumbList` (serviços), `CreativeWork` + `BreadcrumbList` (portfólio), cruzando-se por `@id`.
-2. ✅ **Canonical + hreflang no nível de página** — `alternates` self-referencing em todas as rotas via helper `localeAlternates`.
-3. ✅ **Imagem OG/Twitter** — `[locale]/opengraph-image.tsx` (1200×630) herdada por todas as páginas; portfólio usa a capa do projeto.
-
-**Pontos de atenção remanescentes (baixa severidade)**
-1. ℹ️ Core Web Vitals **não medidos** (exigem URL pública + PageSpeed). ISR já implementado deve ajudar TTFB/LCP.
-2. ℹ️ Meta `keywords` ainda presente (ignorada pelo Google; inofensiva — mantida para Bing).
-3. ℹ️ Ícones PWA são gerados por código (`icon.tsx`/`apple-icon.tsx` via `ImageResponse`) — funcionais; um asset de marca dedicado (PNG desenhado) renderiza melhor que o monograma automático.
+**Site:** https://n8xmarketing.com.br
+**Código-fonte:** `C:\Users\ViniciusAlberto\Documents\GitHub\n8x` (Next.js 16 · App Router · next-intl)
+**Data da auditoria:** 25/06/2026
+**Tipo:** Auditoria full (site no ar + cruzamento com o código-fonte)
 
 ---
 
-## B) Tabela de Achados
+## Pontuação Geral: 90 / 100 — Excelente
 
-| Área | Severidade | Confiança | Achado | Evidência | Status |
-|------|-----------|-----------|--------|-----------|--------|
-| Dados estruturados | ✅ Pass | Confirmed | JSON-LD `ProfessionalService` + `WebSite` em todas as páginas; `Service`/`CreativeWork` + `BreadcrumbList` nos detalhes | [json-ld.tsx](src/components/json-ld.tsx); build: `@type` `ProfessionalService`/`WebSite`/`Service`/`BreadcrumbList` no HTML de serviços, `CreativeWork`+`BreadcrumbList` no de portfólio | Implementado |
-| Canonical / i18n | ✅ Pass | Confirmed | `canonical` + `hreflang` (pt/en) em cada rota | [seo.ts:`localeAlternates`](src/lib/seo.ts); build: `<link rel="canonical">` + `<link rel="alternate" hreflang>` em `pt.html` | Implementado |
-| Social / OG | ✅ Pass | Confirmed | OG/Twitter image global 1200×630; títulos/descrições derivados por página | [opengraph-image.tsx](src/app/[locale]/opengraph-image.tsx); build: `og:image`/`twitter:image` + `og:title` específico por página | Implementado |
-| OG (detalhe serviço) | ✅ Pass | Confirmed | Serviço herda a OG image padrão (antes saía sem imagem) | build: `og:image` presente em `pt/services/branding.html` | Corrigido |
-| Schema `Service`/`CreativeWork` | ✅ Pass | Confirmed | `Service` (com `provider`→org) e `CreativeWork` (com `creator`→org, imagem absoluta) | [services/[slug]](src/app/[locale]/(marketing)/services/[slug]/page.tsx), [portfolio/[slug]](src/app/[locale]/(marketing)/portfolio/[slug]/page.tsx) | Implementado |
-| Breadcrumbs | ✅ Pass | Confirmed | `BreadcrumbList` (3 níveis, nomes localizados) nos detalhes | build: 3× `ListItem` por página de detalhe | Implementado |
-| Performance | ⚠️ Warning | Likely | ISR no lugar de `force-dynamic` (cache por tag + fallback 1 dia) | [queries.ts](src/lib/queries.ts) `unstable_cache`; build: rotas marcadas `●/○` (SSG/Static), não `ƒ` | Implementado (CWV não medido) |
-| Robots | ✅ Pass | Confirmed | `disallow` derivado de `locales`; política explícita para crawlers de IA | [robots.ts](src/app/robots.ts); build `robots.txt`: regra `*` + regra GPTBot/ClaudeBot/PerplexityBot/… | Implementado |
-| Sitemap | ✅ Pass | Confirmed | `lastModified` real por registro (`updatedAt`) | [sitemap.ts](src/app/sitemap.ts) + [queries.ts](src/lib/queries.ts) `get*SitemapEntries`; build: 12+ valores `<lastmod>` distintos | Implementado |
-| GEO / IA | ✅ Pass | Confirmed | `llms.txt` (mapa do site para LLMs) + AI crawlers liberados | [llms.txt/route.ts](src/app/llms.txt/route.ts); build: `○ /llms.txt` | Implementado |
-| PWA / Ícones | ✅ Pass | Confirmed | `icon` 512 (maskable) + `apple-icon` 180; manifest com `purpose: any/maskable` | [icon.tsx](src/app/icon.tsx), [apple-icon.tsx](src/app/apple-icon.tsx), [manifest.ts](src/app/manifest.ts); build: `apple-touch-icon` no HTML | Implementado |
-| Metadata (keywords) | ℹ️ Info | Confirmed | Meta `keywords` presente (ignorada pelo Google) | [layout.tsx:41](src/app/[locale]/layout.tsx#L41) | Mantido (inofensivo) |
-| On-page | ✅ Pass | Confirmed | H1 único e semântico por página | [hero.tsx:26](src/components/sections/hero.tsx#L26); detalhes usam `<article>` + `<h1>`/`<h2>` | — |
-| Imagens / Acessibilidade | ✅ Pass | Confirmed | Todas as `<Image>` têm `alt` significativo; `priority`+`sizes` nas capas | `project.title`, `member.name`, `client.name` | — |
-| Metadata interna | ✅ Pass | Confirmed | Páginas internas com title/description via i18n | `generateMetadata` em about/services/portfolio/contact/careers + detalhes | — |
-| Indexação admin | ✅ Pass | Confirmed | Admin com `noindex` + `disallow` (todos os locales) | [admin layout](src/app/[locale]/admin/(dashboard)/layout.tsx#L6); robots cobre `/admin` e `/en/admin` | — |
+| Categoria | Peso | Nota | Avaliação |
+|-----------|:----:|:----:|-----------|
+| Technical SEO | 25% | 95 | ✅ Excelente |
+| Conteúdo & E-E-A-T | 20% | 85 | ✅ Bom |
+| On-Page SEO | 15% | 92 | ✅ Excelente |
+| Schema / Dados estruturados | 15% | 93 | ✅ Excelente |
+| Performance (CWV) | 10% | 85* | ✅ Bom (*não verificado — ver limitações) |
+| Otimização de imagens | 10% | 90 | ✅ Excelente |
+| AI Search / GEO | 5% | 95 | ✅ Excelente |
+
+> **Resumo executivo:** O site é uma das implementações de SEO técnico mais sólidas que se vê em sites de agência. Canonical e hreflang auto-referenciados por página, sitemap com alternâncias de idioma, robots com gestão explícita de crawlers de IA, grafo de dados estruturados JSON-LD interligado por `@id`, llms.txt com nota 100/100 e cabeçalhos de segurança fortes. Os ajustes pendentes são todos de baixo impacto e refinamento — **não há nenhum problema crítico de indexação ou ranqueamento.**
 
 ---
 
-## C) Detalhe por Categoria (score direcional)
+## Metodologia & Evidências
 
-| Categoria | Peso | Score antes | Score agora | Observação |
-|-----------|------|-------------|-------------|------------|
-| Technical SEO | 25% | 70 | **88** | canonical/hreflang, ISR, robots locale-aware + AI, sitemap com `lastModified` real |
-| Content Quality / E-E-A-T | 20% | 80 | **85** | sinais reais (sobre, time, endereço/CNPJ) agora **estruturados** via schema |
-| On-Page SEO | 15% | 80 | **80** | títulos, descrições e headings já corretos |
-| Schema / Structured Data | 15% | 10 | **90** | Organization, WebSite, Service, CreativeWork, BreadcrumbList — grafo conectado por `@id` |
-| Performance (CWV) | 10% | 55 | **70** | ISR implementado; **CWV ainda não medido** (sem URL pública) |
-| Image Optimization | 10% | 85 | **88** | `next/image` + OG image social agora presente |
-| AI Search Readiness (GEO) | 5% | 45 | **80** | schema + `llms.txt` + política explícita de AI crawlers |
+Esta auditoria cruzou três fontes:
+1. **HTML renderizado no ar** (`curl` ao `<head>`, sitemap.xml, robots.txt).
+2. **Scripts de verificação** do skill (robots, security headers, social meta, llms.txt, PageSpeed).
+3. **Código-fonte** (fonte da verdade — confirma intenção e elimina falsos positivos).
 
-> Score global ≈ **84** → *Good* (antes ≈ 63). O salto vem sobretudo de Schema (10→90) e Technical SEO (70→88). O teto até a auditoria por URL é limitado por Performance/CWV não medido.
+> ⚠️ **Falso positivo eliminado:** um fetch automatizado da home reportou "3 tags `<h1>`". A leitura de [`hero-carousel.tsx`](../../src/components/sections/hero-carousel.tsx) confirma que **só o primeiro slide renderiza `<h1>`; os demais são `<h2>`** (`const Heading = i === 0 ? "h1" : "h2"`). Não há problema de múltiplos H1.
 
 ---
 
-## D) Resumo das alterações implementadas
+## 1. Technical SEO — 95/100 ✅
 
-- **`src/components/json-ld.tsx`** — novos componentes `WebSiteJsonLd`, `BreadcrumbJsonLd`, `ServiceJsonLd`, `CreativeWorkJsonLd` (além do `OrganizationJsonLd` existente), cruzando-se por `@id` (`#organization`, `#website`).
-- **`src/lib/seo.ts`** — helper `absoluteUrl()` para tornar absolutas as imagens de schema.
-- **`src/app/[locale]/(marketing)/layout.tsx`** — render do `WebSiteJsonLd`.
-- **`src/app/[locale]/layout.tsx`** — `openGraph`/`twitter` sem `title`/`description` fixos (derivam por página); OG image herdada.
-- **`src/app/[locale]/opengraph-image.tsx`** — movido da raiz para o segmento `[locale]` para ser anexado à metadata das páginas (correção do card em branco).
-- **`src/app/[locale]/(marketing)/services/[slug]/page.tsx`** — `ServiceJsonLd` + `BreadcrumbJsonLd`; remoção do `openGraph` redundante (herda a OG image).
-- **`src/app/[locale]/(marketing)/portfolio/[slug]/page.tsx`** — `CreativeWorkJsonLd` + `BreadcrumbJsonLd`.
-- **`src/app/robots.ts`** — `disallow` derivado de `locales`; segunda regra liberando GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-Web, PerplexityBot, Google-Extended.
-- **`src/app/llms.txt/route.ts`** — novo handler `text/plain` (revalidação diária; degrada para páginas-núcleo sem DB).
-- **`src/app/sitemap.ts`** + **`src/lib/queries.ts`** — `lastModified` real via `get{Project,Service}SitemapEntries` (slug + `updatedAt`).
-- **`src/app/icon.tsx`** (512, maskable-safe) + **`src/app/apple-icon.tsx`** (180) + **`src/app/manifest.ts`** (ícones 192/512, `purpose: any` e `maskable`).
+| Item | Status | Evidência |
+|------|:------:|-----------|
+| HTTPS | ✅ | Live: HTTPS Yes |
+| Canonical auto-referenciado por página | ✅ | `<link rel="canonical" href="https://n8xmarketing.com.br"/>` · `lib/seo.ts → localeAlternates()` |
+| hreflang pt/en + x-default implícito | ✅ | `<link rel="alternate" hreflang="pt|en">` na head e no sitemap |
+| robots.txt | ✅ | HTTP 200, aponta sitemap, bloqueia `/admin` por locale |
+| sitemap.xml | ✅ | XML válido com `xhtml:link` de alternância de idioma e `lastmod` |
+| Gestão de crawlers de IA | ✅ | GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot, Google-Extended explicitamente liberados (estratégia GEO opt-in) |
+| Cabeçalhos de segurança | ✅ 85/100 | HSTS (preload), X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy |
+| Mobile-first / responsivo | ✅ | Layout responsivo (Tailwind), `viewport` automático do Next |
+| PWA / manifest | ✅ | `manifest.ts` com ícones any+maskable, theme_color |
+| Bloqueio de admin do índice | ✅ | `robots.ts` deriva `/admin` e `/{locale}/admin` de `locales` |
 
-**Verificação:** `tsc --noEmit` e `eslint` sem erros (1 warning pré-existente, alheio às mudanças, em `service-form.tsx`); `next build` concluído com sucesso (87 páginas estáticas). Saída inspecionada: JSON-LD, canonical/hreflang, OG/Twitter image, `robots.txt`, `sitemap.xml` (lastmod reais), `llms.txt` e `apple-touch-icon`.
+**Pontos fortes notáveis**
+- `localePrefix: "as-needed"` — locale padrão (pt) servido sem prefixo, evitando duplicação de conteúdo. Canonical e hreflang são coerentes com essa regra (`lib/seo.ts`).
+- `robots.ts` deriva os caminhos de admin de `locales`, então adicionar um idioma nunca deixa um path de admin exposto. Engenharia defensiva.
+
+**Oportunidades**
+- ⚠️ **CSP ausente** — único header de segurança faltando. O código documenta a decisão de adiar ([`next.config.ts`](../../next.config.ts)): a CSP exige nonce-middleware por causa do JSON-LD inline e fontes externas. Decisão consciente, mas vale priorizar como hardening.
+- ℹ️ **6 scrapers de IA não gerenciados explicitamente** (Bytespider, CCBot, Amazonbot, anthropic-ai, Applebot-Extended, FacebookBot) herdam a regra `*` (allow). Não é um defeito — é uma **decisão estratégica a tomar**: Bytespider/CCBot são scrapers de treino sem benefício de citação; alguns sites os bloqueiam. Ver Action Plan.
 
 ---
 
-## E) Incógnitas e Follow-ups (continuam dependendo de domínio publicado)
+## 2. Conteúdo & E-E-A-T — 85/100 ✅
 
-- **Core Web Vitals reais (LCP/INP/CLS):** exigem URL pública + PageSpeed. Hoje `NEXT_PUBLIC_SITE_URL=http://localhost:3000`.
-- **robots.txt / sitemap.xml / llms.txt servidos:** validar a saída real em produção (o `host`/`sitemap` no robots usam `NEXT_PUBLIC_SITE_URL` — definir o domínio real antes do deploy).
-- **Renderização final em produção:** confirmar tags no `<head>` servido por um domínio público (validar JSON-LD no Rich Results Test do Google).
+| Sinal E-E-A-T | Status | Evidência |
+|---------------|:------:|-----------|
+| Identidade da organização | ✅ | `ProfessionalService` schema: nome, legalName, CNPJ-ready, foundingDate 2017 |
+| Endereço físico (NAP) | ✅ | Rua Frei Gaspar 22, Santos/SP — `PostalAddress` no schema + footer |
+| Contato (e-mail/telefone/WhatsApp) | ✅ | `siteConfig.contact` + botão WhatsApp flutuante |
+| Página "Quem somos" / time | ✅ | `/about` + seção Team com fotos e nomes |
+| Prova social (depoimentos/clientes) | ✅ | Seções Testimonials, Clients, Stats, Portfolio |
+| Organização-mãe | ⚠️ parcial | `parentOrganization: Grupo Vannuchi Engenharia` declarado **só pelo nome** — `url` e `sameAs` comentados/vazios |
+| Bilíngue (pt/en) | ✅ | Catálogo completo em `messages/{pt,en}.json` |
+| Conteúdo editorial (blog/informações) | ✅ | `/informations` (artigos via CMS) |
+
+**Oportunidades**
+- ℹ️ **Autoria dos artigos** — `ArticleJsonLd` usa a organização como `author`/`publisher` (correto), mas não há **byline de pessoa** nem `datePublished`/`dateModified`. Para E-E-A-T de conteúdo competitivo (padrão dez/2025, aplica-se a todas as queries), nomear um autor-pessoa e datar os artigos fortalece o sinal de "Expertise/Experience".
+- ℹ️ **Profundidade de conteúdo / cadência** — a estrutura para blog (`/informations`) existe e está bem otimizada; o ganho de ranqueamento orgânico de cauda longa virá de **volume e frequência de publicação**, não de mudanças técnicas.
 
 ---
 
-## Limitações de Ambiente
+## 3. On-Page SEO — 92/100 ✅
 
-Auditoria **estática (código-fonte)** + verificação contra o build local. Não foram executados: fetch de URL pública, PageSpeed/CrUX, checagem de headers de segurança, broken links nem captura visual. Nenhum valor de ranking, tráfego, CWV ou penalidade foi inferido. Para fechar as incógnitas de CWV/headers/robots servido, publique o site e rode `seo audit https://SEU-DOMINIO`.
+| Item | Status | Evidência |
+|------|:------:|-----------|
+| Title único por página | ✅ | `defaultTitle` + `titleTemplate "%s · {brand}"` em `[locale]/layout.tsx` |
+| Title da home | ✅ | "N8X Marketing — Sua marca na primeira página do Google" (60 car., ideal) |
+| Meta description | ✅ | 156 caracteres, com keyword e proposta de valor (ideal ≤ 160) |
+| Um único H1 por página | ✅ | Confirmado no código (carousel emite só 1 `<h1>`) |
+| Hierarquia de headings | ✅ | H1 → H2 (seções) → H3 (serviços/cases) coerente |
+| Keywords meta | ✅ (neutro) | Presente; Google ignora, mas não prejudica |
+| Metadata por rota | ✅ | Todas as 12 páginas de marketing têm `generateMetadata` próprio |
+
+**Observação:** title/description de OG e Twitter são **deliberadamente omitidos** no layout para que o Next os derive do `title`/`description` de cada rota — assim cada página recebe copy social própria. Decisão correta e bem documentada no código.
+
+---
+
+## 4. Schema / Dados Estruturados — 93/100 ✅ (exemplar)
+
+Grafo JSON-LD interligado por `@id` estável — referência de boas práticas:
+
+| Tipo | Onde | Status |
+|------|------|:------:|
+| `ProfessionalService` (`#organization`) | Layout marketing (todas as páginas) | ✅ |
+| `WebSite` (`#website`) | Layout marketing | ✅ (sem SearchAction — correto, não há busca on-site) |
+| `BreadcrumbList` | Páginas de detalhe (serviço/portfólio/info) | ✅ |
+| `Service` | `/services/[slug]` | ✅ provider → `#organization` |
+| `Article` | `/informations/[slug]` | ✅ author/publisher → `#organization` |
+| `CreativeWork` | `/portfolio/[slug]` | ✅ creator → `#organization`, com image/dateCreated |
+
+**Pontos fortes**
+- JSON-LD apenas (nunca Microdata/RDFa) — conforme padrão atual.
+- Entidades cruzam-se por `@id` → motores resolvem um único grafo conectado.
+- Nenhum uso de schema restrito/depreciado (sem FAQPage indevido, sem HowTo).
+
+**Oportunidades**
+- ℹ️ `ArticleJsonLd` sem `datePublished`/`dateModified`/`image` — adicionar habilita melhor elegibilidade a rich results e sinais de frescor.
+- ℹ️ `parentOrganization` sem `url`/`sameAs` — preencher o perfil do Grupo Vannuchi (Google Business / LinkedIn) melhora a desambiguação de entidade.
+
+---
+
+## 5. Performance / Core Web Vitals — 85/100 ✅ (*não verificado)
+
+> ⚠️ **Limitação de ambiente:** o PageSpeed Insights API retornou *rate limit* (sem chave). **LCP/INP/CLS reais não foram medidos** — confiança: Hipótese. Recomenda-se rodar manualmente em https://pagespeed.web.dev/?url=https://n8xmarketing.com.br
+
+**Sinais arquiteturais positivos (do código):**
+- Next.js 16 com renderização estática + ISR (`revalidateTag` nas edições) → HTML servido estático e rápido.
+- `next/image` em todas as imagens, com `priority` na imagem LCP do hero e `sizes="100vw"`.
+- Fontes Google com `subsets: ["latin"]` (Geist) — subset reduzido.
+- Animação do carousel respeita `prefers-reduced-motion` e pausa no hover/focus.
+- Região de deploy `gru1` (São Paulo) — baixa latência para público brasileiro.
+
+**Ação:** medir CWV reais (campo + lab) e confirmar LCP < 2,5s / INP < 200ms / CLS < 0,1.
+
+---
+
+## 6. Otimização de Imagens — 90/100 ✅
+
+- **Disciplina de alt correta:** imagens significativas recebem alt descritivo (`client.name`, `project.title`, `member.name`, `item.authorName`); imagens decorativas (fundo do hero, ícones, og-image, capa de info) recebem `alt=""`. Padrão impecável.
+- Todas as imagens passam por `next/image` (lazy/responsive/AVIF-WebP automático).
+- `remotePatterns` restringe hosts externos (Unsplash, Drive, etc.) — bom para segurança.
+
+**Oportunidade:** as imagens de capa de `informations` usam `alt=""` (decorativas, duplicam o título adjacente) — defensável; se passarem a ser ilustrativas/informativas, dar alt descritivo.
+
+---
+
+## 7. AI Search / GEO — 95/100 ✅
+
+| Item | Status | Evidência |
+|------|:------:|-----------|
+| `llms.txt` | ✅ 100/100 | 3 seções, 23 links, descrição da agência + endereço |
+| Crawlers de IA liberados | ✅ | GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot explicitamente allow |
+| Entidade resolvível (schema) | ✅ | Grafo `@id` conectado — facilita citação por IA |
+| NAP consistente | ✅ | Mesmo endereço no schema, footer e llms.txt |
+
+**Oportunidades**
+- ℹ️ `llms-full.txt` não existe — opcional; um arquivo expandido com o conteúdo completo dos serviços/cases pode aumentar a qualidade da citação por LLMs.
+- ℹ️ Decidir explicitamente sobre Bytespider/CCBot (treino sem citação) vs. PerplexityBot/OAI (citação com tráfego).
+
+---
+
+## Tabela de Achados (priorizada)
+
+| # | Severidade | Achado | Confiança |
+|---|:----------:|--------|:---------:|
+| 1 | ⚠️ Warning | `og:url` ausente em todas as páginas | Confirmado (live) |
+| 2 | ⚠️ Warning | CSP (Content-Security-Policy) ausente | Confirmado |
+| 3 | ℹ️ Info | `parentOrganization` sem `url`/`sameAs` (Grupo Vannuchi) | Confirmado (código) |
+| 4 | ℹ️ Info | `ArticleJsonLd` sem `datePublished`/`dateModified`/`image` | Confirmado (código) |
+| 5 | ℹ️ Info | 6 scrapers de IA herdam regra `*` (decisão estratégica) | Confirmado |
+| 6 | ℹ️ Info | Sem byline de autor-pessoa nos artigos | Confirmado |
+| 7 | ℹ️ Info | `llms-full.txt` ausente (opcional) | Confirmado |
+| 8 | ℹ️ Info | `twitter:site`/`twitter:creator` ausentes (opcionais) | Confirmado |
+| 9 | ℹ️ Info | CWV reais não medidos | Limitação de ambiente |
+
+---
+
+## Limitações da Auditoria
+
+- **PageSpeed Insights:** rate limit da API (sem chave) — CWV não medidos. Rodar manualmente.
+- Demais checagens foram confirmadas no HTML ao vivo **e** no código-fonte, eliminando hipóteses.
