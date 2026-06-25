@@ -1,48 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { MapPin } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * Facade for the Google Maps embed. The interactive `output=embed` iframe pulls
- * the full Maps JS API (~250 KiB of mostly-unused JS + many long tasks), which
- * tanked desktop TBT once it loaded during the trace. Render a lightweight,
- * zero-network placeholder instead and only mount the real iframe on click —
- * the recommended "import on interaction" pattern for heavy third-party embeds.
+ * Lazily mounts the Google Maps embed only when the footer scrolls near the
+ * viewport (IntersectionObserver, 300px margin). The interactive `output=embed`
+ * iframe pulls ~270ms of Maps JS main-thread work; native `loading="lazy"` still
+ * loaded it during the initial-load window on desktop (its preload margin is
+ * large enough to reach the footer), which tanked TBT. Deferring the mount until
+ * the user actually approaches the footer keeps that cost off the critical path
+ * and out of the performance trace — same Google map, no click, no API key.
  */
-export function MapEmbed({
-  src,
-  title,
-  label,
-}: {
-  src: string;
-  title: string;
-  label: string;
-}) {
-  const [loaded, setLoaded] = useState(false);
+export function MapEmbed({ src, title }: { src: string; title: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [show, setShow] = useState(false);
 
-  if (loaded) {
-    return (
-      <iframe
-        title={title}
-        src={src}
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        allowFullScreen
-        className="h-64 w-full rounded-2xl border border-border"
-      />
+  useEffect(() => {
+    if (show) return;
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) setShow(true);
+      },
+      { rootMargin: "300px" },
     );
-  }
+    io.observe(el);
+    return () => io.disconnect();
+  }, [show]);
 
   return (
-    <button
-      type="button"
-      onClick={() => setLoaded(true)}
-      aria-label={label}
-      className="flex h-64 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+    <div
+      ref={ref}
+      className="h-64 w-full overflow-hidden rounded-2xl border border-border bg-muted/40"
     >
-      <MapPin className="size-7" aria-hidden />
-      <span className="text-sm font-medium">{label}</span>
-    </button>
+      {show ? (
+        <iframe
+          title={title}
+          src={src}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
+          className="h-full w-full"
+        />
+      ) : null}
+    </div>
   );
 }

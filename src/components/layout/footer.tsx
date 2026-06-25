@@ -96,7 +96,7 @@ export async function Footer() {
 
       <div className="border-t border-border">
         <Container className="py-10">
-          <MapEmbed src={mapSrc} title={t("mapTitle")} label={t("loadMap")} />
+          <MapEmbed src={mapSrc} title={t("mapTitle")} />
         </Container>
       </div>
 
