@@ -148,21 +148,28 @@ export function HeroCarousel({
               <ChevronRight className="size-6" />
             </button>
 
-            <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2.5">
+            <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1">
               {slides.map((_, i) => (
+                // 24px-tall flex wrapper keeps the tap target accessible
+                // (WCAG 2.5.8 / Lighthouse `target-size`) while the inner bar
+                // stays visually small.
                 <button
                   key={i}
                   type="button"
                   onClick={() => go(i)}
                   aria-label={labels.goTo[i]}
                   aria-current={i === index}
-                  className={cn(
-                    "h-2.5 rounded-full transition-all",
-                    i === index
-                      ? "w-8 bg-brand"
-                      : "w-2.5 bg-foreground/30 hover:bg-foreground/50",
-                  )}
-                />
+                  className="group flex h-6 min-w-6 items-center justify-center px-2"
+                >
+                  <span
+                    className={cn(
+                      "h-2.5 rounded-full transition-all",
+                      i === index
+                        ? "w-8 bg-brand"
+                        : "w-2.5 bg-foreground/30 group-hover:bg-foreground/50",
+                    )}
+                  />
+                </button>
               ))}
             </div>
           </>
