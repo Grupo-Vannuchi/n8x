@@ -1,56 +1,38 @@
 # Plano de Ação SEO — N8X Marketing
 
-**Site:** https://n8xmarketing.com.br · **Nota geral:** 95/100 (Excelente)
-**Data:** 25/06/2026 · **Atualizado:** 25/06 — item #1 (Open Graph) concluído (PR #67)
+**Site:** https://n8xmarketing.com.br · **Nota geral:** 94/100 (Excelente)
+**Data:** 26/06/2026
 
-> A base técnica está excelente e quase todo o plano anterior (24/06) foi implementado. A correção de alto alcance (Open Graph) **já foi entregue** — o foco restante é refinamento e conteúdo.
+> Todo o plano técnico anterior foi entregue e **verificado em produção**. Não há nada crítico ou urgente em aberto. Os itens abaixo são refinamentos e estratégia.
 
 ---
 
-## ✅ Concluído — 25/06 (PR #67)
-
-### 1. Restaurar as tags Open Graph removidas (regressão site-wide) — FEITO
-**Problema (resolvido):** `og:image`, `og:type`, `og:site_name`, `og:locale` e `twitter:image` haviam sumido de **todas** as páginas. Cards de compartilhamento (WhatsApp/LinkedIn/IG/X) e previews de IA ficaram sem imagem.
-
-**Causa:** [`src/lib/seo.ts`](../../src/lib/seo.ts) → `localeMetadata()` devolvia `openGraph: { url }`, e como o Next **não mescla `openGraph` em profundidade**, esse objeto substituía inteiro o `openGraph` do layout (type/siteName/locale) e derrubava a imagem do `opengraph-image.tsx`.
-
-**Solução entregue:** helper único `baseOpenGraph(locale, overrides)` em `src/lib/seo.ts` (fonte de verdade), usado **tanto** no layout **quanto** no `localeMetadata`. Atributos por página entram via `overrides` — artigos `type: "article"` + imagem própria; portfólio com a capa do projeto. Sem duplicar literais entre layout e páginas.
-```ts
-export function baseOpenGraph(locale: Locale, overrides: Partial<OpenGraph> = {}): OpenGraph {
-  return {
-    type: "website",
-    siteName: siteConfig.name,
-    locale,
-    images: [{ url: `${localizedUrl(locale)}/opengraph-image`, width: 1200, height: 630, alt: siteConfig.name }],
-    ...overrides,
-  } as OpenGraph;
-}
-```
-**Validação (curl, dev):** home/serviços/artigo/portfólio voltaram com o OG completo, 1 `og:image` por página, artigos com `og:type=article`. Conferir em produção após o deploy:
-```bash
-curl -s https://n8xmarketing.com.br | grep -oiE 'property="og:(image|type|site_name|locale)"'
-```
+## 🥇 Prioridade Alta
+Nenhum item crítico em aberto. ✅ As correções da semana já estão live e verificadas:
+- Open Graph site-wide restaurado (PR #67).
+- HTTP 500 nas páginas de informação corrigido (PR #61).
+- TBT de desktop pelo Google Maps resolvido com lazy-load via IntersectionObserver (PR #65).
+- Acessibilidade (touch targets) 96 → 100; LCP mobile do hero 3,2 s → ~2,7 s.
 
 ---
 
 ## 🥈 Prioridade Média — esta/próxima semana
 
-### 2. Medir Core Web Vitals reais
-Não foi possível medir nesta auditoria (rate limit da API). As melhorias recentes (defer das imagens do hero, lazy-load do Maps) devem ter melhorado o LCP — **confirmar em campo**.
-**Como:** https://pagespeed.web.dev/?url=https://n8xmarketing.com.br (mobile + desktop). Metas: LCP < 2,5s · INP < 200ms · CLS < 0,1.
+### 1. Medir Core Web Vitals em corrida fresca
+A API do PageSpeed deu rate-limit (sem chave). Rodar manualmente mobile + desktop em https://pagespeed.web.dev/?url=https://n8xmarketing.com.br e confirmar: LCP < 2,5 s · INP < 200 ms · CLS < 0,1. Atenção ao **LCP mobile (~2,7 s, limítrofe)**.
 
-### 3. (Opcional) `twitter:site` / `twitter:creator`
-Adicionar o handle do X/Twitter da agência (se houver) ao bloco `twitter` para atribuição nos cards. Baixo impacto.
+### 2. (Opcional) `twitter:site` / `twitter:creator`
+Adicionar o handle do X/Twitter da agência (se houver) ao bloco `twitter` via `baseOpenGraph`. Baixo impacto, ~5 min.
 
 ---
 
 ## 🥉 Prioridade Baixa — backlog / estratégico
 
-### 4. CSP (Content-Security-Policy)
-Único header de segurança faltando (85 → 100). Já é **dívida consciente** documentada em [`docs/adr/0004-defer-csp.md`](../adr/0004-defer-csp.md) — exige nonce-middleware por causa do JSON-LD inline. Manter no radar; entregar como mudança própria com teste.
+### 3. CSP (Content-Security-Policy)
+Único header de segurança faltando (85 → 100). Dívida consciente documentada em [`docs/adr/0004-defer-csp.md`](../adr/0004-defer-csp.md) — exige nonce-middleware por causa do JSON-LD inline. Entregar como mudança própria, com teste.
 
-### 5. Cadência editorial (maior alavanca orgânica)
-A estrutura está pronta (schema Article completo, hreflang, sitemap com 177 URLs, autor-pessoa). O ganho de tráfego orgânico agora vem de **publicar com regularidade** em `/informations`, mirando cauda longa local: "agência de marketing Santos", "social media Baixada Santista", "tráfego pago Santos", etc.
+### 4. Cadência editorial — maior alavanca orgânica
+A estrutura está pronta (Article schema completo, hreflang, sitemap 177 URLs, autor-pessoa). O ganho de tráfego agora vem de **publicar com regularidade** em `/informations`, mirando cauda longa local: "agência de marketing Santos", "social media Baixada Santista", "tráfego pago Santos".
 
 ---
 
@@ -58,8 +40,8 @@ A estrutura está pronta (schema Article completo, hreflang, sitemap com 177 URL
 
 | Prioridade | Itens | Esforço | Impacto |
 |-----------|-------|---------|---------|
-| ✅ Feito | Restaurar OG/Twitter image (regressão) — PR #67 | — | Alto (social/GEO/CTR) |
-| 🥈 Média | Medir CWV · twitter:site | Minutos | Médio |
-| 🥉 Baixa | CSP · cadência de conteúdo | Variado | Médio (conteúdo) |
+| 🥇 Alta | — (nada crítico) | — | — |
+| 🥈 Média | Medir CWV fresco · twitter:site | Minutos | Médio |
+| 🥉 Baixa | CSP · cadência de conteúdo | Variado | Médio→Alto (conteúdo) |
 
-**Veredito:** Excelente evolução desde 24/06 — quase todo o plano anterior entregue. Com a regressão de Open Graph corrigida (item #1, PR #67), o site está no nível ~95/100. O foco agora deixa de ser técnico e passa a ser **conteúdo e autoridade**.
+**Veredito:** O trabalho técnico de SEO está concluído e estável em produção (94/100). O foco daqui pra frente deixa de ser técnico e passa a ser **conteúdo e autoridade** (cadência editorial), com os CWV a confirmar em campo.
