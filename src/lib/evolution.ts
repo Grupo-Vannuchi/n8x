@@ -1,5 +1,7 @@
 import "server-only";
+import { unstable_cache, updateTag } from "next/cache";
 import { env } from "@/lib/env";
+import { tags } from "@/lib/cache";
 import { toWhatsappNumber } from "@/lib/phone";
 
 /**
@@ -34,6 +36,7 @@ async function evoRequest<T>(
   method: string,
   path: string,
   body?: unknown,
+  timeoutMs = 8_000,
 ): Promise<EvoResult<T>> {
   if (!isEvolutionConfigured()) return { ok: false, error: "not_configured" };
   try {
@@ -44,9 +47,9 @@ async function evoRequest<T>(
         apikey: env.EVOLUTION_API_KEY!,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
-      // Management calls populate UI — keep the wait short so a slow/unreachable
-      // server degrades quickly instead of hanging the request.
-      signal: AbortSignal.timeout(8_000),
+      // Keep the wait short so a slow/unreachable server degrades quickly instead
+      // of hanging the request. `fetchInstances` overrides this (it's much slower).
+      signal: AbortSignal.timeout(timeoutMs),
     });
     const text = await res.text().catch(() => "");
     if (!res.ok) {
@@ -150,12 +153,58 @@ function normalizeInstance(raw: unknown): EvoInstance | null {
   };
 }
 
-/** List every instance on the server. */
-export async function fetchInstances(): Promise<EvoResult<EvoInstance[]>> {
-  const res = await evoRequest<unknown>("GET", "/instance/fetchInstances");
-  if (!res.ok) return res;
+/**
+ * Raw instance list from the Evolution server. This endpoint is SLOW — it
+ * gathers connection state for every instance (~5–8s with a dozen instances),
+ * so it gets a generous timeout and throws on failure (so failures are never
+ * cached by `unstable_cache` below).
+ */
+async function loadInstances(): Promise<EvoInstance[]> {
+  const res = await evoRequest<unknown>(
+    "GET",
+    "/instance/fetchInstances",
+    undefined,
+    15_000,
+  );
+  if (!res.ok) throw new Error(res.error);
   const list = Array.isArray(res.data) ? res.data : [];
-  return { ok: true, data: list.map(normalizeInstance).filter(Boolean) as EvoInstance[] };
+  return list.map(normalizeInstance).filter(Boolean) as EvoInstance[];
+}
+
+/**
+ * Cached instance list. The slow Evolution call is paid once per 60s and shared
+ * across the WhatsApp panel + the funnel editor, so normal page loads are
+ * instant. Admin mutations (create/delete/logout) tag-out the cache via
+ * `invalidateInstances()`, and Next serves the last good list if a background
+ * refresh fails.
+ */
+const cachedInstances = unstable_cache(loadInstances, ["whatsapp-instances"], {
+  tags: [tags.whatsappInstances],
+  revalidate: 60,
+});
+
+/**
+ * List every instance on the server. Cached by default (fast); pass `force` to
+ * bypass the cache for a fresh read (e.g. the admin panel's Refresh button).
+ */
+export async function fetchInstances(
+  force = false,
+): Promise<EvoResult<EvoInstance[]>> {
+  if (!isEvolutionConfigured()) return { ok: false, error: "not_configured" };
+  try {
+    const data = force ? await loadInstances() : await cachedInstances();
+    return { ok: true, data };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "fetch_failed",
+    };
+  }
+}
+
+/** Invalidate the cached instance list after a mutation. */
+export function invalidateInstances(): void {
+  updateTag(tags.whatsappInstances);
 }
 
 /** Create an instance (Baileys/WhatsApp) and return its first QR code. */

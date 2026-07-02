@@ -25,23 +25,47 @@ const STATE_STYLES: Record<string, string> = {
 };
 
 export function WhatsappManager({
-  initialInstances,
   defaultInstance,
 }: {
-  initialInstances: EvoInstance[];
   defaultInstance: string | null;
 }) {
   const t = useTranslations("admin.whatsapp");
-  const [instances, setInstances] = useState(initialInstances);
+  const [instances, setInstances] = useState<EvoInstance[]>([]);
+  const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [qr, setQr] = useState<Qr | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Always read fresh on the management screen (bypass the 60s cache) — the admin
+  // is here to see current connection state.
   async function refresh() {
-    const res = await listInstancesAction();
-    if (res.ok) setInstances(res.data);
+    setStatus("loading");
+    const res = await listInstancesAction(true);
+    if (res.ok) {
+      setInstances(res.data);
+      setStatus("ok");
+    } else {
+      setStatus("error");
+    }
   }
+
+  // Load the list client-side so a slow Evolution server never blocks the page.
+  useEffect(() => {
+    let active = true;
+    listInstancesAction(true).then((res) => {
+      if (!active) return;
+      if (res.ok) {
+        setInstances(res.data);
+        setStatus("ok");
+      } else {
+        setStatus("error");
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // While a QR is shown, poll the connection state; close + refresh once linked.
   useEffect(() => {
@@ -135,7 +159,11 @@ export function WhatsappManager({
           </button>
         </div>
 
-        {instances.length === 0 ? (
+        {status === "loading" ? (
+          <p className="text-sm text-muted-foreground">{t("loadingInstances")}</p>
+        ) : status === "error" ? (
+          <p className="text-sm text-amber-600">{t("loadError")}</p>
+        ) : instances.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("empty")}</p>
         ) : (
           <ul className="flex flex-col divide-y divide-border">
