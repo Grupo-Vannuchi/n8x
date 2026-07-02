@@ -8,7 +8,7 @@ import {
   type UseFormRegister,
 } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { Plus, Trash2, ArrowUp, ArrowDown, RotateCcw } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, RotateCcw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label, FieldError } from "@/components/ui/field";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -291,7 +291,8 @@ export function FunnelForm({
             )}
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
               {instancesStatus === "loading" ? (
-                <span className="text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <Loader2 className="size-3 animate-spin" />
                   {t("whatsappInstancesLoading")}
                 </span>
               ) : null}
