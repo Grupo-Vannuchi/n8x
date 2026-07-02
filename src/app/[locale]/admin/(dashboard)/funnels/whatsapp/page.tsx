@@ -3,14 +3,14 @@ import { ArrowLeft, AlertCircle, MessagesSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { WhatsappManager } from "@/components/admin/whatsapp-manager";
-import {
-  fetchInstances,
-  isEvolutionConfigured,
-  defaultInstance,
-} from "@/lib/evolution";
+import { isEvolutionConfigured, defaultInstance } from "@/lib/evolution";
 import { env } from "@/lib/env";
 import { resolveLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+
+// The Evolution `fetchInstances` call can take ~10s on a cache miss; give the
+// server action room instead of the platform default.
+export const maxDuration = 30;
 
 export default async function FunnelWhatsappPage({
   params,
@@ -21,9 +21,9 @@ export default async function FunnelWhatsappPage({
   setRequestLocale(locale);
   const t = await getTranslations("admin.whatsapp");
 
+  // Don't block the page render on the slow Evolution server — the manager loads
+  // the instance list client-side (with its own loading/error/retry states).
   const configured = isEvolutionConfigured();
-  const res = configured ? await fetchInstances() : null;
-  const instances = res?.ok ? res.data : [];
   const inboxUrl = env.WHATSAPP_INBOX_URL;
 
   return (
@@ -79,10 +79,7 @@ export default async function FunnelWhatsappPage({
           </div>
         </div>
       ) : (
-        <WhatsappManager
-          initialInstances={instances}
-          defaultInstance={defaultInstance()}
-        />
+        <WhatsappManager defaultInstance={defaultInstance()} />
       )}
     </div>
   );

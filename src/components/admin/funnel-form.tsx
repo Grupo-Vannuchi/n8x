@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   useForm,
   useFieldArray,
@@ -161,23 +161,42 @@ export function FunnelForm({
   const watchedQuestions = watch("questions") ?? [];
   const watchedEndings = watch("endings") ?? [];
   // Load WhatsApp instances client-side and non-blocking: the funnel editor must
-  // never hang or fail because the Evolution server is slow/unreachable.
+  // never hang or fail because the Evolution server is slow/unreachable. On
+  // failure the admin still gets a retry and a manual name field (below), so the
+  // dropdown is never a dead end.
   const [instanceOptions, setInstanceOptions] = useState<string[]>([]);
-  useEffect(() => {
-    let active = true;
-    listInstancesAction().then((r) => {
-      if (active && r.ok) setInstanceOptions(r.data.map((i) => i.name));
-    });
-    return () => {
-      active = false;
-    };
+  const [instancesStatus, setInstancesStatus] = useState<
+    "loading" | "ok" | "error"
+  >("loading");
+  const [manualInstance, setManualInstance] = useState(false);
+
+  const loadInstances = useCallback(() => {
+    setInstancesStatus("loading");
+    return listInstancesAction()
+      .then((r) => {
+        if (r.ok) {
+          setInstanceOptions(r.data.map((i) => i.name));
+          setInstancesStatus("ok");
+        } else {
+          setInstancesStatus("error");
+        }
+      })
+      .catch(() => setInstancesStatus("error"));
   }, []);
+
+  useEffect(() => {
+    void loadInstances();
+  }, [loadInstances]);
+
   // Keep the funnel's current instance selectable even if it's not in the live list.
   const watchedInstance = watch("whatsappInstance");
   const instanceSelectOptions =
     watchedInstance && !instanceOptions.includes(watchedInstance)
       ? [watchedInstance, ...instanceOptions]
       : instanceOptions;
+  // Fall back to a free-text field when the list failed to load, so the admin is
+  // never blocked from picking an instance they know exists.
+  const showManualInstance = manualInstance || instancesStatus === "error";
 
   async function onSubmit(values: FunnelFormValues) {
     setServerError(null);
@@ -249,18 +268,58 @@ export function FunnelForm({
           </div>
           <div className="sm:col-span-2">
             <Label htmlFor="whatsappInstance">{t("whatsappInstance")}</Label>
-            <select
-              id="whatsappInstance"
-              className={cn(selectStyles)}
-              {...register("whatsappInstance")}
-            >
-              <option value="">{t("whatsappInstanceDefault")}</option>
-              {instanceSelectOptions.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            {showManualInstance ? (
+              <Input
+                id="whatsappInstance"
+                placeholder={t("whatsappInstanceManualPlaceholder")}
+                {...register("whatsappInstance")}
+              />
+            ) : (
+              <select
+                id="whatsappInstance"
+                className={cn(selectStyles)}
+                disabled={instancesStatus === "loading"}
+                {...register("whatsappInstance")}
+              >
+                <option value="">{t("whatsappInstanceDefault")}</option>
+                {instanceSelectOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            )}
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              {instancesStatus === "loading" ? (
+                <span className="text-muted-foreground">
+                  {t("whatsappInstancesLoading")}
+                </span>
+              ) : null}
+              {instancesStatus === "error" ? (
+                <>
+                  <span className="text-amber-600">
+                    {t("whatsappInstancesError")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void loadInstances()}
+                    className="text-brand hover:underline"
+                  >
+                    {t("whatsappInstancesRetry")}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setManualInstance((v) => !v)}
+                  className="text-brand hover:underline"
+                >
+                  {manualInstance
+                    ? t("whatsappInstanceUseList")
+                    : t("whatsappInstanceTypeManually")}
+                </button>
+              )}
+            </div>
             <p className="mt-1 text-xs text-muted-foreground">
               {t("whatsappInstanceHint")}{" "}
               <Link href="/admin/funnels/whatsapp" className="text-brand hover:underline">

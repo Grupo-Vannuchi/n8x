@@ -3,6 +3,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import {
   fetchInstances,
+  invalidateInstances,
   createInstance,
   connectInstance,
   getConnectionState,
@@ -27,16 +28,20 @@ function cleanName(name: string): string | null {
   return n;
 }
 
-export async function listInstancesAction(): Promise<Result<EvoInstance[]>> {
+export async function listInstancesAction(
+  force = false,
+): Promise<Result<EvoInstance[]>> {
   if (!(await requireAdmin())) return { ok: false, error: "unauthorized" };
-  return fetchInstances();
+  return fetchInstances(force);
 }
 
 export async function createInstanceAction(name: string): Promise<Result<EvoQrCode>> {
   if (!(await requireAdmin())) return { ok: false, error: "unauthorized" };
   const clean = cleanName(name);
   if (!clean) return { ok: false, error: "invalid_name" };
-  return createInstance(clean);
+  const res = await createInstance(clean);
+  if (res.ok) invalidateInstances();
+  return res;
 }
 
 export async function connectInstanceAction(name: string): Promise<Result<EvoQrCode>> {
@@ -51,10 +56,14 @@ export async function connectionStateAction(name: string): Promise<Result<string
 
 export async function logoutInstanceAction(name: string): Promise<Result<unknown>> {
   if (!(await requireAdmin())) return { ok: false, error: "unauthorized" };
-  return logoutInstance(name);
+  const res = await logoutInstance(name);
+  if (res.ok) invalidateInstances();
+  return res;
 }
 
 export async function deleteInstanceAction(name: string): Promise<Result<unknown>> {
   if (!(await requireAdmin())) return { ok: false, error: "unauthorized" };
-  return deleteInstance(name);
+  const res = await deleteInstance(name);
+  if (res.ok) invalidateInstances();
+  return res;
 }

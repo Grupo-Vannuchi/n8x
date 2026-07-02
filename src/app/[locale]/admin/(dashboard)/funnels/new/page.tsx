@@ -10,6 +10,10 @@ import {
 } from "@/lib/funnel-runtime";
 import { resolveLocale } from "@/i18n/routing";
 
+// The funnel editor's WhatsApp-instance dropdown calls the Evolution server via a
+// Server Action; on a cache miss that can take ~10s, so give the action room.
+export const maxDuration = 30;
+
 export default async function NewFunnelPage({
   params,
 }: {
