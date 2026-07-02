@@ -160,7 +160,26 @@ export function WhatsappManager({
         </div>
 
         {status === "loading" ? (
-          <p className="text-sm text-muted-foreground">{t("loadingInstances")}</p>
+          <>
+            <span className="sr-only">{t("loadingInstances")}</span>
+            <ul
+              aria-hidden
+              className="flex flex-col divide-y divide-border"
+            >
+              {Array.from({ length: 3 }).map((_, i) => (
+                <li
+                  key={i}
+                  className="flex items-center justify-between gap-3 py-3"
+                >
+                  <div className="flex flex-col gap-2">
+                    <div className="h-4 w-36 animate-pulse rounded bg-muted" />
+                    <div className="h-3 w-24 animate-pulse rounded bg-muted" />
+                  </div>
+                  <div className="h-8 w-24 animate-pulse rounded-lg bg-muted" />
+                </li>
+              ))}
+            </ul>
+          </>
         ) : status === "error" ? (
           <p className="text-sm text-amber-600">{t("loadError")}</p>
         ) : instances.length === 0 ? (
