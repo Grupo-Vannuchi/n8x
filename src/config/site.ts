@@ -113,10 +113,10 @@ export const siteConfig: SiteConfig = {
 
   contact: {
     email: "marketing@n8company.com.br",
-    phone: "+55 (13) 99618-4401",
+    phone: "+55 (13) 99733-4424",
     whatsapp: {
-      number: "5513996184401",
-      display: "(13) 99618-4401",
+      number: "5513997334424",
+      display: "(13) 99733-4424",
     },
     address: {
       street: "Rua Frei Gaspar, 22 - sala 14",
