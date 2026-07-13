@@ -269,7 +269,7 @@
     "bookedTitle": "Meeting booked! 📅",
     "meetingUnavailableTitle": "We got your details! 📩",
     "meetingUnavailableText": "Scheduling is unavailable right now. We'll reach out shortly to set the best time.",
-    "invalidPhone": "Enter a valid number with area code, e.g. (13) 99618-4401",
+    "invalidPhone": "Enter a valid number with area code, e.g. (13) 91234-5678",
     "invalidEmail": "Enter a valid email.",
     "prevDay": "Previous day",
     "nextDay": "Next day"
