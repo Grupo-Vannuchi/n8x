@@ -366,7 +366,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
               }}
               placeholder={
                 inputNode.field === "phone"
-                  ? "(13) 99618-4401"
+                  ? "(13) 91234-5678"
                   : t("placeholder")
               }
               aria-invalid={Boolean(inputError)}
