@@ -63,6 +63,8 @@ export type SiteConfig = {
       number: string;
       /** Human-readable display form. */
       display: string;
+      /** Pre-filled message for the WhatsApp CTA (wa.me `?text=`). */
+      defaultMessage?: string;
     };
     address: {
       street: string;
@@ -117,6 +119,8 @@ export const siteConfig: SiteConfig = {
     whatsapp: {
       number: "5513997334424",
       display: "(13) 99733-4424",
+      defaultMessage:
+        "Olá! Encontrei o contato de vocês pelo seu site e gostaria de saber mais sobre os serviços. Podem me ajudar?",
     },
     address: {
       street: "Rua Frei Gaspar, 22 - sala 14",
@@ -169,10 +173,14 @@ export function yearsInBusiness(now: Date = new Date()): number {
   return now.getFullYear() - siteConfig.foundedYear;
 }
 
-/** Build a wa.me deep link with an optional pre-filled message. */
+/**
+ * Build a wa.me deep link. Falls back to the configured default message when
+ * none is passed, so every CTA opens WhatsApp with the pre-filled greeting.
+ */
 export function whatsappLink(message?: string): string {
   const base = `https://wa.me/${siteConfig.contact.whatsapp.number}`;
-  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+  const text = message ?? siteConfig.contact.whatsapp.defaultMessage;
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 }
 
 /** The agency's address as a single comma-separated line. */
