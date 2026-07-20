@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label, FieldError } from "@/components/ui/field";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Icon, iconNames } from "@/components/ui/icon";
 import { Link, useRouter } from "@/i18n/navigation";
 import { locales } from "@/i18n/routing";
@@ -40,6 +41,7 @@ export function InformationForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<InformationFormValues>({ defaultValues });
 
@@ -109,13 +111,14 @@ export function InformationForm({
             <p className="mt-1 text-xs text-muted-foreground">{t("orderHint")}</p>
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="image">{t("image")}</Label>
-            <Input
+            <ImageUploadField
               id="image"
-              placeholder="https://…"
-              {...register("image")}
+              label={t("image")}
+              hint={t("imageHint")}
+              preset="cover"
+              value={watch("image") ?? ""}
+              onChange={(v) => setValue("image", v, { shouldDirty: true })}
             />
-            <p className="mt-1 text-xs text-muted-foreground">{t("imageHint")}</p>
           </div>
         </div>
       </fieldset>

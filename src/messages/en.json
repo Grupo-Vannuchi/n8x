@@ -526,6 +526,17 @@
         "unknown": "Something went wrong. Please try again."
       }
     },
+    "upload": {
+      "upload": "Upload image",
+      "replace": "Replace image",
+      "uploading": "Uploading…",
+      "remove": "Remove image",
+      "urlPlaceholder": "or paste an image URL",
+      "tooLarge": "Image too large (max 15 MB).",
+      "notImage": "Select an image file.",
+      "notConfigured": "Upload unavailable (storage not configured).",
+      "error": "Upload failed. Please try again."
+    },
     "team": {
       "title": "Team",
       "new": "New member",

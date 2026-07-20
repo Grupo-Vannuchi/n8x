@@ -5,6 +5,10 @@ import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label, FieldError } from "@/components/ui/field";
+import {
+  ImageUploadField,
+  GalleryUploadField,
+} from "@/components/admin/image-upload-field";
 import { Link, useRouter } from "@/i18n/navigation";
 import { locales } from "@/i18n/routing";
 import {
@@ -36,6 +40,8 @@ export function ProjectForm({
 
   const {
     register,
+    watch,
+    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<ProjectFormValues>({ defaultValues });
@@ -108,20 +114,24 @@ export function ProjectForm({
         <legend className="px-1 text-sm font-semibold">{t("sectionMedia")}</legend>
         <div className="flex flex-col gap-4">
           <div>
-            <Label htmlFor="coverImage">{t("coverImage")}</Label>
-            <Input
+            <ImageUploadField
               id="coverImage"
-              type="url"
-              placeholder="https://…"
-              aria-invalid={Boolean(errors.coverImage)}
-              {...register("coverImage", required)}
+              label={t("coverImage")}
+              preset="cover"
+              value={watch("coverImage") ?? ""}
+              onChange={(v) =>
+                setValue("coverImage", v, { shouldDirty: true, shouldValidate: true })
+              }
             />
             <FieldError>{errors.coverImage?.message}</FieldError>
           </div>
           <div>
-            <Label htmlFor="gallery">{t("gallery")}</Label>
-            <Textarea id="gallery" placeholder="https://…&#10;https://…" {...register("gallery")} />
-            <p className="mt-1 text-xs text-muted-foreground">{t("galleryHint")}</p>
+            <GalleryUploadField
+              label={t("gallery")}
+              hint={t("galleryHint")}
+              value={watch("gallery") ?? ""}
+              onChange={(v) => setValue("gallery", v, { shouldDirty: true })}
+            />
           </div>
           <div>
             <Label htmlFor="tags">{t("tags")}</Label>

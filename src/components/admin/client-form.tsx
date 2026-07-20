@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/field";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Link, useRouter } from "@/i18n/navigation";
 import { formToInput, type ClientFormValues } from "@/lib/client-form";
 import {
@@ -29,6 +30,8 @@ export function ClientForm({
 
   const {
     register,
+    watch,
+    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<ClientFormValues>({ defaultValues });
@@ -72,16 +75,17 @@ export function ClientForm({
             <p className="mt-1 text-xs text-muted-foreground">{t("orderHint")}</p>
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="logoUrl">{t("logoUrl")}</Label>
-            <Input
+            <ImageUploadField
               id="logoUrl"
-              type="url"
-              placeholder="https://…"
-              aria-invalid={Boolean(errors.logoUrl)}
-              {...register("logoUrl", required)}
+              label={t("logoUrl")}
+              hint={t("logoUrlHint")}
+              preset="logo"
+              value={watch("logoUrl") ?? ""}
+              onChange={(v) =>
+                setValue("logoUrl", v, { shouldDirty: true, shouldValidate: true })
+              }
             />
             <FieldError>{errors.logoUrl?.message}</FieldError>
-            <p className="mt-1 text-xs text-muted-foreground">{t("logoUrlHint")}</p>
           </div>
           <div className="sm:col-span-2">
             <Label htmlFor="website">{t("website")}</Label>

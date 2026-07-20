@@ -30,6 +30,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Admin image uploads go through a Server Action; the default 1MB body cap is
+  // too small for a phone photo. Match the action's 15MB limit (+ FormData
+  // overhead). Only admins (session-gated) can hit the upload action.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "16mb",
+    },
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
@@ -43,6 +51,8 @@ const nextConfig: NextConfig = {
       // Google Drive images: use the lh3.googleusercontent.com/d/<FILE_ID> form,
       // NOT the drive.google.com/file/d/<ID>/view share link.
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      // Supabase Storage (admin image uploads) — the project's public bucket.
+      { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
 };
