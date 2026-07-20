@@ -409,8 +409,11 @@ export type FunnelRunView = {
   defaultBlock: FunnelDefaultStep[];
   questions: {
     key: string;
+    kind: "CHOICE" | "TEXT";
     prompt: string;
     options: { label: string; next: string }[];
+    /** TEXT only: single continuation target. */
+    next: string;
   }[];
   /** Endings in order; the first is the default/fallback. Completion messages
    * and meeting config stay server-side and are NOT exposed here. */
@@ -435,11 +438,13 @@ export const getPublishedFunnelBySlug = unstable_cache(
       defaultBlock: (f.defaultBlock as FunnelDefaultStep[] | null) ?? [],
       questions: f.questions.map((q) => ({
         key: q.key,
+        kind: q.kind,
         prompt: q.prompt,
         options: q.options.map((label, i) => ({
           label,
           next: q.optionNext?.[i] ?? "",
         })),
+        next: q.next,
       })),
       endings: f.endings.map((e) => ({
         key: e.key,

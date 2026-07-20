@@ -33,17 +33,31 @@ export const funnelDefaultStepSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
-/** A custom single-choice question (buttons), with per-option branch targets. */
-const funnelQuestionSchema = z.object({
-  key: z.string().trim().min(1).max(60),
-  prompt: z.string().trim().min(1).max(2000),
-  options: z
-    .array(z.string().trim().min(1).max(200))
-    .min(2, "Add at least two options")
-    .max(12),
-  /** Aligned with `options`: a question key, an ending key, "END", or "" (next). */
-  optionNext: z.array(z.string().trim().max(60)).max(12),
-});
+/**
+ * A custom question — either single-choice (buttons, with per-option branch
+ * targets) or a free-text/descriptive answer (with one continuation target).
+ */
+const funnelQuestionSchema = z
+  .object({
+    key: z.string().trim().min(1).max(60),
+    kind: z.enum(["CHOICE", "TEXT"]).default("CHOICE"),
+    prompt: z.string().trim().min(1).max(2000),
+    // CHOICE only:
+    options: z.array(z.string().trim().min(1).max(200)).max(12).default([]),
+    /** Aligned with `options`: a question key, an ending key, "END", or "" (next). */
+    optionNext: z.array(z.string().trim().max(60)).max(12).default([]),
+    // TEXT only: single continuation target.
+    next: z.string().trim().max(60).default(""),
+  })
+  .superRefine((val, ctx) => {
+    if (val.kind === "CHOICE" && val.options.length < 2) {
+      ctx.addIssue({
+        path: ["options"],
+        code: z.ZodIssueCode.custom,
+        message: "Add at least two options",
+      });
+    }
+  });
 
 /** A named funnel ending (type + WhatsApp message + type-specific config). */
 const funnelEndingSchema = z

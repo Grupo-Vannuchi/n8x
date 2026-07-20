@@ -298,7 +298,14 @@ model FunnelEnding {
   @@map("funnel_endings")
 }
 
-/// A custom single-choice (buttons) question that runs after the default block.
+/// How a custom question is answered: single-choice buttons, or free text.
+enum FunnelQuestionKind {
+  CHOICE
+  TEXT
+}
+
+/// A custom question that runs after the default block — either single-choice
+/// (buttons) or a free-text (descriptive) answer.
 model FunnelQuestion {
   id       String   @id @default(cuid())
   funnelId String
@@ -307,11 +314,15 @@ model FunnelQuestion {
   /// Stable identifier within the funnel, used as a branch target. Survives edits
   /// (the DB `id` is regenerated on save, so branching can't rely on it).
   key      String   @default("")
+  kind     FunnelQuestionKind @default(CHOICE)
   prompt   String
-  options  String[] @default([]) // ordered single-choice labels
-  /// Per-option branch target, aligned with `options`: a question `key`, an
-  /// ending `key`, "END" (the default ending), or "" (the next question in order).
+  options  String[] @default([]) // CHOICE only: ordered single-choice labels
+  /// CHOICE only: per-option branch target, aligned with `options`: a question
+  /// `key`, an ending `key`, "END" (the default ending), or "" (the next in order).
   optionNext String[] @default([])
+  /// TEXT only: single continuation target after the answer (a question `key`,
+  /// an ending `key`, "END", or "" for the next question in order).
+  next     String   @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

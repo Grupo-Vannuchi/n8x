@@ -39,9 +39,11 @@ function questionsCreate(input: FunnelInput) {
   return input.questions.map((q, i) => ({
     order: i,
     key: q.key,
+    kind: q.kind,
     prompt: q.prompt,
     options: q.options,
     optionNext: q.optionNext,
+    next: q.next,
   }));
 }
 

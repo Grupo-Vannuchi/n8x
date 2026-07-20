@@ -36,7 +36,52 @@ const selectStyles =
 
 const inputFields = ["name", "role", "phone", "email"] as const;
 
-/** Nested options editor for one custom question (single-choice buttons). */
+/** The <option>s for a branch-target <select>: default (next) / END / other
+ * questions / endings. Shared by the choice options and the text continuation. */
+function BranchTargetOptions({
+  qIndex,
+  questions,
+  endings,
+}: {
+  qIndex: number;
+  questions: FunnelFormValues["questions"];
+  endings: FunnelFormValues["endings"];
+}) {
+  const t = useTranslations("admin.funnels");
+  // Other questions this can branch to (exclude self; need a key).
+  const targets = questions
+    .map((q, j) => ({ key: q.key, prompt: q.prompt, j }))
+    .filter((q) => q.j !== qIndex && q.key);
+  const endingTargets = endings
+    .map((e, j) => ({ key: e.key, name: e.name, j }))
+    .filter((e) => e.key);
+  return (
+    <>
+      <option value="">{t("nextDefault")}</option>
+      <option value="END">{t("nextEnd")}</option>
+      {targets.length > 0 ? (
+        <optgroup label={t("sectionQuestions")}>
+          {targets.map((tg) => (
+            <option key={tg.key} value={tg.key}>
+              {tg.prompt || `${t("question")} ${tg.j + 1}`}
+            </option>
+          ))}
+        </optgroup>
+      ) : null}
+      {endingTargets.length > 0 ? (
+        <optgroup label={t("sectionEndings")}>
+          {endingTargets.map((e) => (
+            <option key={e.key} value={e.key}>
+              {e.name || `${t("ending")} ${e.j + 1}`}
+            </option>
+          ))}
+        </optgroup>
+      ) : null}
+    </>
+  );
+}
+
+/** Nested options editor for one single-choice question (buttons). */
 function OptionsEditor({
   control,
   register,
@@ -56,14 +101,6 @@ function OptionsEditor({
     control,
     name: `questions.${qIndex}.options`,
   });
-
-  // Other questions this option can branch to (exclude self; need a key).
-  const targets = questions
-    .map((q, j) => ({ key: q.key, prompt: q.prompt, j }))
-    .filter((q) => q.j !== qIndex && q.key);
-  const endingTargets = endings
-    .map((e, j) => ({ key: e.key, name: e.name, j }))
-    .filter((e) => e.key);
 
   return (
     <div className="flex flex-col gap-2">
@@ -93,26 +130,11 @@ function OptionsEditor({
               className={cn(selectStyles, "py-1.5 text-xs")}
               {...register(`questions.${qIndex}.options.${i}.next` as const)}
             >
-              <option value="">{t("nextDefault")}</option>
-              <option value="END">{t("nextEnd")}</option>
-              {targets.length > 0 ? (
-                <optgroup label={t("sectionQuestions")}>
-                  {targets.map((tg) => (
-                    <option key={tg.key} value={tg.key}>
-                      {tg.prompt || `${t("question")} ${tg.j + 1}`}
-                    </option>
-                  ))}
-                </optgroup>
-              ) : null}
-              {endingTargets.length > 0 ? (
-                <optgroup label={t("sectionEndings")}>
-                  {endingTargets.map((e) => (
-                    <option key={e.key} value={e.key}>
-                      {e.name || `${t("ending")} ${e.j + 1}`}
-                    </option>
-                  ))}
-                </optgroup>
-              ) : null}
+              <BranchTargetOptions
+                qIndex={qIndex}
+                questions={questions}
+                endings={endings}
+              />
             </select>
           </label>
         </div>
@@ -489,13 +511,42 @@ export function FunnelForm({
                   <Label>{t("questionPrompt")}</Label>
                   <Input {...register(`questions.${qIndex}.prompt` as const)} />
                 </div>
-                <OptionsEditor
-                  control={control}
-                  register={register}
-                  qIndex={qIndex}
-                  questions={watchedQuestions}
-                  endings={watchedEndings}
-                />
+                <div>
+                  <Label>{t("questionKind")}</Label>
+                  <select
+                    className={cn(selectStyles)}
+                    {...register(`questions.${qIndex}.kind` as const)}
+                  >
+                    <option value="CHOICE">{t("kindChoice")}</option>
+                    <option value="TEXT">{t("kindText")}</option>
+                  </select>
+                </div>
+                {watchedQuestions[qIndex]?.kind === "TEXT" ? (
+                  <div>
+                    <Label>{t("textNextLabel")}</Label>
+                    <select
+                      className={cn(selectStyles)}
+                      {...register(`questions.${qIndex}.next` as const)}
+                    >
+                      <BranchTargetOptions
+                        qIndex={qIndex}
+                        questions={watchedQuestions}
+                        endings={watchedEndings}
+                      />
+                    </select>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t("textAnswerHint")}
+                    </p>
+                  </div>
+                ) : (
+                  <OptionsEditor
+                    control={control}
+                    register={register}
+                    qIndex={qIndex}
+                    questions={watchedQuestions}
+                    endings={watchedEndings}
+                  />
+                )}
               </div>
             </div>
           ))}

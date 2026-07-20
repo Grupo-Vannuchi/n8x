@@ -18,12 +18,16 @@ export type FunnelFormStep = {
   prompt: string;
 };
 
-/** A custom question in form-friendly shape. `key` is the stable branch id; each
- * option's `next` is its branch target (a question/ending key, "END", or ""). */
+/** A custom question in form-friendly shape. `key` is the stable branch id.
+ * CHOICE: each option's `next` is its branch target (a question/ending key,
+ * "END", or ""). TEXT: `next` is the single continuation target. */
 export type FunnelFormQuestion = {
   key: string;
+  kind: "CHOICE" | "TEXT";
   prompt: string;
   options: { value: string; next: string }[];
+  /** TEXT only: single continuation target. */
+  next: string;
 };
 
 /** A named ending in form-friendly shape (numbers as strings). */
@@ -66,11 +70,13 @@ export function blankInputStep(): FunnelFormStep {
 export function blankQuestion(): FunnelFormQuestion {
   return {
     key: crypto.randomUUID(),
+    kind: "CHOICE",
     prompt: "",
     options: [
       { value: "", next: "" },
       { value: "", next: "" },
     ],
+    next: "",
   };
 }
 export function blankEnding(): FunnelFormEnding {
@@ -160,9 +166,11 @@ type FunnelRow = {
 
 type QuestionRow = {
   key: string;
+  kind: "CHOICE" | "TEXT";
   prompt: string;
   options: string[];
   optionNext: string[];
+  next: string;
 };
 
 type EndingRow = {
@@ -216,11 +224,15 @@ export function funnelToForm(
     defaultBlock: readSteps(funnel.defaultBlock),
     questions: questions.map((q) => ({
       key: q.key || crypto.randomUUID(),
+      kind: q.kind ?? "CHOICE",
       prompt: q.prompt,
-      options: q.options.map((value, i) => ({
-        value,
-        next: q.optionNext?.[i] ?? "",
-      })),
+      options: q.options.length
+        ? q.options.map((value, i) => ({ value, next: q.optionNext?.[i] ?? "" }))
+        : [
+            { value: "", next: "" },
+            { value: "", next: "" },
+          ],
+      next: q.next ?? "",
     })),
     endings: endings.length ? endings.map(endingToForm) : [blankEnding()],
   };
@@ -237,15 +249,28 @@ export function formToInput(values: FunnelFormValues): FunnelInput {
     defaultBlock: stepsToStored(values.defaultBlock),
     questions: values.questions
       .map((q) => {
-        // Drop blank options, keeping options[] and optionNext[] aligned.
+        // TEXT questions carry no options — just the single `next` target.
+        if (q.kind === "TEXT") {
+          return {
+            key: q.key,
+            kind: "TEXT" as const,
+            prompt: q.prompt.trim(),
+            options: [],
+            optionNext: [],
+            next: q.next,
+          };
+        }
+        // CHOICE: drop blank options, keeping options[] and optionNext[] aligned.
         const opts = q.options
           .map((o) => ({ label: o.value.trim(), next: o.next }))
           .filter((o) => o.label.length > 0);
         return {
           key: q.key,
+          kind: "CHOICE" as const,
           prompt: q.prompt.trim(),
           options: opts.map((o) => o.label),
           optionNext: opts.map((o) => o.next),
+          next: "",
         };
       })
       .filter((q) => q.prompt.length > 0),

@@ -25,6 +25,13 @@ type Node =
       questionKey: string;
       prompt: string;
       options: ChoiceOption[];
+    }
+  | {
+      type: "text";
+      questionKey: string;
+      prompt: string;
+      /** Single continuation target after the free-text answer. */
+      next: string;
     };
 
 type ChatMessage = { role: "bot" | "user"; text: string };
@@ -39,12 +46,21 @@ function buildNodes(funnel: FunnelRunView): Node[] {
     else nodes.push({ type: "input", field: step.field, prompt: step.prompt });
   }
   for (const q of funnel.questions) {
-    nodes.push({
-      type: "choice",
-      questionKey: q.key,
-      prompt: q.prompt,
-      options: q.options,
-    });
+    if (q.kind === "TEXT") {
+      nodes.push({
+        type: "text",
+        questionKey: q.key,
+        prompt: q.prompt,
+        next: q.next,
+      });
+    } else {
+      nodes.push({
+        type: "choice",
+        questionKey: q.key,
+        prompt: q.prompt,
+        options: q.options,
+      });
+    }
   }
   return nodes;
 }
@@ -74,7 +90,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   const keyToIndex = useMemo(() => {
     const map = new Map<string, number>();
     nodes.forEach((n, i) => {
-      if (n.type === "choice") map.set(n.questionKey, i);
+      if (n.type === "choice" || n.type === "text") map.set(n.questionKey, i);
     });
     return map;
   }, [nodes]);
@@ -236,6 +252,34 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     }
   }
 
+  function answerText(questionKey: string, prompt: string, next: string) {
+    const value = draft.trim();
+    if (!value) return;
+    // Compute the new answers locally so a branch that submits in this same
+    // handler includes the just-typed answer (state updates are async).
+    const nextAnswers = [
+      ...answers,
+      { questionId: questionKey, prompt, answer: value },
+    ];
+    setAnswers(nextAnswers);
+    setMessages((m) => [...m, { role: "user", text: value }]);
+    setDraft("");
+    setAwaiting(false);
+    // Branch to the single target: an ending, the default ending ("END"), a
+    // question, or the next node in order.
+    if (next === "END") {
+      reachEnding(defaultEnding, nextAnswers);
+    } else if (next && keyToIndex.has(next)) {
+      setIndex(keyToIndex.get(next)!);
+    } else if (next && endingByKey.has(next)) {
+      reachEnding(endingByKey.get(next)!, nextAnswers);
+    } else if (index + 1 >= nodes.length) {
+      reachEnding(defaultEnding, nextAnswers);
+    } else {
+      setIndex((i) => i + 1);
+    }
+  }
+
   function retry() {
     if (!reachedEnding) {
       setStatus("error");
@@ -251,8 +295,10 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
   const current = nodes[index];
   const inputNode = current?.type === "input" ? current : null;
   const choiceNode = current?.type === "choice" ? current : null;
+  const textNode = current?.type === "text" ? current : null;
   const showInput = awaiting && inputNode !== null && status === "running";
   const showChoices = awaiting && choiceNode !== null && status === "running";
+  const showText = awaiting && textNode !== null && status === "running";
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-4 py-6">
@@ -384,6 +430,34 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
           {inputError ? (
             <p className="px-1 text-xs text-red-500">{t(inputError)}</p>
           ) : null}
+        </form>
+      ) : null}
+
+      {showText && textNode ? (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            answerText(textNode.questionKey, textNode.prompt, textNode.next);
+          }}
+          className="mt-4 flex items-end gap-2"
+        >
+          <textarea
+            autoFocus
+            rows={3}
+            maxLength={2000}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={t("placeholder")}
+            className="flex-1 resize-y rounded-xl border border-border bg-card px-4 py-3 text-sm focus-visible:border-brand focus-visible:outline-none"
+          />
+          <button
+            type="submit"
+            aria-label={t("send")}
+            disabled={!draft.trim()}
+            className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground transition-opacity disabled:opacity-50"
+          >
+            <Send className="size-5" />
+          </button>
         </form>
       ) : null}
     </div>
