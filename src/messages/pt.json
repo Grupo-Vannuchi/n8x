@@ -526,6 +526,17 @@
         "unknown": "Algo deu errado. Tente novamente."
       }
     },
+    "upload": {
+      "upload": "Enviar imagem",
+      "replace": "Trocar imagem",
+      "uploading": "Enviando…",
+      "remove": "Remover imagem",
+      "urlPlaceholder": "ou cole uma URL de imagem",
+      "tooLarge": "Imagem muito grande (máx. 15 MB).",
+      "notImage": "Selecione um arquivo de imagem.",
+      "notConfigured": "Upload indisponível (storage não configurado).",
+      "error": "Falha no upload. Tente de novo."
+    },
     "team": {
       "title": "Time",
       "new": "Novo membro",

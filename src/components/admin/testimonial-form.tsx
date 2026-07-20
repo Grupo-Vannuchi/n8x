@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label, FieldError } from "@/components/ui/field";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Link, useRouter } from "@/i18n/navigation";
 import { locales } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,8 @@ export function TestimonialForm({
 
   const {
     register,
+    watch,
+    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<TestimonialFormValues>({ defaultValues });
@@ -98,16 +101,15 @@ export function TestimonialForm({
             <p className="mt-1 text-xs text-muted-foreground">{t("orderHint")}</p>
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="avatarUrl">{t("avatarUrl")}</Label>
-            <Input
+            <ImageUploadField
               id="avatarUrl"
-              type="url"
-              placeholder="https://…"
-              aria-invalid={Boolean(errors.avatarUrl)}
-              {...register("avatarUrl")}
+              label={t("avatarUrl")}
+              hint={t("avatarUrlHint")}
+              preset="avatar"
+              value={watch("avatarUrl") ?? ""}
+              onChange={(v) => setValue("avatarUrl", v, { shouldDirty: true })}
             />
             <FieldError>{errors.avatarUrl?.message}</FieldError>
-            <p className="mt-1 text-xs text-muted-foreground">{t("avatarUrlHint")}</p>
           </div>
         </div>
       </fieldset>

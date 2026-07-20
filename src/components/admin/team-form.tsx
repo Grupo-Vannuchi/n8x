@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/field";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Link, useRouter } from "@/i18n/navigation";
 import { locales } from "@/i18n/routing";
 import { formToInput, type TeamFormValues } from "@/lib/team-form";
@@ -32,6 +33,8 @@ export function TeamForm({
 
   const {
     register,
+    watch,
+    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<TeamFormValues>({ defaultValues });
@@ -75,16 +78,15 @@ export function TeamForm({
             <p className="mt-1 text-xs text-muted-foreground">{t("orderHint")}</p>
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="photoUrl">{t("photoUrl")}</Label>
-            <Input
+            <ImageUploadField
               id="photoUrl"
-              type="url"
-              placeholder="https://…"
-              aria-invalid={Boolean(errors.photoUrl)}
-              {...register("photoUrl")}
+              label={t("photoUrl")}
+              hint={t("photoUrlHint")}
+              preset="photo"
+              value={watch("photoUrl") ?? ""}
+              onChange={(v) => setValue("photoUrl", v, { shouldDirty: true })}
             />
             <FieldError>{errors.photoUrl?.message}</FieldError>
-            <p className="mt-1 text-xs text-muted-foreground">{t("photoUrlHint")}</p>
           </div>
         </div>
       </fieldset>
