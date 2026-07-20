@@ -19,7 +19,7 @@ export type FunnelDefaultStep =
       prompt: string;
     };
 
-/** A captured answer to a custom single-choice question. */
+/** A captured answer to a custom question (a chosen option or free text). */
 export type FunnelAnswer = { questionId: string; prompt: string; answer: string };
 
 /** Values collected by the default block, used for token interpolation. */

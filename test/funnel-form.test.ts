@@ -16,9 +16,19 @@ const funnel = {
 const questions = [
   {
     key: "q1",
+    kind: "CHOICE" as const,
     prompt: "Tem orçamento?",
     options: ["Sim", "Não"],
     optionNext: ["END", "q2"],
+    next: "",
+  },
+  {
+    key: "q2",
+    kind: "TEXT" as const,
+    prompt: "Conte mais sobre o projeto",
+    options: [],
+    optionNext: [],
+    next: "e1",
   },
 ];
 
@@ -57,11 +67,21 @@ describe("funnel-form round-trip", () => {
       ],
     });
 
-    expect(input.questions).toHaveLength(1);
+    expect(input.questions).toHaveLength(2);
     expect(input.questions[0]).toMatchObject({
+      kind: "CHOICE",
       prompt: "Tem orçamento?",
       options: ["Sim", "Não"],
       optionNext: ["END", "q2"],
+    });
+    // The descriptive question round-trips with its single continuation target
+    // and no options.
+    expect(input.questions[1]).toMatchObject({
+      kind: "TEXT",
+      prompt: "Conte mais sobre o projeto",
+      options: [],
+      optionNext: [],
+      next: "e1",
     });
 
     expect(input.endings).toHaveLength(1);

@@ -19,7 +19,8 @@ export const funnelSubmissionSchema = z.object({
       z.object({
         questionId: z.string().min(1).max(40),
         prompt: z.string().max(2000),
-        answer: z.string().max(500),
+        // Roomy enough for a free-text/descriptive answer, not just a chosen option.
+        answer: z.string().max(2000),
       }),
     )
     .max(50),
