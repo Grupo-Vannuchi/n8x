@@ -416,7 +416,10 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
                   : t("placeholder")
               }
               aria-invalid={Boolean(inputError)}
-              className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm focus-visible:border-brand focus-visible:outline-none aria-[invalid=true]:border-red-500"
+              // text-base on phones keeps iOS Safari from auto-zooming on
+              // focus (it does that under 16px), which would shove the send
+              // button out of frame; sm:text-sm restores the look elsewhere.
+              className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-base focus-visible:border-brand focus-visible:outline-none aria-[invalid=true]:border-red-500 sm:text-sm"
             />
             <button
               type="submit"
@@ -448,7 +451,8 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={t("placeholder")}
-            className="flex-1 resize-y rounded-xl border border-border bg-card px-4 py-3 text-sm focus-visible:border-brand focus-visible:outline-none"
+            // See the input above: 16px on phones avoids iOS's focus zoom.
+            className="flex-1 resize-y rounded-xl border border-border bg-card px-4 py-3 text-base focus-visible:border-brand focus-visible:outline-none sm:text-sm"
           />
           <button
             type="submit"

@@ -1,8 +1,14 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * `text-base sm:text-sm` is deliberate: iOS Safari (and the in-app WebViews
+ * built on it) auto-zooms when a focused text control computes under 16px,
+ * which shifts the layout and pushes the submit button off screen. 16px on
+ * phones prevents that; the `sm` breakpoint keeps the 14px look everywhere else.
+ */
 const fieldStyles =
-  "w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm transition-colors placeholder:text-muted-foreground focus-visible:border-brand focus-visible:outline-none aria-[invalid=true]:border-red-500";
+  "w-full rounded-lg border border-border bg-card px-4 py-2.5 text-base transition-colors placeholder:text-muted-foreground focus-visible:border-brand focus-visible:outline-none aria-[invalid=true]:border-red-500 sm:text-sm";
 
 export const Input = React.forwardRef<
   HTMLInputElement,

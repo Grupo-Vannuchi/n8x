@@ -420,11 +420,20 @@ export type FunnelRunView = {
   endings: FunnelEndingView[];
 };
 
-/** A published funnel by slug, matched to its own (single) locale. */
+/**
+ * A published funnel by slug.
+ *
+ * Deliberately NOT filtered by the request locale: a funnel is single-language
+ * and that language belongs to the funnel (`locale`, chosen at creation), not
+ * to the URL. Filtering by the negotiated locale used to 404 every visitor
+ * whose device is set to another language — the proxy sends them to `/en/…`,
+ * where no Portuguese funnel could ever match. Callers render the funnel in
+ * `FunnelRunView.locale` instead.
+ */
 export const getPublishedFunnelBySlug = unstable_cache(
-  async (locale: Locale, slug: string): Promise<FunnelRunView | null> => {
+  async (slug: string): Promise<FunnelRunView | null> => {
     const f = await prisma.funnel.findFirst({
-      where: { slug, status: "PUBLISHED", locale },
+      where: { slug, status: "PUBLISHED" },
       include: {
         questions: { orderBy: { order: "asc" } },
         endings: { orderBy: { order: "asc" } },
