@@ -5,6 +5,19 @@ import { PrismaClient } from "@prisma/client";
 export const E2E_FUNNEL_SLUG = "e2e-funnel";
 
 /**
+ * Fixed id for the seeded funnel — deliberately not a fresh cuid.
+ *
+ * The seed writes straight to Postgres, so it can't invalidate the DAL's
+ * `unstable_cache` the way the admin actions do (`updateTag(tags.funnels)`).
+ * A dev server that is already running therefore keeps serving the funnel it
+ * cached from an earlier seed. When every run minted a new id, that cached copy
+ * carried a **deleted** id, and submitting it failed with `not_found` — the
+ * suite went red locally while CI (fresh server, cold cache) stayed green.
+ * Pinning the id keeps a stale cache pointing at a funnel that still exists.
+ */
+export const E2E_FUNNEL_ID = "e2efunnelfixedid000000000";
+
+/**
  * Seed (idempotently) a published, dependency-free MESSAGE funnel for the E2E
  * suite: a one-line default block + a name capture, one yes/no question, and a
  * MESSAGE ending — no Google/WhatsApp needed (the WhatsApp send is best-effort
@@ -27,6 +40,7 @@ export async function seedE2EFunnel(): Promise<void> {
     await prisma.funnel.deleteMany({ where: { slug: E2E_FUNNEL_SLUG } });
     await prisma.funnel.create({
       data: {
+        id: E2E_FUNNEL_ID,
         slug: E2E_FUNNEL_SLUG,
         locale: "pt",
         name: "E2E test funnel",

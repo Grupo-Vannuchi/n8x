@@ -73,6 +73,30 @@ Scripts (package.json):
 - Prefer accessible locators (`getByRole`/`getByText`); add a few `data-testid`
   only where the chat UI is ambiguous.
 
+#### Gotcha: the seed can't invalidate the DAL cache
+
+The E2E seed writes straight to Postgres, so — unlike the admin server actions —
+it can't call `updateTag(tags.funnels)`. Content read through the DAL is cached
+by `unstable_cache` for `CONTENT_REVALIDATE_SECONDS` (**24h**), and locally that
+cache is written to disk under **`.next/dev/cache/`** (note: *not* `.next/cache`,
+which is a different directory in Next 16). A dev server that was already running
+therefore keeps serving the funnel it cached from an earlier seed.
+
+That is why `prisma/seed-e2e.ts` pins `E2E_FUNNEL_ID` instead of letting Prisma
+mint a fresh cuid: when every run created a new id, the cached page submitted an
+id that had just been deleted, and `submitFunnel` answered `not_found` — the
+suite went red locally while CI (fresh server, cold cache) stayed green.
+
+If a local run still submits stale content, clear it once:
+
+```bash
+rm -rf .next/dev/cache
+```
+
+Also note both public write endpoints are rate limited to **5 requests/minute per
+IP**, so running the suite in a tight loop can fail on `rate_limited` rather than
+on a real regression. Space the runs out before believing a red result.
+
 ## What to test — prioritized
 
 ### Unit (Vitest) — pure logic, fast, high coverage
