@@ -6,12 +6,12 @@ import { HeroCarousel, type HeroSlide } from "@/components/sections/hero-carouse
  * Hero carousel background images — self-hosted under `/public/hero` so
  * `next/image` serves optimized AVIF/WebP from the SAME origin (faster LCP than
  * fetching from a remote host). One per slide, matched by index to the localized
- * copy in `home.hero.slides`. These are the agency's own office photography.
+ * copy in `home.hero.slides`. The brand plate opens, then our own office photography.
  */
 const slideImages = [
-  "/hero/slide-1.webp", // the team at work in the open office (LCP — kept lean)
-  "/hero/slide-2.webp", // strategy session around the meeting table
-  "/hero/slide-3.webp", // one-on-one with a client
+  "/hero/slide-1.webp", // n8x brand plate (LCP — flat art, compresses tiny)
+  "/hero/slide-2.webp", // the team at work in the open office
+  "/hero/slide-3.webp", // strategy session around the meeting table
 ];
 
 export async function Hero() {
