@@ -769,6 +769,7 @@
         "unauthorized": "Your session expired. Please sign in again.",
         "invalid": "Please check the fields and try again.",
         "slug_taken": "That slug is already in use. Choose another.",
+        "field_conflict": "Some field names are repeated or reserved. Fix the warnings on the questions.",
         "unknown": "Something went wrong. Please try again."
       }
     },

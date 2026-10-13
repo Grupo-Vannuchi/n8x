@@ -1,3 +1,4 @@
+import { FUNNEL_INPUT_TYPES } from "@/lib/funnel-fields";
 import { z } from "zod";
 import { locales, type Locale } from "@/i18n/routing";
 
@@ -48,6 +49,10 @@ const funnelQuestionSchema = z
     optionNext: z.array(z.string().trim().max(60)).max(12).default([]),
     // TEXT only: single continuation target.
     next: z.string().trim().max(60).default(""),
+    // Field name → `{token}` + CSV header. Uniqueness/reserved names are checked
+    // by `hasFieldNameIssue` in the save actions (dedicated error message).
+    fieldName: z.string().trim().max(40).default(""),
+    inputType: z.enum(FUNNEL_INPUT_TYPES).default("TEXT"),
   })
   .superRefine((val, ctx) => {
     if (val.kind === "CHOICE" && val.options.length < 2) {

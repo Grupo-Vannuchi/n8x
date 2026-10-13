@@ -5,6 +5,7 @@ import { localize, localizeRich } from "@/lib/content";
 import { tags, CONTENT_REVALIDATE_SECONDS } from "@/lib/cache";
 import type { Locale } from "@/i18n/routing";
 import type { FunnelDefaultStep } from "@/lib/funnel-runtime";
+import type { FunnelInputType } from "@/lib/funnel-fields";
 
 /**
  * Content data-access layer.
@@ -414,6 +415,10 @@ export type FunnelRunView = {
     options: { label: string; next: string }[];
     /** TEXT only: single continuation target. */
     next: string;
+    /** Admin-given field name ("" = unnamed): its `{token}` and CSV column. */
+    fieldName: string;
+    /** Answer format; meaningful for TEXT only. */
+    inputType: FunnelInputType;
   }[];
   /** Endings in order; the first is the default/fallback. Completion messages
    * and meeting config stay server-side and are NOT exposed here. */
@@ -454,6 +459,8 @@ export const getPublishedFunnelBySlug = unstable_cache(
           next: q.optionNext?.[i] ?? "",
         })),
         next: q.next,
+        fieldName: q.fieldName,
+        inputType: q.inputType,
       })),
       endings: f.endings.map((e) => ({
         key: e.key,

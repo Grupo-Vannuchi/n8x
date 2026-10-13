@@ -94,4 +94,25 @@ describe("funnel-form round-trip", () => {
       redirectDelaySeconds: 3,
     });
   });
+
+  it("round-trips a question's field name and answer format", () => {
+    const named = [
+      { ...questions[0], fieldName: "Orçamento", inputType: "TEXT" as const },
+      { ...questions[1], fieldName: " CNPJ ", inputType: "CNPJ" as const },
+    ];
+    const input = formToInput(funnelToForm(funnel, named, endings));
+    expect(input.questions[0]).toMatchObject({ fieldName: "Orçamento", inputType: "TEXT" });
+    expect(input.questions[1]).toMatchObject({ fieldName: "CNPJ", inputType: "CNPJ" });
+  });
+
+  it("defaults legacy questions to no field name and free text", () => {
+    const input = formToInput(funnelToForm(funnel, questions, endings));
+    expect(input.questions[1]).toMatchObject({ fieldName: "", inputType: "TEXT" });
+  });
+
+  it("stores a choice question's format as TEXT even if the form held another", () => {
+    const form = funnelToForm(funnel, questions, endings);
+    form.questions[0]!.inputType = "CPF";
+    expect(formToInput(form).questions[0]).toMatchObject({ kind: "CHOICE", inputType: "TEXT" });
+  });
 });
