@@ -11,6 +11,7 @@ import {
   type MeetingSlot,
 } from "@/lib/google-calendar";
 import { interpolateTokens } from "@/lib/funnel-runtime";
+import { sanitizeAnswers, buildFieldValues } from "@/lib/funnel-fields";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import {
   funnelSubmissionSchema,
@@ -62,7 +63,10 @@ export async function submitFunnel(
   try {
     const funnel = await prisma.funnel.findFirst({
       where: { id: data.funnelId, status: "PUBLISHED" },
-      include: { endings: { orderBy: { order: "asc" } } },
+      include: {
+        endings: { orderBy: { order: "asc" } },
+        questions: { orderBy: { order: "asc" } },
+      },
     });
     if (!funnel || funnel.endings.length === 0) {
       return { ok: false, error: "not_found" };
@@ -73,6 +77,12 @@ export async function submitFunnel(
       where: { submissionToken: data.submissionToken },
     });
     if (existing) return { ok: true };
+
+    // The server is the trust boundary: re-check every answer against the stored
+    // questions (format, prompt) before it is booked, stored or messaged.
+    const checked = sanitizeAnswers(funnel.questions, data.answers, funnel.locale);
+    if (!checked.ok) return { ok: false, error: "invalid" };
+    const answers = checked.answers;
 
     // Resolve the reached ending; fall back to the default (first) ending.
     const ending =
@@ -93,7 +103,7 @@ export async function submitFunnel(
         email: data.email || null,
         role: data.role || null,
         funnelName: funnel.name,
-        answers: data.answers.map((a) => ({ prompt: a.prompt, answer: a.answer })),
+        answers: answers.map((a) => ({ prompt: a.prompt, answer: a.answer })),
       });
       if (booking.ok) {
         meetingStartAt = new Date(data.meetingStartAt);
@@ -112,7 +122,7 @@ export async function submitFunnel(
         phone: data.phone || null,
         phoneE164,
         email: data.email || null,
-        answers: data.answers as unknown as Prisma.InputJsonValue,
+        answers: answers as unknown as Prisma.InputJsonValue,
         outcome: outcomeFor(ending.type, Boolean(googleEventId)),
         endingName: ending.name,
         meetingStartAt,
@@ -150,6 +160,7 @@ export async function submitFunnel(
       time: meetingTime,
       completionMessage: ending.completionMessage,
       instance: funnel.whatsappInstance,
+      fields: buildFieldValues(funnel.questions, answers),
     });
 
     return { ok: true };
@@ -207,6 +218,8 @@ async function deliverWhatsapp(args: {
   time?: string;
   completionMessage: string;
   instance?: string | null;
+  /** Field token → answer, for custom `{tokens}` in the completion message. */
+  fields: Record<string, string>;
 }): Promise<void> {
   const tokens = {
     name: args.name,
@@ -214,6 +227,7 @@ async function deliverWhatsapp(args: {
     link: args.link ?? "",
     date: args.date ?? "",
     time: args.time ?? "",
+    fields: args.fields,
   };
 
   if (!args.phoneE164) return markWhatsapp(args.submissionId, "FAILED", "no_phone");
