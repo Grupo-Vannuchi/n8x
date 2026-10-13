@@ -50,7 +50,10 @@ How the n8x system fits together. For coding conventions see
 - **Leads:** `Lead` (contact / careers).
 - **Funnels:**
   - `Funnel` — `slug`, `locale`, `status`, `defaultBlock` (Json), `whatsappInstance?`.
-  - `FunnelQuestion` — `key`, `prompt`, `options[]`, `optionNext[]` (branching).
+  - `FunnelQuestion` — `key`, `kind` (`CHOICE` buttons / `TEXT` typed), `prompt`,
+    `options[]` + `optionNext[]` or `next` (branching), `fieldName` (its
+    `{token}` in later messages and its CSV column) and `inputType` (TEXT
+    format: number, date, CPF, CNPJ, link). Rules live in `src/lib/funnel-fields.ts`.
   - `FunnelEnding` — `key`, `name`, `type` (MEETING/BONUS/MESSAGE/REDIRECT),
     `completionMessage`, + per-type config (meeting hours, bonus URL, redirect URL).
   - `FunnelSubmission` — captured lead + `answers` (Json) + `outcome` + WhatsApp status.
