@@ -1,6 +1,6 @@
 # Funnel custom fields — named, typed, reusable answers
 
-**Status:** approved design, pending implementation plan
+**Status:** implemented
 **Date:** 2026-10-13
 
 ## Problem
@@ -158,8 +158,9 @@ extracted, unit-tested function:
 
 - unknown `questionId` (funnel edited mid-session) → drop that answer, **keep
   the lead**;
-- descriptive with a format → `validateAnswer`; invalid → `{ ok: false,
-  error: "invalid" }` (only reachable by tampering — the client validated first);
+- descriptive with a format → `validateAnswer`; invalid → the answer is dropped
+  and the lead kept — a funnel edited mid-session can make a legitimate
+  visitor's answer stale, and invalid data is never stored, booked or messaged;
 - choice → kept as given (length-capped label);
 - `prompt` always comes from the database, never from the client.
 
@@ -196,5 +197,5 @@ Written before the implementation:
 ## Risks
 
 - **CSV layout change** — announce before release.
-- **Funnel edited during a live session** — handled by dropping unknown answers
-  rather than failing the lead.
+- **Funnel edited during a live session** — handled by dropping unknown or
+  no-longer-valid answers rather than failing the lead.

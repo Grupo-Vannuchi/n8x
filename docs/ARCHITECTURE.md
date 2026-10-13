@@ -57,6 +57,7 @@ How the n8x system fits together. For coding conventions see
   - `FunnelEnding` — `key`, `name`, `type` (MEETING/BONUS/MESSAGE/REDIRECT),
     `completionMessage`, + per-type config (meeting hours, bonus URL, redirect URL).
   - `FunnelSubmission` — captured lead + `answers` (Json) + `outcome` + WhatsApp status.
+    - CSV export: one column per question in funnel order (header = the question's field name, else its text; repeats numbered), then "Outras respostas" for answers to deleted questions; replaced the single "Respostas" column.
   - `FunnelDefaultTemplate` — global default opening block per locale.
 - **Integration state:** `GoogleAccount` (singleton: tokens + `invalidatedAt`).
 

@@ -471,7 +471,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
             </button>
           </div>
           {inputError ? (
-            <p className="px-1 text-xs text-red-500">{t(inputError)}</p>
+            <p role="alert" className="px-1 text-xs text-red-500">{t(inputError)}</p>
           ) : null}
         </form>
       ) : null}
@@ -531,7 +531,7 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
             </button>
           </div>
           {inputError ? (
-            <p className="px-1 text-xs text-red-500">{t(inputError)}</p>
+            <p role="alert" className="px-1 text-xs text-red-500">{t(inputError)}</p>
           ) : null}
         </form>
       ) : null}

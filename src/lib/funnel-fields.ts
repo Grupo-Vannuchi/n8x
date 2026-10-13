@@ -26,7 +26,7 @@ export const RESERVED_TOKENS: ReadonlySet<string> = new Set(BUILT_IN_TOKENS.keys
 export function fieldToken(fieldName: string): string {
   return fieldName
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
@@ -251,8 +251,9 @@ export function buildFieldValues(
  *   one answer beats losing the lead;
  * - a descriptive answer is re-validated in its format and stored normalized;
  * - the prompt always comes from the database, never from the client.
- * A typed answer that fails here can only come from a tampered client, so the
- * whole submission is refused.
+ * An answer that no longer fits its stored format (a funnel edited mid-session,
+ * or a tampered client) is dropped, keeping the lead; invalid data is never
+ * stored, booked or messaged.
  */
 export function sanitizeAnswers(
   questions: readonly {
@@ -263,7 +264,7 @@ export function sanitizeAnswers(
   }[],
   submitted: readonly FunnelAnswer[],
   locale: string,
-): { ok: true; answers: FunnelAnswer[] } | { ok: false } {
+): FunnelAnswer[] {
   const byKey = new Map(questions.map((q) => [q.key, q]));
   const answers: FunnelAnswer[] = [];
   for (const a of submitted) {
@@ -271,13 +272,13 @@ export function sanitizeAnswers(
     if (!question) continue;
     if (question.kind === "TEXT") {
       const checked = validateAnswer(question.inputType, a.answer, locale);
-      if (!checked.ok) return { ok: false };
+      if (!checked.ok) continue;
       answers.push({ questionId: question.key, prompt: question.prompt, answer: checked.value });
     } else {
       answers.push({ questionId: question.key, prompt: question.prompt, answer: a.answer.trim() });
     }
   }
-  return { ok: true, answers };
+  return answers;
 }
 
 /** Last CSV column: answers to questions that no longer exist. */

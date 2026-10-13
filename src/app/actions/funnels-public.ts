@@ -80,9 +80,8 @@ export async function submitFunnel(
 
     // The server is the trust boundary: re-check every answer against the stored
     // questions (format, prompt) before it is booked, stored or messaged.
-    const checked = sanitizeAnswers(funnel.questions, data.answers, funnel.locale);
-    if (!checked.ok) return { ok: false, error: "invalid" };
-    const answers = checked.answers;
+    // An answer that no longer fits its format is dropped (the lead is kept).
+    const answers = sanitizeAnswers(funnel.questions, data.answers, funnel.locale);
 
     // Resolve the reached ending; fall back to the default (first) ending.
     const ending =

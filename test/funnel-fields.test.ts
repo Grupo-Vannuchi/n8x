@@ -168,13 +168,10 @@ describe("sanitizeAnswers", () => {
       ],
       "pt",
     );
-    expect(result).toEqual({
-      ok: true,
-      answers: [
-        { questionId: "q1", prompt: "Tem orçamento?", answer: "Sim" },
-        { questionId: "q2", prompt: "CNPJ da empresa", answer: "11.222.333/0001-81" },
-      ],
-    });
+    expect(result).toEqual([
+      { questionId: "q1", prompt: "Tem orçamento?", answer: "Sim" },
+      { questionId: "q2", prompt: "CNPJ da empresa", answer: "11.222.333/0001-81" },
+    ]);
   });
 
   it("drops answers to questions that no longer exist, keeping the rest", () => {
@@ -186,16 +183,20 @@ describe("sanitizeAnswers", () => {
       ],
       "pt",
     );
-    expect(result).toEqual({
-      ok: true,
-      answers: [{ questionId: "q1", prompt: "Tem orçamento?", answer: "Não" }],
-    });
+    expect(result).toEqual([{ questionId: "q1", prompt: "Tem orçamento?", answer: "Não" }]);
   });
 
-  it("refuses the submission when a typed answer is invalid (tampered client)", () => {
+  it("drops an invalid typed answer but keeps the others", () => {
     expect(
-      sanitizeAnswers(questions, [{ questionId: "q2", prompt: "x", answer: "123" }], "pt"),
-    ).toEqual({ ok: false });
+      sanitizeAnswers(
+        questions,
+        [
+          { questionId: "q1", prompt: "x", answer: "Sim" },
+          { questionId: "q2", prompt: "x", answer: "123" },
+        ],
+        "pt",
+      ),
+    ).toEqual([{ questionId: "q1", prompt: "Tem orçamento?", answer: "Sim" }]);
   });
 });
 
