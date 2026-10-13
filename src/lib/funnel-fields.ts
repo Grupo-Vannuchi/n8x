@@ -1,4 +1,4 @@
-import { BUILT_IN_TOKENS } from "@/lib/funnel-runtime";
+import { BUILT_IN_TOKENS, type FunnelAnswer } from "@/lib/funnel-runtime";
 
 /**
  * Custom-question fields for funnels: the `{token}` an admin-given field name
@@ -242,4 +242,40 @@ export function buildFieldValues(
     if (token) values[token] = byQuestion.get(q.key) ?? "";
   }
   return values;
+}
+
+/**
+ * Re-check submitted answers against the stored questions — the server is the
+ * trust boundary, the browser's copy is only a suggestion:
+ * - an unknown question (the funnel was edited mid-session) is dropped: losing
+ *   one answer beats losing the lead;
+ * - a descriptive answer is re-validated in its format and stored normalized;
+ * - the prompt always comes from the database, never from the client.
+ * A typed answer that fails here can only come from a tampered client, so the
+ * whole submission is refused.
+ */
+export function sanitizeAnswers(
+  questions: readonly {
+    key: string;
+    kind: "CHOICE" | "TEXT";
+    prompt: string;
+    inputType: FunnelInputType;
+  }[],
+  submitted: readonly FunnelAnswer[],
+  locale: string,
+): { ok: true; answers: FunnelAnswer[] } | { ok: false } {
+  const byKey = new Map(questions.map((q) => [q.key, q]));
+  const answers: FunnelAnswer[] = [];
+  for (const a of submitted) {
+    const question = byKey.get(a.questionId);
+    if (!question) continue;
+    if (question.kind === "TEXT") {
+      const checked = validateAnswer(question.inputType, a.answer, locale);
+      if (!checked.ok) return { ok: false };
+      answers.push({ questionId: question.key, prompt: question.prompt, answer: checked.value });
+    } else {
+      answers.push({ questionId: question.key, prompt: question.prompt, answer: a.answer.trim() });
+    }
+  }
+  return { ok: true, answers };
 }

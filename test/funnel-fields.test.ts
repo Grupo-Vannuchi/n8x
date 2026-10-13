@@ -6,6 +6,7 @@ import {
   validateAnswer,
   maskAnswer,
   buildFieldValues,
+  sanitizeAnswers,
 } from "@/lib/funnel-fields";
 
 describe("fieldToken", () => {
@@ -147,5 +148,51 @@ describe("buildFieldValues", () => {
         { questionId: "q1", answer: "B" },
       ]).empresa,
     ).toBe("B");
+  });
+});
+
+describe("sanitizeAnswers", () => {
+  const questions = [
+    { key: "q1", kind: "CHOICE" as const, prompt: "Tem orçamento?", inputType: "TEXT" as const },
+    { key: "q2", kind: "TEXT" as const, prompt: "CNPJ da empresa", inputType: "CNPJ" as const },
+  ];
+
+  it("re-validates typed answers, normalizes them and takes the prompt from the database", () => {
+    const result = sanitizeAnswers(
+      questions,
+      [
+        { questionId: "q1", prompt: "forjado pelo navegador", answer: " Sim " },
+        { questionId: "q2", prompt: "forjado", answer: "11222333000181" },
+      ],
+      "pt",
+    );
+    expect(result).toEqual({
+      ok: true,
+      answers: [
+        { questionId: "q1", prompt: "Tem orçamento?", answer: "Sim" },
+        { questionId: "q2", prompt: "CNPJ da empresa", answer: "11.222.333/0001-81" },
+      ],
+    });
+  });
+
+  it("drops answers to questions that no longer exist, keeping the rest", () => {
+    const result = sanitizeAnswers(
+      questions,
+      [
+        { questionId: "apagada", prompt: "x", answer: "y" },
+        { questionId: "q1", prompt: "x", answer: "Não" },
+      ],
+      "pt",
+    );
+    expect(result).toEqual({
+      ok: true,
+      answers: [{ questionId: "q1", prompt: "Tem orçamento?", answer: "Não" }],
+    });
+  });
+
+  it("refuses the submission when a typed answer is invalid (tampered client)", () => {
+    expect(
+      sanitizeAnswers(questions, [{ questionId: "q2", prompt: "x", answer: "123" }], "pt"),
+    ).toEqual({ ok: false });
   });
 });
