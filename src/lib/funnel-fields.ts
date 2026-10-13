@@ -279,3 +279,43 @@ export function sanitizeAnswers(
   }
   return { ok: true, answers };
 }
+
+/** Last CSV column: answers to questions that no longer exist. */
+export const OTHER_ANSWERS_HEADER = "Outras respostas";
+
+export type AnswerColumns = { headers: string[]; keys: string[] };
+
+/**
+ * One CSV column per question, in funnel order (header = field name, or the
+ * question text when unnamed; a repeated header gets " (2)", " (3)"), plus a
+ * trailing column for answers whose question was deleted — nothing is dropped.
+ */
+export function answerColumns(
+  questions: readonly { key: string; fieldName: string; prompt: string }[],
+): AnswerColumns {
+  const seen = new Map<string, number>();
+  const headers = questions.map((q) => {
+    const base = q.fieldName.trim() || q.prompt.trim();
+    const count = (seen.get(base) ?? 0) + 1;
+    seen.set(base, count);
+    return count === 1 ? base : `${base} (${count})`;
+  });
+  return {
+    headers: [...headers, OTHER_ANSWERS_HEADER],
+    keys: questions.map((q) => q.key),
+  };
+}
+
+/** A submission's cells for `answerColumns`, in the same order. */
+export function answerCells(
+  columns: AnswerColumns,
+  answers: readonly FunnelAnswer[],
+): string[] {
+  const known = new Set(columns.keys);
+  const byKey = new Map(answers.map((a) => [a.questionId, a.answer]));
+  const orphans = answers
+    .filter((a) => !known.has(a.questionId))
+    .map((a) => `${a.prompt}: ${a.answer}`)
+    .join(" | ");
+  return [...columns.keys.map((key) => byKey.get(key) ?? ""), orphans];
+}

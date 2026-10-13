@@ -7,6 +7,8 @@ import {
   maskAnswer,
   buildFieldValues,
   sanitizeAnswers,
+  answerColumns,
+  answerCells,
 } from "@/lib/funnel-fields";
 
 describe("fieldToken", () => {
@@ -194,5 +196,33 @@ describe("sanitizeAnswers", () => {
     expect(
       sanitizeAnswers(questions, [{ questionId: "q2", prompt: "x", answer: "123" }], "pt"),
     ).toEqual({ ok: false });
+  });
+});
+
+describe("answerColumns / answerCells", () => {
+  const questions = [
+    { key: "q1", fieldName: "Empresa", prompt: "Qual a empresa?" },
+    { key: "q2", fieldName: "", prompt: "Tem orçamento?" },
+    { key: "q3", fieldName: "Empresa", prompt: "Outra empresa?" },
+  ];
+
+  it("one column per question in order — field name, else prompt; repeats numbered — plus Outras respostas", () => {
+    expect(answerColumns(questions).headers).toEqual([
+      "Empresa",
+      "Tem orçamento?",
+      "Empresa (2)",
+      "Outras respostas",
+    ]);
+  });
+
+  it("fills each column by question key, '' when unanswered, orphans in the last column", () => {
+    const columns = answerColumns(questions);
+    expect(
+      answerCells(columns, [
+        { questionId: "q2", prompt: "Tem orçamento?", answer: "Sim" },
+        { questionId: "old", prompt: "Pergunta apagada", answer: "talvez" },
+        { questionId: "old2", prompt: "Outra apagada", answer: "não" },
+      ]),
+    ).toEqual(["", "Sim", "", "Pergunta apagada: talvez | Outra apagada: não"]);
   });
 });
