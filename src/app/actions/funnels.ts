@@ -12,10 +12,14 @@ import {
   type FunnelInput,
   type FunnelDefaultTemplateInput,
 } from "@/lib/validations/funnel";
+import { hasFieldNameIssue } from "@/lib/funnel-fields";
 
 export type FunnelActionResult =
   | { ok: true; id: string }
-  | { ok: false; error: "unauthorized" | "invalid" | "slug_taken" | "unknown" };
+  | {
+      ok: false;
+      error: "unauthorized" | "invalid" | "slug_taken" | "field_conflict" | "unknown";
+    };
 
 /** Funnels are read by the public runtime; one tag invalidates every cached read. */
 function revalidateFunnels(): void {
@@ -44,6 +48,8 @@ function questionsCreate(input: FunnelInput) {
     options: q.options,
     optionNext: q.optionNext,
     next: q.next,
+    fieldName: q.fieldName,
+    inputType: q.inputType,
   }));
 }
 
@@ -77,6 +83,9 @@ export async function createFunnel(
 
   const parsed = funnelSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "invalid" };
+  if (hasFieldNameIssue(parsed.data.questions)) {
+    return { ok: false, error: "field_conflict" };
+  }
 
   try {
     const funnel = await prisma.funnel.create({
@@ -110,6 +119,9 @@ export async function updateFunnel(
 
   const parsed = funnelSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "invalid" };
+  if (hasFieldNameIssue(parsed.data.questions)) {
+    return { ok: false, error: "field_conflict" };
+  }
 
   try {
     await prisma.$transaction([

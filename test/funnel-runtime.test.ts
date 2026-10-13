@@ -30,3 +30,37 @@ describe("interpolateTokens", () => {
     expect(interpolateTokens("{ nome }", { name: "Ana" })).toBe("Ana");
   });
 });
+
+describe("interpolateTokens — custom field tokens", () => {
+  const fields = { empresa: "Acme", cidade: "" };
+
+  it("replaces a defined field token with its answer, case-insensitively", () => {
+    expect(interpolateTokens("Na {empresa} ou {EMPRESA}?", { fields })).toBe(
+      "Na Acme ou Acme?",
+    );
+  });
+
+  it("renders a defined but unanswered field as empty", () => {
+    expect(interpolateTokens("Em {cidade}.", { fields })).toBe("Em .");
+  });
+
+  it("leaves an undefined token literal, so typos stay visible", () => {
+    expect(interpolateTokens("Na {empresaa}", { fields })).toBe("Na {empresaa}");
+  });
+
+  it("fills built-in and custom tokens together", () => {
+    expect(interpolateTokens("{NOME}, da {empresa}", { name: "Ana", fields })).toBe(
+      "Ana, da Acme",
+    );
+  });
+
+  it("never re-interpolates a value that itself looks like a token", () => {
+    expect(
+      interpolateTokens("{NOME} / {empresa}", { name: "{empresa}", fields }),
+    ).toBe("{empresa} / Acme");
+  });
+
+  it("does not resolve object-prototype names as fields", () => {
+    expect(interpolateTokens("{constructor}", { fields })).toBe("{constructor}");
+  });
+});

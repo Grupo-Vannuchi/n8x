@@ -33,24 +33,52 @@ export type FunnelLeadValues = {
   /** Booked meeting date / time (pre-formatted in the funnel locale + timezone). */
   date?: string;
   time?: string;
+  /**
+   * Custom-question answers by field token (see `buildFieldValues` in
+   * `funnel-fields.ts`). Holds every token the funnel defines, "" until
+   * answered — presence is what separates a defined field from a typo.
+   */
+  fields?: Record<string, string>;
 };
 
+/** Built-in tokens (pt and en spellings) → the lead value that fills them. */
+export const BUILT_IN_TOKENS: ReadonlyMap<
+  string,
+  "name" | "role" | "link" | "date" | "time"
+> = new Map([
+  ["nome", "name"],
+  ["name", "name"],
+  ["cargo", "role"],
+  ["role", "role"],
+  ["link", "link"],
+  ["data", "date"],
+  ["date", "date"],
+  ["hora", "time"],
+  ["time", "time"],
+]);
+
 /**
- * Replace tokens (case-insensitive) in a bot/message string with the visitor's
- * captured values: `{NOME}`/`{NAME}`, `{CARGO}`/`{ROLE}`, `{LINK}`,
- * `{DATA}`/`{DATE}`, `{HORA}`/`{TIME}`. Unknown/empty tokens collapse to an empty
- * string so a half-filled funnel never shows raw braces.
+ * Replace `{tokens}` (case-insensitive, spaces inside the braces tolerated) in a
+ * bot/message string, in a single pass so a value that looks like a token is
+ * never re-interpolated:
+ * - built-ins (`{NOME}`, `{CARGO}`, `{LINK}`, `{DATA}`, `{HORA}` and English
+ *   spellings) → the captured value, or "" when empty;
+ * - a field token the funnel defines → its answer, or "" until answered;
+ * - anything else (a typo such as `{empresaa}`) → left as written, so it shows
+ *   up while testing instead of silently vanishing.
  */
 export function interpolateTokens(
   text: string,
   values: FunnelLeadValues,
 ): string {
-  return text
-    .replace(/\{\s*(nome|name)\s*\}/gi, values.name?.trim() ?? "")
-    .replace(/\{\s*(cargo|role)\s*\}/gi, values.role?.trim() ?? "")
-    .replace(/\{\s*link\s*\}/gi, values.link?.trim() ?? "")
-    .replace(/\{\s*(data|date)\s*\}/gi, values.date?.trim() ?? "")
-    .replace(/\{\s*(hora|time)\s*\}/gi, values.time?.trim() ?? "");
+  return text.replace(/\{\s*([a-z0-9_]+)\s*\}/gi, (match, raw: string) => {
+    const token = raw.toLowerCase();
+    const builtIn = BUILT_IN_TOKENS.get(token);
+    if (builtIn) return values[builtIn]?.trim() ?? "";
+    const fields = values.fields;
+    if (fields && Object.hasOwn(fields, token)) return fields[token].trim();
+    return match;
+  });
 }
 
 /**

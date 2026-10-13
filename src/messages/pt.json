@@ -268,6 +268,12 @@
     "meetingUnavailableText": "A agenda está indisponível no momento. Em breve entraremos em contato para marcar o melhor horário.",
     "invalidPhone": "Digite um número válido com DDD, ex: (13) 91234-5678",
     "invalidEmail": "Digite um e-mail válido.",
+    "invalidNumber": "Digite apenas números, ex: 1500 ou 12,5.",
+    "invalidDate": "Digite uma data válida no formato dd/mm/aaaa.",
+    "invalidCpf": "Digite um CPF válido.",
+    "invalidCnpj": "Digite um CNPJ válido.",
+    "invalidUrl": "Digite um link válido, ex: seusite.com.br",
+    "datePlaceholder": "dd/mm/aaaa",
     "prevDay": "Dia anterior",
     "nextDay": "Próximo dia"
   },
@@ -701,6 +707,24 @@
       "kindText": "Resposta descritiva (texto)",
       "textNextLabel": "Após responder, ir para:",
       "textAnswerHint": "O visitante digita a resposta livremente.",
+      "fieldName": "Nome do campo (opcional)",
+      "fieldNamePlaceholder": "Ex.: Empresa",
+      "fieldNameHelp": "Dê um nome para usar a resposta nas mensagens seguintes e ter uma coluna própria no CSV.",
+      "fieldNameToken": "Use {token} nas mensagens seguintes.",
+      "fieldNameIssue": {
+        "invalid": "Use letras ou números no nome do campo.",
+        "reserved": "Esse nome já é uma variável do sistema (nome, cargo, link, data, hora). Escolha outro.",
+        "duplicate": "Outra pergunta já usa esse nome de campo."
+      },
+      "answerFormat": "Formato da resposta",
+      "format": {
+        "TEXT": "Texto livre",
+        "NUMBER": "Número",
+        "DATE": "Data",
+        "CPF": "CPF",
+        "CNPJ": "CNPJ",
+        "URL": "Link (URL)"
+      },
       "options": "Opções",
       "option": "Opção",
       "addOption": "Adicionar opção",
@@ -769,6 +793,7 @@
         "unauthorized": "Sua sessão expirou. Entre novamente.",
         "invalid": "Verifique os campos e tente novamente.",
         "slug_taken": "Esse slug já está em uso. Escolha outro.",
+        "field_conflict": "Há nomes de campo repetidos ou reservados. Corrija os avisos nas perguntas.",
         "unknown": "Algo deu errado. Tente novamente."
       }
     },

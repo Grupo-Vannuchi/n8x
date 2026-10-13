@@ -1,4 +1,5 @@
 import { resolveLocale, type Locale } from "@/i18n/routing";
+import type { FunnelInputType } from "@/lib/funnel-fields";
 import type { FunnelDefaultStep } from "@/lib/funnel-runtime";
 import type { FunnelInput } from "@/lib/validations/funnel";
 
@@ -28,6 +29,10 @@ export type FunnelFormQuestion = {
   options: { value: string; next: string }[];
   /** TEXT only: single continuation target. */
   next: string;
+  /** Field name → `{token}` + CSV column ("" = unnamed). */
+  fieldName: string;
+  /** Answer format; meaningful for TEXT only. */
+  inputType: FunnelInputType;
 };
 
 /** A named ending in form-friendly shape (numbers as strings). */
@@ -77,6 +82,8 @@ export function blankQuestion(): FunnelFormQuestion {
       { value: "", next: "" },
     ],
     next: "",
+    fieldName: "",
+    inputType: "TEXT",
   };
 }
 export function blankEnding(): FunnelFormEnding {
@@ -171,6 +178,8 @@ type QuestionRow = {
   options: string[];
   optionNext: string[];
   next: string;
+  fieldName?: string;
+  inputType?: FunnelInputType;
 };
 
 type EndingRow = {
@@ -233,6 +242,8 @@ export function funnelToForm(
             { value: "", next: "" },
           ],
       next: q.next ?? "",
+      fieldName: q.fieldName ?? "",
+      inputType: q.inputType ?? "TEXT",
     })),
     endings: endings.length ? endings.map(endingToForm) : [blankEnding()],
   };
@@ -258,6 +269,8 @@ export function formToInput(values: FunnelFormValues): FunnelInput {
             options: [],
             optionNext: [],
             next: q.next,
+            fieldName: q.fieldName.trim(),
+            inputType: q.inputType,
           };
         }
         // CHOICE: drop blank options, keeping options[] and optionNext[] aligned.
@@ -271,6 +284,9 @@ export function formToInput(values: FunnelFormValues): FunnelInput {
           options: opts.map((o) => o.label),
           optionNext: opts.map((o) => o.next),
           next: "",
+          fieldName: q.fieldName.trim(),
+          // Choice questions have no format; normalize whatever the form held.
+          inputType: "TEXT" as const,
         };
       })
       .filter((q) => q.prompt.length > 0),

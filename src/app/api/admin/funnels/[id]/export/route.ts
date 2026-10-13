@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFunnelById, getFunnelSubmissions } from "@/lib/admin-queries";
+import { answerColumns, answerCells } from "@/lib/funnel-fields";
 
 type Answer = { questionId: string; prompt: string; answer: string };
 
@@ -43,30 +44,32 @@ export async function GET(
     });
   }
 
+  // One column per custom question (field name, else the question text), plus
+  // "Outras respostas" for answers to deleted questions — nothing is dropped.
+  const columns = answerColumns(funnel.questions);
   const header = [
     "Nome",
     "Cargo",
     "WhatsApp",
     "E-mail",
+    ...columns.headers,
     "Resultado",
     "Reuniao",
     "Status WhatsApp",
-    "Respostas",
     "Recebido em",
   ];
 
   const lines = rows.map((r) => {
     const answers = (Array.isArray(r.answers) ? r.answers : []) as Answer[];
-    const answersText = answers.map((a) => `${a.prompt}: ${a.answer}`).join(" | ");
     return [
       r.name,
       r.role ?? "",
       r.phone ?? "",
       r.email ?? "",
+      ...answerCells(columns, answers),
       r.outcome,
       r.meetingStartAt ? r.meetingStartAt.toISOString() : "",
       r.whatsappStatus,
-      answersText,
       r.createdAt.toISOString(),
     ]
       .map((field) => csv(String(field)))

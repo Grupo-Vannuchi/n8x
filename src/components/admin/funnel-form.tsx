@@ -22,8 +22,10 @@ import {
   blankInputStep,
   blankQuestion,
   blankEnding,
+  type FunnelFormQuestion,
   type FunnelFormValues,
 } from "@/lib/funnel-form";
+import { FUNNEL_INPUT_TYPES, fieldNameIssue, fieldToken } from "@/lib/funnel-fields";
 import {
   createFunnel,
   updateFunnel,
@@ -521,23 +523,47 @@ export function FunnelForm({
                     <option value="TEXT">{t("kindText")}</option>
                   </select>
                 </div>
+                <div>
+                  <Label>{t("fieldName")}</Label>
+                  <Input
+                    maxLength={40}
+                    placeholder={t("fieldNamePlaceholder")}
+                    {...register(`questions.${qIndex}.fieldName` as const)}
+                  />
+                  <FieldNameHint questions={watchedQuestions} index={qIndex} />
+                </div>
                 {watchedQuestions[qIndex]?.kind === "TEXT" ? (
-                  <div>
-                    <Label>{t("textNextLabel")}</Label>
-                    <select
-                      className={cn(selectStyles)}
-                      {...register(`questions.${qIndex}.next` as const)}
-                    >
-                      <BranchTargetOptions
-                        qIndex={qIndex}
-                        questions={watchedQuestions}
-                        endings={watchedEndings}
-                      />
-                    </select>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {t("textAnswerHint")}
-                    </p>
-                  </div>
+                  <>
+                    <div>
+                      <Label>{t("answerFormat")}</Label>
+                      <select
+                        className={cn(selectStyles)}
+                        {...register(`questions.${qIndex}.inputType` as const)}
+                      >
+                        {FUNNEL_INPUT_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {t(`format.${type}`)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <Label>{t("textNextLabel")}</Label>
+                      <select
+                        className={cn(selectStyles)}
+                        {...register(`questions.${qIndex}.next` as const)}
+                      >
+                        <BranchTargetOptions
+                          qIndex={qIndex}
+                          questions={watchedQuestions}
+                          endings={watchedEndings}
+                        />
+                      </select>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t("textAnswerHint")}
+                      </p>
+                    </div>
+                  </>
                 ) : (
                   <OptionsEditor
                     control={control}
@@ -796,5 +822,29 @@ export function FunnelForm({
         </Link>
       </div>
     </form>
+  );
+}
+
+/** Live feedback under a question's field name: its `{token}`, or why it can't be used. */
+function FieldNameHint({
+  questions,
+  index,
+}: {
+  questions: FunnelFormQuestion[];
+  index: number;
+}) {
+  const t = useTranslations("admin.funnels");
+  const name = questions[index]?.fieldName ?? "";
+  if (!name.trim()) {
+    return <p className="mt-1 text-xs text-muted-foreground">{t("fieldNameHelp")}</p>;
+  }
+  const issue = fieldNameIssue(questions, index);
+  if (issue) {
+    return <p className="mt-1 text-xs text-red-600">{t(`fieldNameIssue.${issue}`)}</p>;
+  }
+  return (
+    <p className="mt-1 text-xs text-muted-foreground">
+      {t("fieldNameToken", { token: `{${fieldToken(name)}}` })}
+    </p>
   );
 }

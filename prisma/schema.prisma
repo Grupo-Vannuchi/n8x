@@ -318,6 +318,15 @@ enum FunnelQuestionKind {
   TEXT
 }
 
+enum FunnelInputType {
+  TEXT
+  NUMBER
+  DATE
+  CPF
+  CNPJ
+  URL
+}
+
 /// A custom question that runs after the default block — either single-choice
 /// (buttons) or a free-text (descriptive) answer.
 model FunnelQuestion {
@@ -337,6 +346,11 @@ model FunnelQuestion {
   /// TEXT only: single continuation target after the answer (a question `key`,
   /// an ending `key`, "END", or "" for the next question in order).
   next     String   @default("")
+  /// Admin-given field name (e.g. "Empresa"): drives the `{empresa}` message
+  /// token and the CSV column header. "" = unnamed.
+  fieldName String          @default("")
+  /// Answer format — only meaningful for TEXT questions.
+  inputType FunnelInputType @default(TEXT)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -268,6 +268,12 @@
     "meetingUnavailableText": "Scheduling is unavailable right now. We'll reach out shortly to set the best time.",
     "invalidPhone": "Enter a valid number with area code, e.g. (13) 91234-5678",
     "invalidEmail": "Enter a valid email.",
+    "invalidNumber": "Numbers only, e.g. 1500 or 12.5.",
+    "invalidDate": "Enter a valid date as mm/dd/yyyy.",
+    "invalidCpf": "Enter a valid CPF.",
+    "invalidCnpj": "Enter a valid CNPJ.",
+    "invalidUrl": "Enter a valid link, e.g. yoursite.com",
+    "datePlaceholder": "mm/dd/yyyy",
     "prevDay": "Previous day",
     "nextDay": "Next day"
   },
@@ -701,6 +707,24 @@
       "kindText": "Descriptive answer (text)",
       "textNextLabel": "After answering, go to:",
       "textAnswerHint": "The visitor types the answer freely.",
+      "fieldName": "Field name (optional)",
+      "fieldNamePlaceholder": "e.g. Company",
+      "fieldNameHelp": "Name it to reuse the answer in later messages and get its own CSV column.",
+      "fieldNameToken": "Use {token} in later messages.",
+      "fieldNameIssue": {
+        "invalid": "Use letters or numbers in the field name.",
+        "reserved": "That name is already a system variable (name, role, link, date, time). Pick another.",
+        "duplicate": "Another question already uses this field name."
+      },
+      "answerFormat": "Answer format",
+      "format": {
+        "TEXT": "Free text",
+        "NUMBER": "Number",
+        "DATE": "Date",
+        "CPF": "CPF",
+        "CNPJ": "CNPJ",
+        "URL": "Link (URL)"
+      },
       "options": "Options",
       "option": "Option",
       "addOption": "Add option",
@@ -769,6 +793,7 @@
         "unauthorized": "Your session expired. Please sign in again.",
         "invalid": "Please check the fields and try again.",
         "slug_taken": "That slug is already in use. Choose another.",
+        "field_conflict": "Some field names are repeated or reserved. Fix the warnings on the questions.",
         "unknown": "Something went wrong. Please try again."
       }
     },
