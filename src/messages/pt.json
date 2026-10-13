@@ -268,6 +268,12 @@
     "meetingUnavailableText": "A agenda está indisponível no momento. Em breve entraremos em contato para marcar o melhor horário.",
     "invalidPhone": "Digite um número válido com DDD, ex: (13) 91234-5678",
     "invalidEmail": "Digite um e-mail válido.",
+    "invalidNumber": "Digite apenas números, ex: 1500 ou 12,5.",
+    "invalidDate": "Digite uma data válida no formato dd/mm/aaaa.",
+    "invalidCpf": "Digite um CPF válido.",
+    "invalidCnpj": "Digite um CNPJ válido.",
+    "invalidUrl": "Digite um link válido, ex: seusite.com.br",
+    "datePlaceholder": "dd/mm/aaaa",
     "prevDay": "Dia anterior",
     "nextDay": "Próximo dia"
   },

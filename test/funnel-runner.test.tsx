@@ -72,4 +72,84 @@ describe("FunnelRunner", () => {
       { questionId: "q1", prompt: "Tem interesse?", answer: "Não" },
     ]);
   });
+
+  /** A funnel made only of the given custom questions, ending in a MESSAGE. */
+  function questionsFunnel(questions: unknown[]) {
+    return {
+      id: "f2",
+      slug: "y",
+      locale: "pt",
+      name: "Y",
+      defaultBlock: [],
+      questions,
+      endings: [messageEnding("end-default")],
+    } as unknown as FunnelRunView;
+  }
+
+  it("blocks an invalid CNPJ with an inline error and submits the valid one formatted", async () => {
+    const user = userEvent.setup();
+    renderWithIntl(
+      <FunnelRunner
+        funnel={questionsFunnel([
+          {
+            key: "q1",
+            kind: "TEXT",
+            prompt: "Qual o CNPJ?",
+            options: [],
+            next: "END",
+            fieldName: "CNPJ",
+            inputType: "CNPJ",
+          },
+        ])}
+      />,
+    );
+
+    const input = await screen.findByPlaceholderText("Digite sua resposta…");
+    await user.type(input, "11222333000182");
+    await user.click(screen.getByRole("button", { name: "Enviar" }));
+    expect(await screen.findByText("Digite um CNPJ válido.")).toBeInTheDocument();
+    expect(mockSubmit).not.toHaveBeenCalled();
+
+    await user.clear(input);
+    await user.type(input, "11222333000181");
+    await user.click(screen.getByRole("button", { name: "Enviar" }));
+    await waitFor(() => expect(mockSubmit).toHaveBeenCalledTimes(1));
+    expect(mockSubmit.mock.calls[0]![0].answers).toEqual([
+      { questionId: "q1", prompt: "Qual o CNPJ?", answer: "11.222.333/0001-81" },
+    ]);
+  });
+
+  it("quotes an earlier answer through its field token in the next message", async () => {
+    const user = userEvent.setup();
+    renderWithIntl(
+      <FunnelRunner
+        funnel={questionsFunnel([
+          {
+            key: "q1",
+            kind: "TEXT",
+            prompt: "Qual o nome da sua empresa?",
+            options: [],
+            next: "",
+            fieldName: "Empresa",
+            inputType: "TEXT",
+          },
+          {
+            key: "q2",
+            kind: "CHOICE",
+            prompt: "Quantas pessoas trabalham na {empresa}?",
+            options: [{ label: "Até 10", next: "END" }],
+            next: "",
+            fieldName: "",
+            inputType: "TEXT",
+          },
+        ])}
+      />,
+    );
+
+    await user.type(await screen.findByPlaceholderText("Digite sua resposta…"), "Acme");
+    await user.click(screen.getByRole("button", { name: "Enviar" }));
+    expect(
+      await screen.findByText("Quantas pessoas trabalham na Acme?"),
+    ).toBeInTheDocument();
+  });
 });

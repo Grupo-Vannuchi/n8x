@@ -10,6 +10,13 @@ import {
   type FunnelAnswer,
 } from "@/lib/funnel-runtime";
 import { normalizePhoneBR, maskPhoneBR } from "@/lib/phone";
+import {
+  validateAnswer,
+  maskAnswer,
+  inputModeFor,
+  buildFieldValues,
+  type FunnelInputType,
+} from "@/lib/funnel-fields";
 import type { FunnelRunView, FunnelEndingView } from "@/lib/queries";
 import { submitFunnel } from "@/app/actions/funnels-public";
 import { FunnelScheduler } from "@/components/funnels/funnel-scheduler";
@@ -32,6 +39,8 @@ type Node =
       prompt: string;
       /** Single continuation target after the free-text answer. */
       next: string;
+      /** Answer format, validated before the funnel advances. */
+      inputType: FunnelInputType;
     };
 
 type ChatMessage = { role: "bot" | "user"; text: string };
@@ -52,6 +61,7 @@ function buildNodes(funnel: FunnelRunView): Node[] {
         questionKey: q.key,
         prompt: q.prompt,
         next: q.next,
+        inputType: q.inputType ?? "TEXT",
       });
     } else {
       nodes.push({
@@ -74,7 +84,24 @@ const inputType: Record<string, string> = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type FieldError = "invalidPhone" | "invalidEmail";
+type FieldError =
+  | "invalidPhone"
+  | "invalidEmail"
+  | "invalidNumber"
+  | "invalidDate"
+  | "invalidCpf"
+  | "invalidCnpj"
+  | "invalidUrl";
+
+/** Message for a descriptive answer that fails its format (non-empty TEXT can't). */
+const ANSWER_ERROR: Record<FunnelInputType, FieldError | null> = {
+  TEXT: null,
+  NUMBER: "invalidNumber",
+  DATE: "invalidDate",
+  CPF: "invalidCpf",
+  CNPJ: "invalidCnpj",
+  URL: "invalidUrl",
+};
 
 /** Validate a capture field; returns a `funnel` message key or null if ok. */
 function validateField(field: string, value: string): FieldError | null {
@@ -145,10 +172,10 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     setTyping(true);
     const timer = setTimeout(() => {
       setTyping(false);
-      const text = interpolateTokens(
-        node.type === "bot" ? node.text : node.prompt,
-        values,
-      );
+      const text = interpolateTokens(node.type === "bot" ? node.text : node.prompt, {
+        ...values,
+        fields: buildFieldValues(funnel.questions, answers),
+      });
       setMessages((m) => [...m, { role: "bot", text }]);
       if (node.type === "bot") {
         setIndex((i) => i + 1);
@@ -252,9 +279,22 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
     }
   }
 
-  function answerText(questionKey: string, prompt: string, next: string) {
-    const value = draft.trim();
-    if (!value) return;
+  function answerText(
+    questionKey: string,
+    prompt: string,
+    next: string,
+    type: FunnelInputType,
+  ) {
+    const raw = draft.trim();
+    if (!raw) return;
+    const checked = validateAnswer(type, raw, funnel.locale);
+    if (!checked.ok) {
+      setInputError(ANSWER_ERROR[type]);
+      return;
+    }
+    // Store the normalized value (formatted CPF/CNPJ, link with https://).
+    const value = checked.value;
+    setInputError(null);
     // Compute the new answers locally so a branch that submits in this same
     // handler includes the just-typed answer (state updates are async).
     const nextAnswers = [
@@ -440,28 +480,59 @@ export function FunnelRunner({ funnel }: { funnel: FunnelRunView }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            answerText(textNode.questionKey, textNode.prompt, textNode.next);
+            answerText(
+              textNode.questionKey,
+              textNode.prompt,
+              textNode.next,
+              textNode.inputType,
+            );
           }}
-          className="mt-4 flex items-end gap-2"
+          className="mt-4 flex flex-col gap-1.5"
         >
-          <textarea
-            autoFocus
-            rows={3}
-            maxLength={2000}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={t("placeholder")}
-            // See the input above: 16px on phones avoids iOS's focus zoom.
-            className="flex-1 resize-y rounded-xl border border-border bg-card px-4 py-3 text-base focus-visible:border-brand focus-visible:outline-none sm:text-sm"
-          />
-          <button
-            type="submit"
-            aria-label={t("send")}
-            disabled={!draft.trim()}
-            className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground transition-opacity disabled:opacity-50"
-          >
-            <Send className="size-5" />
-          </button>
+          <div className="flex items-end gap-2">
+            {textNode.inputType === "TEXT" ? (
+              <textarea
+                autoFocus
+                rows={3}
+                maxLength={2000}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder={t("placeholder")}
+                // 16px on phones avoids iOS's focus zoom; sm:text-sm elsewhere.
+                className="flex-1 resize-y rounded-xl border border-border bg-card px-4 py-3 text-base focus-visible:border-brand focus-visible:outline-none sm:text-sm"
+              />
+            ) : (
+              <input
+                autoFocus
+                type="text"
+                inputMode={inputModeFor(textNode.inputType)}
+                autoCapitalize={textNode.inputType === "CNPJ" ? "characters" : undefined}
+                maxLength={2000}
+                value={draft}
+                onChange={(e) => {
+                  setDraft(maskAnswer(textNode.inputType, e.target.value));
+                  if (inputError) setInputError(null);
+                }}
+                placeholder={
+                  textNode.inputType === "DATE" ? t("datePlaceholder") : t("placeholder")
+                }
+                aria-invalid={Boolean(inputError)}
+                // 16px on phones avoids iOS's focus zoom; sm:text-sm elsewhere.
+                className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-base focus-visible:border-brand focus-visible:outline-none aria-[invalid=true]:border-red-500 sm:text-sm"
+              />
+            )}
+            <button
+              type="submit"
+              aria-label={t("send")}
+              disabled={!draft.trim()}
+              className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground transition-opacity disabled:opacity-50"
+            >
+              <Send className="size-5" />
+            </button>
+          </div>
+          {inputError ? (
+            <p className="px-1 text-xs text-red-500">{t(inputError)}</p>
+          ) : null}
         </form>
       ) : null}
     </div>
