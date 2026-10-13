@@ -701,6 +701,24 @@
       "kindText": "Descriptive answer (text)",
       "textNextLabel": "After answering, go to:",
       "textAnswerHint": "The visitor types the answer freely.",
+      "fieldName": "Field name (optional)",
+      "fieldNamePlaceholder": "e.g. Company",
+      "fieldNameHelp": "Name it to reuse the answer in later messages and get its own CSV column.",
+      "fieldNameToken": "Use {token} in later messages.",
+      "fieldNameIssue": {
+        "invalid": "Use letters or numbers in the field name.",
+        "reserved": "That name is already a system variable (name, role, link, date, time). Pick another.",
+        "duplicate": "Another question already uses this field name."
+      },
+      "answerFormat": "Answer format",
+      "format": {
+        "TEXT": "Free text",
+        "NUMBER": "Number",
+        "DATE": "Date",
+        "CPF": "CPF",
+        "CNPJ": "CNPJ",
+        "URL": "Link (URL)"
+      },
       "options": "Options",
       "option": "Option",
       "addOption": "Add option",

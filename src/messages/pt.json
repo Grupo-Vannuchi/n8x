@@ -701,6 +701,24 @@
       "kindText": "Resposta descritiva (texto)",
       "textNextLabel": "Após responder, ir para:",
       "textAnswerHint": "O visitante digita a resposta livremente.",
+      "fieldName": "Nome do campo (opcional)",
+      "fieldNamePlaceholder": "Ex.: Empresa",
+      "fieldNameHelp": "Dê um nome para usar a resposta nas mensagens seguintes e ter uma coluna própria no CSV.",
+      "fieldNameToken": "Use {token} nas mensagens seguintes.",
+      "fieldNameIssue": {
+        "invalid": "Use letras ou números no nome do campo.",
+        "reserved": "Esse nome já é uma variável do sistema (nome, cargo, link, data, hora). Escolha outro.",
+        "duplicate": "Outra pergunta já usa esse nome de campo."
+      },
+      "answerFormat": "Formato da resposta",
+      "format": {
+        "TEXT": "Texto livre",
+        "NUMBER": "Número",
+        "DATE": "Data",
+        "CPF": "CPF",
+        "CNPJ": "CNPJ",
+        "URL": "Link (URL)"
+      },
       "options": "Opções",
       "option": "Opção",
       "addOption": "Adicionar opção",
